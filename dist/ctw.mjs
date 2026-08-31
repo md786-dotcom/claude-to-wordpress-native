@@ -12,6 +12,265 @@ import { resolve as resolve6 } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname as dirname2, resolve } from "node:path";
 
+// packages/generate/dist/check-css.js
+var STYLE_BLOCK = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+var HTML_ENTITY = /&(?:gt|lt|amp|quot|#0*60|#0*62|#x0*3[ce]);/i;
+var ESCAPED_COMBINATOR = /\\>|\\3e\s/i;
+var CHILD_COMBINATOR = /(?:[\w.)\]])\s*>\s*(?:[.#:[\w*])/i;
+var STYLE_WRAPPER = /<style[\s>]/i;
+function checkPackageCss(pkg) {
+  const issues = [];
+  for (const source of collectCssSources(pkg)) {
+    issues.push(...checkCssSource(source));
+  }
+  return issues;
+}
+function assertPackageCss(pkg) {
+  const issues = checkPackageCss(pkg);
+  if (issues.length === 0) {
+    return;
+  }
+  throw new Error(formatCssIssues(issues));
+}
+function formatCssIssues(issues) {
+  const lines = issues.map((issue) => `- ${issue.path}: ${issue.message}`);
+  return `CSS check failed with ${String(issues.length)} error(s):
+${lines.join("\n")}`;
+}
+function checkCssSource(source) {
+  const issues = [];
+  const prefix = source.path;
+  const css = source.css;
+  if (source.kind === "css" && STYLE_WRAPPER.test(css)) {
+    issues.push({
+      path: prefix,
+      message: 'WPCode type "css" must be raw CSS. Remove <style> tags; WPCode wraps CSS for you.'
+    });
+  }
+  if (HTML_ENTITY.test(css)) {
+    issues.push({
+      path: prefix,
+      message: "Do not HTML-escape CSS. Write the child combinator as `>` not `&gt;`. Escaping `>` changes the selector and it will not match."
+    });
+  }
+  if (ESCAPED_COMBINATOR.test(css)) {
+    issues.push({
+      path: prefix,
+      message: "Do not backslash-escape the child combinator (`\\>` / `\\3e`). `.grid-2 > .e-con-inner` is valid CSS. Prefer `.grid-2 .e-con-inner, .grid-2` so Elementor inner wrappers still match."
+    });
+  }
+  if (source.kind === "html-css" && CHILD_COMBINATOR.test(css)) {
+    issues.push({
+      path: prefix,
+      message: 'Child combinator `>` inside HTML can break in WordPress. Move this CSS to a WPCode snippet with type "css", or use a descendant selector (a space) such as `.grid-2 .e-con-inner`.'
+    });
+  }
+  for (const message of scanCssStructure(css)) {
+    issues.push({ path: prefix, message });
+  }
+  return issues;
+}
+function scanCssStructure(css) {
+  return new CssBraceScanner().scan(css);
+}
+var CssBraceScanner = class {
+  brace = 0;
+  inString = null;
+  inComment = false;
+  escaped = false;
+  skipNext = false;
+  openAt = [];
+  messages = [];
+  line = 1;
+  col = 1;
+  scan(css) {
+    for (let i = 0; i < css.length; i += 1) {
+      if (this.skipNext) {
+        this.skipNext = false;
+        continue;
+      }
+      this.feed(css[i] ?? "", css[i + 1] ?? "");
+    }
+    this.finish();
+    return this.messages;
+  }
+  feed(ch, next) {
+    if (this.inComment) {
+      this.feedComment(ch, next);
+      return;
+    }
+    if (this.inString !== null) {
+      this.feedString(ch);
+      return;
+    }
+    this.feedCode(ch, next);
+  }
+  feedComment(ch, next) {
+    if (ch === "*" && next === "/") {
+      this.inComment = false;
+      this.skipNext = true;
+      this.col += 2;
+      return;
+    }
+    this.step(ch);
+  }
+  feedString(ch) {
+    if (this.escaped) {
+      this.escaped = false;
+      this.step(ch);
+      return;
+    }
+    if (ch === "\\") {
+      this.escaped = true;
+      this.col += 1;
+      return;
+    }
+    if (ch === this.inString) {
+      this.inString = null;
+    }
+    this.step(ch);
+  }
+  feedCode(ch, next) {
+    if (ch === "/" && next === "*") {
+      this.inComment = true;
+      this.skipNext = true;
+      this.col += 2;
+      return;
+    }
+    if (ch === '"' || ch === "'") {
+      this.inString = ch;
+      this.col += 1;
+      return;
+    }
+    if (ch === "{") {
+      this.brace += 1;
+      this.openAt.push(`${String(this.line)}:${String(this.col)}`);
+      this.col += 1;
+      return;
+    }
+    if (ch === "}") {
+      this.closeBrace();
+      return;
+    }
+    this.step(ch);
+  }
+  closeBrace() {
+    this.brace -= 1;
+    this.openAt.pop();
+    if (this.brace < 0) {
+      this.messages.push(`extra } at ${String(this.line)}:${String(this.col)}`);
+      this.brace = 0;
+    }
+    this.col += 1;
+  }
+  finish() {
+    if (this.inComment) {
+      this.messages.push("unclosed CSS comment");
+    }
+    if (this.inString !== null) {
+      this.messages.push(`unclosed CSS string (${this.inString})`);
+    }
+    if (this.brace > 0) {
+      const where = this.openAt[this.openAt.length - 1] ?? "unknown";
+      this.messages.push(`unclosed { (${String(this.brace)} still open; last opened at ${where}). Every rule must end with }.`);
+    }
+  }
+  step(ch) {
+    if (ch === "\n") {
+      this.line += 1;
+      this.col = 1;
+      return;
+    }
+    this.col += 1;
+  }
+};
+function collectCssSources(pkg) {
+  const sources = [];
+  pkg.snippets.forEach((snippet, index) => {
+    const path = `snippets[${String(index)}] "${snippet.title}"`;
+    if (snippet.type === "css") {
+      sources.push({ path, kind: "css", css: snippet.code });
+      return;
+    }
+    if (snippet.type === "html") {
+      for (const [blockIndex, css] of extractStyleBlocks(snippet.code).entries()) {
+        sources.push({
+          path: `${path} <style>#${String(blockIndex)}`,
+          kind: "html-css",
+          css
+        });
+      }
+    }
+  });
+  pkg.pages.forEach((page, index) => {
+    walkElements(page.elements, `pages[${String(index)}].elements`, sources);
+  });
+  if (pkg.header !== void 0) {
+    walkElements(pkg.header.elements, "header.elements", sources);
+  }
+  if (pkg.footer !== void 0) {
+    walkElements(pkg.footer.elements, "footer.elements", sources);
+  }
+  const wooPages = pkg.woocommerce.pages;
+  ["shop", "cart", "checkout"].forEach((key) => {
+    const page = wooPages[key];
+    if (page !== void 0) {
+      walkElements(page.elements, `woocommerce.pages.${key}.elements`, sources);
+    }
+  });
+  return sources;
+}
+function walkElements(elements, path, sources) {
+  elements.forEach((node, index) => {
+    const nodePath = `${path}[${String(index)}]`;
+    const html = settingString(node.settings, "html");
+    if (html !== void 0) {
+      extractStyleBlocks(html).forEach((css, blockIndex) => {
+        sources.push({
+          path: `${nodePath} html <style>#${String(blockIndex)}`,
+          kind: "html-css",
+          css
+        });
+      });
+    }
+    const editor = settingString(node.settings, "editor");
+    if (editor !== void 0) {
+      extractStyleBlocks(editor).forEach((css, blockIndex) => {
+        sources.push({
+          path: `${nodePath} editor <style>#${String(blockIndex)}`,
+          kind: "html-css",
+          css
+        });
+      });
+    }
+    const customCss = settingString(node.settings, "custom_css");
+    if (customCss !== void 0 && customCss.trim() !== "") {
+      sources.push({
+        path: `${nodePath} custom_css`,
+        kind: "css",
+        css: customCss
+      });
+    }
+    if (node.elements.length > 0) {
+      walkElements(node.elements, `${nodePath}.elements`, sources);
+    }
+  });
+}
+function settingString(settings, key) {
+  const value = settings[key];
+  return typeof value === "string" ? value : void 0;
+}
+function extractStyleBlocks(html) {
+  const blocks = [];
+  const matcher = new RegExp(STYLE_BLOCK.source, STYLE_BLOCK.flags);
+  let match = matcher.exec(html);
+  while (match !== null) {
+    blocks.push(match[1] ?? "");
+    match = matcher.exec(html);
+  }
+  return blocks;
+}
+
 // packages/generate/dist/theme-files.js
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -4199,12 +4458,24 @@ var formSchema = external_exports.object({
   slug,
   fields: external_exports.array(formFieldSchema).min(1)
 });
+var snippetLocation = external_exports.enum(["header", "footer", "everywhere"]);
 var snippetSchema = external_exports.object({
   title: external_exports.string().min(1).max(120),
   code: external_exports.string().min(1),
   type: external_exports.enum(SNIPPET_TYPES),
-  location: external_exports.enum(["header", "footer", "everywhere"]).default("everywhere")
-});
+  location: snippetLocation.optional()
+}).superRefine((snippet, ctx) => {
+  if (snippet.type !== "php" && snippet.location === "everywhere") {
+    ctx.addIssue({
+      code: external_exports.ZodIssueCode.custom,
+      message: 'WPCode Free: css, js, and html snippets must use location "header" or "footer". "everywhere" is PHP-only (insert-headers-and-footers).',
+      path: ["location"]
+    });
+  }
+}).transform((snippet) => ({
+  ...snippet,
+  location: snippet.location ?? (snippet.type === "php" ? "everywhere" : "header")
+}));
 var wooProductSchema = external_exports.object({
   name: external_exports.string().min(1).max(120),
   price: external_exports.string().regex(/^\d+(?:\.\d{1,2})?$/, "price must be a number string like 19.99"),
@@ -5302,6 +5573,7 @@ function buildChildThemeZip(options) {
 // packages/generate/dist/generate.js
 function generateChildThemeZip(options) {
   const pkg = readPackageFromFile(options.packagePath);
+  assertPackageCss(pkg);
   const bytes = buildChildThemeZip({
     package: pkg,
     ...options.mediaRoot !== void 0 ? { mediaRoot: options.mediaRoot } : {},
@@ -5584,7 +5856,14 @@ function slugify(value) {
 }
 
 // packages/cli/src/skill.ts
-import { cpSync, existsSync as existsSync3, mkdirSync as mkdirSync4, readFileSync as readFileSync6, writeFileSync as writeFileSync5 } from "node:fs";
+import {
+  cpSync,
+  existsSync as existsSync3,
+  mkdirSync as mkdirSync4,
+  readdirSync as readdirSync3,
+  readFileSync as readFileSync6,
+  writeFileSync as writeFileSync5
+} from "node:fs";
 import { dirname as dirname5, join as join5, resolve as resolve5 } from "node:path";
 import { fileURLToPath as fileURLToPath3 } from "node:url";
 var here3 = dirname5(fileURLToPath3(import.meta.url));
@@ -5620,12 +5899,27 @@ function skillAssetsDir() {
   );
 }
 function installSkill(projectRoot) {
-  const targetDir = join5(resolve5(projectRoot), ".claude", "skills", "ctw-native");
+  const root = resolve5(projectRoot);
+  const targetDir = join5(root, ".claude", "skills", "ctw-native");
+  const checkDir = join5(root, ".claude", "skills", "ctw-native-check");
   const source = skillAssetsDir();
   const existed = existsSync3(join5(targetDir, "SKILL.md"));
   mkdirSync4(targetDir, { recursive: true });
-  cpSync(source, targetDir, { recursive: true });
+  copyMainSkill(source, targetDir);
+  const checkSource = join5(source, "check", "SKILL.md");
+  if (existsSync3(checkSource)) {
+    mkdirSync4(checkDir, { recursive: true });
+    writeFileSync5(join5(checkDir, "SKILL.md"), readFileSync6(checkSource, "utf8"));
+  }
   return { targetDir, created: !existed };
+}
+function copyMainSkill(source, targetDir) {
+  for (const name of readdirSync3(source)) {
+    if (name === "check") {
+      continue;
+    }
+    cpSync(join5(source, name), join5(targetDir, name), { recursive: true });
+  }
 }
 function initProject(projectRoot, themeSlug, themeName, options) {
   const root = resolve5(projectRoot);
@@ -5723,14 +6017,15 @@ function printHelp() {
       "  npx -y claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media",
       "",
       "Commands:",
-      "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
+      "  skill              Install /ctw-native and /ctw-native-check into .claude/skills",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  media fetch        Download an https image (Unsplash/Pexels/direct) into ./media",
       "  media sync         Download all package media[].sourceUrl files that are missing",
       "  products add       Add a dummy WooCommerce product (max " + String(MAX_DUMMY_PRODUCTS) + ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
-      "  validate           Validate a ctw-package.json without writing a ZIP",
+      "  validate           Validate a ctw-package.json (schema + CSS) without writing a ZIP",
+      "  check              Same as validate; run before generate (Claude: /ctw-native-check)",
       "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
@@ -5937,8 +6232,14 @@ function runValidate(args) {
   }
   try {
     const pkg = readPackageFromFile(resolve6(packagePath));
+    const cssIssues = checkPackageCss(pkg);
+    if (cssIssues.length > 0) {
+      process.stderr.write(`${formatCssIssues(cssIssues)}
+`);
+      return 1;
+    }
     process.stdout.write(
-      `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)})
+      `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)}; CSS check passed)
 `
     );
     return 0;
@@ -6012,6 +6313,7 @@ async function main(argv) {
     case "init":
       return runInit(rest);
     case "validate":
+    case "check":
       return runValidate(rest);
     case "generate":
       return runGenerate(rest);

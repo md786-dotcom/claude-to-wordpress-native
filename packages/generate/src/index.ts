@@ -1,5 +1,12 @@
 export { generateChildThemeZip, type GenerateOptions } from "./generate.js";
 export {
+  assertPackageCss,
+  checkPackageCss,
+  formatCssIssues,
+  scanCssStructure,
+  type CssIssue,
+} from "./check-css.js";
+export {
   ensureContainerFullWidth,
   ensurePackageFullWidth,
   ensureTreeFullWidth,

@@ -187,3 +187,112 @@ if ( ! function_exists( 'is_wp_error' ) ) {
 		return $thing instanceof WP_Error;
 	}
 }
+
+$GLOBALS['ctw_test_posts']               = array();
+$GLOBALS['ctw_test_post_meta']           = array();
+$GLOBALS['ctw_test_post_terms']          = array();
+$GLOBALS['ctw_test_post_types']          = array();
+$GLOBALS['ctw_test_next_post_id']        = 1;
+$GLOBALS['ctw_test_wpcode_cache_rebuilds'] = 0;
+
+if ( ! function_exists( 'wp_insert_post' ) ) {
+	/**
+	 * @param array<string,mixed> $postarr Post fields.
+	 * @param bool                $wp_error Return WP_Error on failure.
+	 * @return int|\WP_Error
+	 */
+	function wp_insert_post( $postarr, $wp_error = false ) {
+		unset( $wp_error );
+		$id = (int) $GLOBALS['ctw_test_next_post_id']++;
+		$GLOBALS['ctw_test_posts'][ $id ] = $postarr;
+		return $id;
+	}
+}
+
+if ( ! function_exists( 'update_post_meta' ) ) {
+	/**
+	 * @param int    $post_id Post ID.
+	 * @param string $key     Meta key.
+	 * @param mixed  $value   Meta value.
+	 */
+	function update_post_meta( $post_id, $key, $value ): bool {
+		if ( ! isset( $GLOBALS['ctw_test_post_meta'][ $post_id ] ) ) {
+			$GLOBALS['ctw_test_post_meta'][ $post_id ] = array();
+		}
+		$GLOBALS['ctw_test_post_meta'][ $post_id ][ $key ] = $value;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_post_meta' ) ) {
+	/**
+	 * @param int    $post_id Post ID.
+	 * @param string $key     Meta key.
+	 * @param bool   $single  Single value.
+	 * @return mixed
+	 */
+	function get_post_meta( $post_id, $key = '', $single = false ) {
+		$meta = $GLOBALS['ctw_test_post_meta'][ $post_id ] ?? array();
+		if ( '' === $key ) {
+			return $meta;
+		}
+		if ( ! array_key_exists( $key, $meta ) ) {
+			return $single ? '' : array();
+		}
+		return $single ? $meta[ $key ] : array( $meta[ $key ] );
+	}
+}
+
+if ( ! function_exists( 'post_type_exists' ) ) {
+	/**
+	 * @param string $post_type Post type.
+	 */
+	function post_type_exists( $post_type ): bool {
+		return isset( $GLOBALS['ctw_test_post_types'][ $post_type ] );
+	}
+}
+
+if ( ! function_exists( 'register_post_type' ) ) {
+	/**
+	 * @param string              $post_type Post type.
+	 * @param array<string,mixed> $args      Args.
+	 */
+	function register_post_type( $post_type, $args = array() ): void {
+		$GLOBALS['ctw_test_post_types'][ $post_type ] = $args;
+	}
+}
+
+if ( ! function_exists( 'wp_set_post_terms' ) ) {
+	/**
+	 * @param int                  $post_id  Post ID.
+	 * @param string|list<string>  $terms    Term slug or list.
+	 * @param string               $taxonomy Taxonomy.
+	 * @param bool                 $append   Append flag.
+	 * @return list<string>
+	 */
+	function wp_set_post_terms( $post_id, $terms, $taxonomy = 'post_tag', $append = false ) {
+		unset( $append );
+		$list = is_array( $terms ) ? $terms : array( $terms );
+		if ( ! isset( $GLOBALS['ctw_test_post_terms'][ $post_id ] ) ) {
+			$GLOBALS['ctw_test_post_terms'][ $post_id ] = array();
+		}
+		$GLOBALS['ctw_test_post_terms'][ $post_id ][ $taxonomy ] = $list;
+		return $list;
+	}
+}
+
+if ( ! function_exists( 'wpcode' ) ) {
+	/**
+	 * Minimal WPCode Free handle so the adapter can rebuild snippet cache.
+	 *
+	 * @return object
+	 */
+	function wpcode() {
+		$cache = new class() {
+			public function cache_all_loaded_snippets(): void {
+				$GLOBALS['ctw_test_wpcode_cache_rebuilds']++;
+			}
+		};
+		return (object) array( 'cache' => $cache );
+	}
+}

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { CtwPackage } from "@ctw/schema";
+import { assertPackageCss } from "./check-css.js";
 import { readPackageFromFile } from "./theme-files.js";
 import { buildChildThemeZip } from "./zip.js";
 
@@ -21,6 +22,7 @@ export function generateChildThemeZip(options: GenerateOptions): {
   outputPath: string;
 } {
   const pkg = readPackageFromFile(options.packagePath);
+  assertPackageCss(pkg);
   const bytes = buildChildThemeZip({
     package: pkg,
     ...(options.mediaRoot !== undefined ? { mediaRoot: options.mediaRoot } : {}),

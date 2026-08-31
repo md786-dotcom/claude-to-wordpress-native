@@ -1,4 +1,11 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG } from "@ctw/schema";
@@ -50,15 +57,35 @@ export type SkillInstallResult = {
 };
 
 /**
- * Install the Claude Code skill into .claude/skills/ctw-native.
+ * Install the Claude Code skills into .claude/skills/ctw-native
+ * and .claude/skills/ctw-native-check.
  */
 export function installSkill(projectRoot: string): SkillInstallResult {
-  const targetDir = join(resolve(projectRoot), ".claude", "skills", "ctw-native");
+  const root = resolve(projectRoot);
+  const targetDir = join(root, ".claude", "skills", "ctw-native");
+  const checkDir = join(root, ".claude", "skills", "ctw-native-check");
   const source = skillAssetsDir();
   const existed = existsSync(join(targetDir, "SKILL.md"));
   mkdirSync(targetDir, { recursive: true });
-  cpSync(source, targetDir, { recursive: true });
+  copyMainSkill(source, targetDir);
+  const checkSource = join(source, "check", "SKILL.md");
+  if (existsSync(checkSource)) {
+    mkdirSync(checkDir, { recursive: true });
+    writeFileSync(join(checkDir, "SKILL.md"), readFileSync(checkSource, "utf8"));
+  }
   return { targetDir, created: !existed };
+}
+
+/**
+ * Copy packaged skill files except the nested check skill folder.
+ */
+function copyMainSkill(source: string, targetDir: string): void {
+  for (const name of readdirSync(source)) {
+    if (name === "check") {
+      continue;
+    }
+    cpSync(join(source, name), join(targetDir, name), { recursive: true });
+  }
 }
 
 export type InitResult = {

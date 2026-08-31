@@ -14,7 +14,7 @@ The Hello Elementor child theme ZIP emitted by `@ctw/generate` (`generateChildTh
 
 ## One-shot package apply
 
-The plugin import path that reads the active child theme package once, sideloads media, writes Elementor Free pages, ElementsKit header/footer, MetForm, WPCode, and menus, then marks import done. Re-import requires wipe. Wipe keeps Customizer Additional CSS.
+The plugin import path that reads the active child theme package once, sideloads media, writes Elementor Free pages, ElementsKit header/footer, MetForm, WPCode Free (`insert-headers-and-footers`) snippets, and menus, then marks import done. Re-import requires wipe. Wipe keeps Customizer Additional CSS. WPCode Free stores snippet type and location as taxonomies (`wpcode_type`, `wpcode_location`) with `_wpcode_auto_insert` = 1. CSS/JS/HTML map to Site Wide Header/Footer; `everywhere` is PHP-only.
 
 ## Elementor persistence
 
@@ -22,7 +22,7 @@ Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and Elements
 
 ## Stack install
 
-Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`). Shop packages may declare branded shop/cart/checkout Elementor pages, up to four dummy products, and WPCode snippets including `php`.
+Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`). Shop packages may declare branded shop/cart/checkout Elementor pages, up to four dummy products, and WPCode Free snippets including `php`. Do not target WPCode Pro.
 
 ## Cache purge
 
