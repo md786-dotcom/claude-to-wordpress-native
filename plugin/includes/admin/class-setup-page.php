@@ -7,11 +7,11 @@
 
 namespace CTW_Native\Admin;
 
-use CTW_Native\Contract\Package_Contract;
 use CTW_Native\Import\Import_Guard;
 use CTW_Native\Import\Importer;
 use CTW_Native\Import\Package_Reader;
 use CTW_Native\Stack\Stack_Installer;
+use CTW_Native\Stack\Woo_Install_Switch;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -57,10 +57,10 @@ final class Setup_Page {
 			wp_die( esc_html__( 'You cannot access this page.', 'ctw-native' ) );
 		}
 
-		$package = Package_Reader::read();
-		$plugins = is_wp_error( $package )
-			? Package_Contract::core_plugins()
-			: Package_Reader::declared_plugins( $package );
+		$package     = Package_Reader::read();
+		$package_woo = is_array( $package ) && Package_Reader::woo_enabled( $package );
+		$want_woo    = Woo_Install_Switch::should_install( is_wp_error( $package ) ? null : $package );
+		$plugins     = Package_Reader::install_plugins( is_wp_error( $package ) ? null : $package, $want_woo );
 
 		$installer = new Stack_Installer();
 		$rows      = $installer->status_rows( $plugins );
@@ -84,12 +84,12 @@ final class Setup_Page {
 		if ( is_wp_error( $package ) ) {
 			echo '<div class="notice notice-warning"><p>' . esc_html( $package->get_error_message() ) . '</p></div>';
 		} else {
-			$woo = Package_Reader::woo_enabled( $package ) ? 'yes' : 'no';
-			echo '<p>Package found. WooCommerce enabled: <strong>' . esc_html( $woo ) . '</strong>.</p>';
+			$woo = $package_woo ? 'yes' : 'no';
+			echo '<p>Package found. WooCommerce in package: <strong>' . esc_html( $woo ) . '</strong>.</p>';
 		}
 
 		echo '<h2>Actions</h2>';
-		$this->action_button( 'ctw_native_install', 'Install / activate stack', 'install_plugins' );
+		$this->render_install_form( $package_woo, $want_woo );
 		$this->action_button( 'ctw_native_import', 'Import package (one-shot)', 'publish_pages' );
 		if ( Import_Guard::is_done() ) {
 			echo '<p>Import already completed. Wipe before a new import. Wipe does not delete Appearance → Customize → Additional CSS.</p>';
@@ -99,9 +99,38 @@ final class Setup_Page {
 		echo '<h2>Client editing</h2><ul>';
 		echo '<li>Pages and posts: Edit with Elementor (Free)</li>';
 		echo '<li>Header and footer: ElementsKit</li>';
-		echo '<li>Shop: native WooCommerce templates (when enabled)</li>';
+		echo '<li>Shop: WooCommerce PHP templates (when enabled)</li>';
 		echo '<li>Extra CSS: Appearance → Customize → Additional CSS</li>';
 		echo '</ul></div>';
+	}
+
+	/**
+	 * Install form with WooCommerce switch.
+	 *
+	 * @param bool $package_woo Package requires Woo.
+	 * @param bool $checked     Checkbox state.
+	 */
+	private function render_install_form( bool $package_woo, bool $checked ): void {
+		$can = current_user_can( 'install_plugins' );
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:1em 0;padding:1em;border:1px solid #c3c4c7;background:#fff;max-width:40rem;">';
+		echo '<input type="hidden" name="action" value="ctw_native_install" />';
+		wp_nonce_field( 'ctw_native_install' );
+		echo '<p><label><input type="checkbox"';
+		if ( ! $package_woo ) {
+			echo ' name="ctw_install_woocommerce" value="1"';
+		}
+		checked( $checked );
+		disabled( $package_woo );
+		echo ' /> <strong>Install WooCommerce</strong></label></p>';
+		if ( $package_woo ) {
+			echo '<p class="description">Required by this package (<code>woocommerce.enabled</code>). The switch stays on.</p>';
+			echo '<input type="hidden" name="ctw_install_woocommerce" value="1" />';
+		} else {
+			echo '<p class="description">Turn on to download and activate WooCommerce from wordpress.org with the rest of the stack. Claude Code can also set <code>woocommerce.enabled: true</code> in the package.</p>';
+		}
+		$disabled = $can ? '' : ' disabled';
+		echo '<p><button type="submit" class="button button-primary"' . esc_attr( $disabled ) . '>Install / activate stack</button></p>';
+		echo '</form>';
 	}
 
 	/**
@@ -123,13 +152,21 @@ final class Setup_Page {
 	 */
 	public function handle_install(): void {
 		$this->verify( 'ctw_native_install', 'install_plugins' );
-		$package = Package_Reader::read();
-		$plugins = is_wp_error( $package )
-			? Package_Contract::core_plugins()
-			: Package_Reader::declared_plugins( $package );
+		$package     = Package_Reader::read();
+		$package_woo = is_array( $package ) && Package_Reader::woo_enabled( $package );
+		$posted_woo  = isset( $_POST['ctw_install_woocommerce'] ) && '1' === (string) wp_unslash( (string) $_POST['ctw_install_woocommerce'] );
+		$install_woo = Woo_Install_Switch::resolve( $package_woo, $posted_woo );
+		Woo_Install_Switch::set_enabled( $install_woo );
+
+		$plugins   = Package_Reader::install_plugins( is_wp_error( $package ) ? null : $package, $install_woo );
 		$installer = new Stack_Installer();
 		$result    = $installer->install_all( $plugins );
-		$msg       = is_wp_error( $result ) ? $result->get_error_message() : 'Stack installed.';
+		if ( is_wp_error( $result ) ) {
+			$this->redirect( $result->get_error_message() );
+		}
+		$msg = $install_woo
+			? 'Stack installed (including WooCommerce).'
+			: 'Stack installed.';
 		$this->redirect( $msg );
 	}
 

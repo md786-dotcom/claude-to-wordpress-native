@@ -18,4 +18,4 @@ Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and Elements
 
 ## Stack install
 
-Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included only when the package enables it.
+Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`).

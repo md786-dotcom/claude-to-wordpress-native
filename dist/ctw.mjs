@@ -5272,18 +5272,23 @@ function installSkill(projectRoot) {
   cpSync(source, targetDir, { recursive: true });
   return { targetDir, created: !existed };
 }
-function initProject(projectRoot, themeSlug, themeName) {
+function initProject(projectRoot, themeSlug, themeName, options) {
   const root = resolve3(projectRoot);
   const packagePath = join4(root, "ctw-package.json");
   const mediaDir = join4(root, "media");
   mkdirSync3(mediaDir, { recursive: true });
   if (!existsSync2(packagePath)) {
-    writeFileSync3(packagePath, starterPackageJson(themeSlug, themeName), "utf8");
+    writeFileSync3(
+      packagePath,
+      starterPackageJson(themeSlug, themeName, options?.woocommerce === true),
+      "utf8"
+    );
   }
   const skill = installSkill(root);
   return { packagePath, skill, mediaDir };
 }
-function starterPackageJson(themeSlug, themeName) {
+function starterPackageJson(themeSlug, themeName, wooEnabled) {
+  const plugins = wooEnabled ? [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG] : [...CORE_PLUGIN_SLUGS];
   const body = {
     version: 1,
     theme: {
@@ -5337,8 +5342,8 @@ function starterPackageJson(themeSlug, themeName) {
     ],
     forms: [],
     snippets: [],
-    woocommerce: { enabled: false },
-    plugins: [...CORE_PLUGIN_SLUGS]
+    woocommerce: { enabled: wooEnabled },
+    plugins
   };
   return `${JSON.stringify(body, null, 2)}
 `;
@@ -5354,12 +5359,14 @@ function printHelp() {
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
       '  npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child',
+      '  npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce',
       "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
+      "                    (add --woocommerce for shop packages)",
       "  validate           Validate a ctw-package.json without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP",
       "",
@@ -5374,6 +5381,9 @@ function readFlag(args, name) {
     return void 0;
   }
   return args[index + 1];
+}
+function hasFlag(args, name) {
+  return args.includes(name);
 }
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
@@ -5419,13 +5429,18 @@ function runInit(args) {
     process.stderr.write("Invalid --slug. Use lowercase kebab-case.\n");
     return 1;
   }
-  const result = initProject(root, slug2, name);
+  const result = initProject(root, slug2, name, {
+    woocommerce: hasFlag(args, "--woocommerce")
+  });
   process.stdout.write(`Wrote ${result.packagePath}
 `);
   process.stdout.write(`Media folder: ${result.mediaDir}
 `);
   process.stdout.write(`Skill: ${result.skill.targetDir}
 `);
+  if (hasFlag(args, "--woocommerce")) {
+    process.stdout.write("WooCommerce enabled in package (plugins includes woocommerce).\n");
+  }
   process.stdout.write(
     "Next: edit ctw-package.json (or ask Claude Code), then run generate.\n"
   );

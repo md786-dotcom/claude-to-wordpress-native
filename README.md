@@ -24,6 +24,8 @@ Scaffold a starter package, media folder, and skill:
 
 ```bash
 npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+# Shop scaffold:
+# npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
 ```
 
 Generate the child theme ZIP:
@@ -66,7 +68,7 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 1. Run `npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
 2. In Claude Code, run the GitHub `npx` skill (or `init`), then generate a site ZIP.
 3. Upload and activate the child theme (`Template: hello-elementor`).
-4. Open **CTW Native → Setup**. Install the stack (WooCommerce only if the package enables it). Import once.
+4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
 
 Re-import is refused while generated pages exist. Wipe first to regenerate. Wipe does not delete Customizer Additional CSS.
@@ -87,7 +89,7 @@ Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package
 
 Always: Elementor, ElementsKit Lite, MetForm, WPCode (`insert-headers-and-footers`).
 
-Optional: WooCommerce when `woocommerce.enabled` is true.
+Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on.
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
 

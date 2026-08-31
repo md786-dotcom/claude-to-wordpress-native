@@ -13,12 +13,14 @@ function printHelp(): void {
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Acme Child\" --slug acme-child",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Shop Child\" --slug shop-child --woocommerce",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
+      "                    (add --woocommerce for shop packages)",
       "  validate           Validate a ctw-package.json without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP",
       "",
@@ -34,6 +36,10 @@ function readFlag(args: string[], name: string): string | undefined {
     return undefined;
   }
   return args[index + 1];
+}
+
+function hasFlag(args: string[], name: string): boolean {
+  return args.includes(name);
 }
 
 function slugify(name: string): string {
@@ -85,10 +91,15 @@ function runInit(args: string[]): number {
     process.stderr.write("Invalid --slug. Use lowercase kebab-case.\n");
     return 1;
   }
-  const result = initProject(root, slug, name);
+  const result = initProject(root, slug, name, {
+    woocommerce: hasFlag(args, "--woocommerce"),
+  });
   process.stdout.write(`Wrote ${result.packagePath}\n`);
   process.stdout.write(`Media folder: ${result.mediaDir}\n`);
   process.stdout.write(`Skill: ${result.skill.targetDir}\n`);
+  if (hasFlag(args, "--woocommerce")) {
+    process.stdout.write("WooCommerce enabled in package (plugins includes woocommerce).\n");
+  }
   process.stdout.write(
     "Next: edit ctw-package.json (or ask Claude Code), then run generate.\n",
   );
