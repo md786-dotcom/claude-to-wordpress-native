@@ -9,11 +9,7 @@ You generate an offline site package. You do **not** edit a live WordPress site 
 
 ## Install this skill (once per project)
 
-```bash
-npx claude-to-wordpress-native skill
-```
-
-Or from GitHub before npm publish:
+This package is **not published to npm** yet. Always use GitHub:
 
 ```bash
 npx github:md786-dotcom/claude-to-wordpress-native skill
@@ -22,8 +18,10 @@ npx github:md786-dotcom/claude-to-wordpress-native skill
 Scaffold a starter package + skill:
 
 ```bash
-npx claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+npx github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 ```
+
+Do **not** run `npx claude-to-wordpress-native` — that name 404s on the public registry until publish.
 
 ## Output
 
@@ -32,10 +30,8 @@ npx claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 3. Run:
 
 ```bash
-npx claude-to-wordpress-native generate --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
+npx github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
 ```
-
-Short alias: `npx ctw generate …` (same binary).
 
 4. Tell the web developer to: install `ctw-native`, upload the child ZIP, open **CTW Native → Setup**, install stack, import once.
 
