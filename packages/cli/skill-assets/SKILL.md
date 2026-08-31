@@ -221,9 +221,11 @@ Forms → MetForm (`forms[]`). Header/footer → ElementsKit (`header` / `footer
 
 ## Output
 
+After `/ctw-native` finishes writing the package, **always** run `/ctw-native-check` before generate.
+
 1. Write valid `ctw-package.json` (version 1).
 2. Ensure media files exist (fetch/sync/products add).
-3. Run `check` and fix CSS/schema errors until it passes:
+3. Run `/ctw-native-check` (same as `check`) and fix CSS/schema errors until it passes:
 
 ```bash
 npx -y claude-to-wordpress-native check --package ./ctw-package.json

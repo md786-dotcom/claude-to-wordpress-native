@@ -59,7 +59,22 @@ npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
-In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. The skill drives `ctw-package.json` and the generate command.
+## Claude Code workflow (`/ctw-native` then `/ctw-native-check`)
+
+After `skill` (or `init`) installs the skills, use the slash commands in this order:
+
+1. Run **`/ctw-native`**. Claude writes `ctw-package.json`, media, WPCode Free snippets, and the rest of the package.
+2. When that output is done, run **`/ctw-native-check`**. That validates schema, WPCode Free locations, and CSS (unclosed `{`, escaped `>` combinators, `<style>` wrappers on `type: "css"`). Fix every error and re-run `/ctw-native-check` until it passes.
+3. Only then generate the child theme ZIP:
+
+```bash
+npx -y claude-to-wordpress-native generate \
+  --package ./ctw-package.json --out ./acme-child.zip --media ./media
+```
+
+Do not skip `/ctw-native-check`. `generate` also refuses a ZIP when CSS check fails, but the slash command is the loop Claude should use after `/ctw-native`.
+
+You can run the same check from the CLI: `npx -y claude-to-wordpress-native check --package ./ctw-package.json` (`validate` is the same command).
 
 ## What you get
 
@@ -67,7 +82,7 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 | --- | --- |
 | `plugin/` (`ctw-native`) | One-click stack install + one-shot import |
 | Child theme ZIP from `ctw generate` | Hello child + `ctw-package.json` + media |
-| Claude Code skill | `.claude/skills/ctw-native` via `npx … skill` |
+| Claude Code skills | `.claude/skills/ctw-native` (`/ctw-native`) and `.claude/skills/ctw-native-check` (`/ctw-native-check`) via `npx … skill` |
 
 ## Client editing surfaces
 
@@ -82,7 +97,7 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 ## Web-dev flow
 
 1. Run `npx -y claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
-2. In Claude Code, run `npx -y claude-to-wordpress-native skill` (or `init`), then generate a site ZIP.
+2. In Claude Code, run `npx -y claude-to-wordpress-native skill` (or `init`). Use `/ctw-native` to build the package, then `/ctw-native-check` until it passes, then generate a site ZIP.
 3. Upload and activate the child theme (`Template: hello-elementor`).
 4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
@@ -125,7 +140,7 @@ npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./b
 
 Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
 
-Validate schema and CSS snippets without writing a ZIP: `npm run ctw -- check --package ./ctw-package.json` (`validate` is the same command). `generate` refuses a ZIP when CSS check fails (unclosed `{`, HTML-escaped `>` combinators, `<style>` wrappers on `type: "css"`).
+Validate schema and CSS snippets without writing a ZIP: `npm run ctw -- check --package ./ctw-package.json` (`validate` is the same command; this is what `/ctw-native-check` runs). `generate` refuses a ZIP when CSS check fails (unclosed `{`, HTML-escaped `>` combinators, `<style>` wrappers on `type: "css"`).
 
 ## Publish (maintainers)
 

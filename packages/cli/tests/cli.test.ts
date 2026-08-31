@@ -42,6 +42,7 @@ describe("ctw CLI", () => {
     assert.match(result.stdout, /media fetch/);
     assert.match(result.stdout, /products add/);
     assert.match(result.stdout, /\bcheck\b/);
+    assert.match(result.stdout, /\/ctw-native-check/);
   });
 
   it("writes plugin-zip into the project directory", () => {

@@ -27,7 +27,7 @@ describe("skill assets", () => {
     assert.match(markdown, /Supported Elementor Free widgets/i);
     assert.match(markdown, /google_maps/);
     assert.match(markdown, /social-icons/);
-    assert.match(markdown, /claude-to-wordpress-native check/);
+    assert.match(markdown, /After `\/ctw-native` finishes|\/ctw-native-check/);
     assert.match(markdown, /Do not.*escape special characters|child combinator/i);
     assert.match(markdown, /e-con-inner/);
     assert.match(markdown, /WPCode Free/);

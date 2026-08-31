@@ -6017,7 +6017,7 @@ function printHelp() {
       "  npx -y claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media",
       "",
       "Commands:",
-      "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
+      "  skill              Install /ctw-native and /ctw-native-check into .claude/skills",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  media fetch        Download an https image (Unsplash/Pexels/direct) into ./media",
       "  media sync         Download all package media[].sourceUrl files that are missing",

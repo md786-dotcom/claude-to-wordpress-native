@@ -5,7 +5,7 @@ description: Validate a CTW Native ctw-package.json (schema + CSS snippets) and 
 
 # CTW Native check
 
-Run this skill when the user invokes `/ctw-native-check`, asks to check the package, or before `generate`.
+Run this skill when the user invokes `/ctw-native-check`, asks to check the package, or **after `/ctw-native` has written `ctw-package.json`** and before `generate`.
 
 You generate an offline site package. You do **not** edit a live WordPress site.
 
