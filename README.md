@@ -52,6 +52,7 @@ From a local clone of this repo:
 npm install
 npm run build
 npm run ctw -- skill
+npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
@@ -99,6 +100,7 @@ Only `https://` image URLs. Remotes are downloaded into `./media/` before the ch
 ```bash
 npm install
 npm run build
+npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./brochure.zip
 ```
 

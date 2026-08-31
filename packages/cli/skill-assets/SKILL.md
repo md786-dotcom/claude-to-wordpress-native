@@ -19,8 +19,15 @@ npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" -
 
 # Shop
 npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
+```
+
+Write the WordPress plugin ZIP (upload under **Plugins → Add New → Upload Plugin**):
+
+```bash
 npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
 ```
+
+From a local clone of this repo, use `npm run ctw -- plugin-zip` instead.
 
 ## Media and images
 

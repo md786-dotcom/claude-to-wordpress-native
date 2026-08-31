@@ -17,6 +17,7 @@ describe("skill assets", () => {
     assert.match(markdown, /claude-to-wordpress-native/);
     assert.match(markdown, /content_width/);
     assert.match(markdown, /full width only|never boxed/i);
+    assert.match(markdown, /plugin-zip/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
   });
 });

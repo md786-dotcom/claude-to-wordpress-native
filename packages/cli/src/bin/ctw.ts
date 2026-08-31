@@ -226,7 +226,7 @@ function runInit(args: string[]): number {
     process.stdout.write("WooCommerce enabled in package (plugins includes woocommerce).\n");
   }
   process.stdout.write(
-    "Next: add images (media fetch or copy into media/), edit ctw-package.json, then generate.\n",
+    "Next: run plugin-zip for WordPress upload, add images (media fetch or copy into media/), edit ctw-package.json, then generate.\n",
   );
   return 0;
 }
