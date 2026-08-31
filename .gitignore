@@ -24,3 +24,4 @@ infection.log
 skills-lock.json
 *.zip
 !fixtures/**/*.zip
+*.tgz
