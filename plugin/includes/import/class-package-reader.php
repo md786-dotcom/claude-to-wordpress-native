@@ -73,9 +73,6 @@ final class Package_Reader {
 					continue;
 				}
 				$type = isset( $snippet['type'] ) ? (string) $snippet['type'] : '';
-				if ( 'php' === $type ) {
-					return new \WP_Error( 'ctw_php_snippet', 'PHP snippets are rejected.' );
-				}
 				if ( '' !== $type && ! Package_Contract::is_snippet_type( $type ) ) {
 					return new \WP_Error( 'ctw_bad_snippet', 'Snippet type is not allowed: ' . $type );
 				}
@@ -102,5 +99,19 @@ final class Package_Reader {
 	 */
 	public static function declared_plugins( array $data ): array {
 		return Package_Contract::declared_plugins( self::woo_enabled( $data ) );
+	}
+
+	/**
+	 * Plugin slugs for stack install, honoring package woo and/or an explicit switch.
+	 *
+	 * @param array<string,mixed>|\WP_Error|null $package Package or missing.
+	 * @param bool                               $install_woo Effective WooCommerce install flag.
+	 * @return list<string>
+	 */
+	public static function install_plugins( $package, bool $install_woo ): array {
+		if ( is_array( $package ) && self::woo_enabled( $package ) ) {
+			$install_woo = true;
+		}
+		return Package_Contract::declared_plugins( $install_woo );
 	}
 }

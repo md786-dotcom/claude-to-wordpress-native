@@ -10,6 +10,8 @@ namespace CTW_Native\Import;
 use CTW_Native\Adapters\ElementsKit_Adapter;
 use CTW_Native\Adapters\Menu_Adapter;
 use CTW_Native\Adapters\MetForm_Adapter;
+use CTW_Native\Adapters\WooCommerce_Pages_Adapter;
+use CTW_Native\Adapters\WooCommerce_Products_Adapter;
 use CTW_Native\Adapters\WPCode_Adapter;
 use CTW_Native\Elementor\Document_Writer;
 use CTW_Native\Stack\Parent_Theme;
@@ -19,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * One-shot package apply: guard → parent → read → media → pages → adapters → mark.
+ * One-shot package apply: guard → parent → read → media → pages → woo → adapters → mark.
  */
 final class Importer {
 
@@ -55,6 +57,7 @@ final class Importer {
 			'forms'     => array(),
 			'snippets'  => array(),
 			'templates' => array(),
+			'products'  => array(),
 		);
 
 		$front_id = 0;
@@ -109,6 +112,20 @@ final class Importer {
 			return $snippets;
 		}
 		$created['snippets'] = $snippets;
+
+		$woo_pages = WooCommerce_Pages_Adapter::import_pages( $package, $media );
+		if ( is_wp_error( $woo_pages ) ) {
+			return $woo_pages;
+		}
+		foreach ( $woo_pages['pages'] as $woo_page_id ) {
+			$created['pages'][] = (int) $woo_page_id;
+		}
+
+		$products = WooCommerce_Products_Adapter::import_products( $package, $media );
+		if ( is_wp_error( $products ) ) {
+			return $products;
+		}
+		$created['products'] = $products;
 
 		Menu_Adapter::import_menus( $package, $created['pages'] );
 

@@ -10,21 +10,21 @@ use PHPUnit\Framework\TestCase;
 
 final class PackageReaderTest extends TestCase {
 
-	public function test_rejects_php_snippets(): void {
+	public function test_accepts_php_snippets(): void {
 		$data = array(
-			'version' => 1,
-			'theme'   => array( 'slug' => 'x', 'name' => 'X' ),
-			'pages'   => array( array( 'title' => 'Home' ) ),
-			'snippets'=> array(
+			'version'  => 1,
+			'theme'    => array( 'slug' => 'x', 'name' => 'X' ),
+			'pages'    => array( array( 'title' => 'Home' ) ),
+			'snippets' => array(
 				array(
-					'title' => 'Bad',
+					'title' => 'Ok',
 					'type'  => 'php',
-					'code'  => '<?php',
+					'code'  => '<?php // brand helper',
 				),
 			),
 		);
 		$result = Package_Reader::validate_shape( $data );
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertTrue( $result );
 	}
 
 	public function test_declared_plugins_omit_woo_by_default(): void {

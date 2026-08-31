@@ -17,3 +17,5 @@ Build a brochure site for a local plumbing company named "Clearflow Plumbing" in
 ## Deliverable
 
 `ctw-package.json` + media + ZIP from `npx -y github:md786-dotcom/claude-to-wordpress-native generate`.
+
+For the hero image: save under `./media/` or `media fetch --url <unsplash-or-pexels-https> --id hero --package ./ctw-package.json`, then reference `{ "id": "hero", "url": "" }` on the image widget.

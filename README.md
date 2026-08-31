@@ -20,10 +20,23 @@ npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
 
 This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload Plugin**.
 
+Pull images from Unsplash/Pexels/direct https into `./media` (optional `--package` updates `media[]`):
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native media fetch \
+  --url "https://images.unsplash.com/photo-…" \
+  --id hero \
+  --package ./ctw-package.json
+```
+
+Or set `media[].sourceUrl` and run `media sync` / `generate` (auto-fetches missing files).
+
 Scaffold a starter package, media folder, and skill:
 
 ```bash
 npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+# Shop scaffold:
+# npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
 ```
 
 Generate the child theme ZIP:
@@ -58,7 +71,8 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 | --- | --- |
 | Pages and posts | **Edit with Elementor** (Free widgets only) |
 | Header and footer | **ElementsKit** Header Footer |
-| Shop / cart / archives | Native **WooCommerce** PHP templates (only if `woocommerce.enabled`) |
+| Shop / cart / checkout | Elementor Free pages + shortcodes (assigned as Woo pages); single/archive use child PHP templates |
+| Dummy products | Up to 4 via `products add` / `woocommerce.products` (name, price, description, image) |
 | Extra CSS | **Appearance → Customize → Additional CSS** |
 
 ## Web-dev flow
@@ -66,10 +80,19 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 1. Run `npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
 2. In Claude Code, run the GitHub `npx` skill (or `init`), then generate a site ZIP.
 3. Upload and activate the child theme (`Template: hello-elementor`).
-4. Open **CTW Native → Setup**. Install the stack (WooCommerce only if the package enables it). Import once.
+4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
 
 Re-import is refused while generated pages exist. Wipe first to regenerate. Wipe does not delete Customizer Additional CSS.
+
+## Media
+
+| Source | How |
+| --- | --- |
+| Local / Claude-attached files | Copy into `./media/`, list in `media[]`, reference `{ "id": "<media.id>", "url": "" }` on image widgets |
+| Unsplash / Pexels / https | `media fetch --url … --id …` or `media[].sourceUrl` + `media sync` / `generate` |
+
+Only `https://` image URLs. Remotes are downloaded into `./media/` before the child ZIP is built — live CDN URLs are not left in Elementor settings.
 
 ## Local monorepo
 
@@ -87,7 +110,7 @@ Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package
 
 Always: Elementor, ElementsKit Lite, MetForm, WPCode (`insert-headers-and-footers`).
 
-Optional: WooCommerce when `woocommerce.enabled` is true.
+Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode snippets (`css` | `js` | `html` | `php`).
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
 

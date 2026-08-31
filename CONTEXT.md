@@ -4,6 +4,10 @@
 
 The single shared definition of what a legal `ctw-package.json` may contain for Free Elementor widgets, core plugins, WooCommerce gate, WPCode snippet types, and wordpress.org plugin main files. Source of truth: `packages/schema/contract/ctw-contract.json`. Synced into TypeScript constants and `CTW_Native\Contract\Package_Contract`.
 
+## Media asset
+
+A file under `./media/` registered in `media[]` with a package-local `id` and relative `path`. Optional `sourceUrl` (https only) is provenance plus a download hint for `media fetch` / `media sync` / `generate`. Elementor Free image controls reference `{ "id": "<media.id>", "url": "" }` until the plugin rewrites them to WordPress attachments.
+
 ## Child theme artifact
 
 The Hello Elementor child theme ZIP emitted by `@ctw/generate` (`generateChildThemeZip`): theme kit, optional Woo templates, media, `style.css` with `Template: hello-elementor`, and embedded `ctw-package.json`.
@@ -18,4 +22,4 @@ Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and Elements
 
 ## Stack install
 
-Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included only when the package enables it.
+Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`). Shop packages may declare branded shop/cart/checkout Elementor pages, up to four dummy products, and WPCode snippets including `php`.

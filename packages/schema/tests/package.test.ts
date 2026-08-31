@@ -79,16 +79,83 @@ describe("parsePackageJson", () => {
     assert.ok(declaredPlugins(pkg).includes(WOO_PLUGIN_SLUG));
   });
 
-  it("rejects php snippet type", () => {
+  it("accepts php snippets for WPCode", () => {
     const input = basePackage();
     input.snippets = [
       {
-        title: "Bad",
-        code: "<?php echo 1;",
+        title: "Woo tweak",
+        code: "<?php add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );",
         type: "php",
         location: "everywhere",
       },
     ];
+    const pkg = parsePackageJson(input);
+    assert.equal(pkg.snippets[0]?.type, "php");
+  });
+
+  it("accepts up to 4 dummy products when woo enabled", () => {
+    const input = basePackage();
+    input.woocommerce = {
+      enabled: true,
+      products: [
+        {
+          name: "Mug",
+          price: "12.00",
+          description: "Ceramic mug",
+          imageMediaId: "mug",
+        },
+      ],
+      pages: {
+        shop: {
+          title: "Shop",
+          elements: [
+            {
+              id: "shop001",
+              elType: "container",
+              widgetType: null,
+              isInner: false,
+              settings: {},
+              elements: [
+                {
+                  id: "shop002",
+                  elType: "widget",
+                  widgetType: "shortcode",
+                  isInner: false,
+                  settings: { shortcode: "[products limit=\"4\"]" },
+                  elements: [],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    input.media = [{ id: "mug", path: "mug.jpg", alt: "Mug" }];
+    input.plugins = [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG];
+    const pkg = parsePackageJson(input);
+    assert.equal(pkg.woocommerce.products.length, 1);
+    assert.equal(pkg.woocommerce.pages.shop?.title, "Shop");
+  });
+
+  it("rejects more than 4 products", () => {
+    const input = basePackage();
+    input.plugins = [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG];
+    input.media = [
+      { id: "a", path: "a.jpg", alt: "" },
+      { id: "b", path: "b.jpg", alt: "" },
+      { id: "c", path: "c.jpg", alt: "" },
+      { id: "d", path: "d.jpg", alt: "" },
+      { id: "e", path: "e.jpg", alt: "" },
+    ];
+    input.woocommerce = {
+      enabled: true,
+      products: ["a", "b", "c", "d", "e"].map((id) => ({
+        name: id,
+        price: "1",
+        description: "",
+        imageMediaId: id,
+      })),
+    };
     const result = safeParsePackageJson(input);
     assert.equal(result.success, false);
   });
@@ -148,6 +215,34 @@ describe("parsePackageJson", () => {
     assert.equal(result.success, false);
   });
 
+  it("accepts https sourceUrl on media", () => {
+    const input = basePackage();
+    input.media = [
+      {
+        id: "hero",
+        path: "hero.jpg",
+        alt: "Hero",
+        sourceUrl: "https://images.unsplash.com/photo-abc",
+      },
+    ];
+    const pkg = parsePackageJson(input);
+    assert.equal(pkg.media[0]?.sourceUrl, "https://images.unsplash.com/photo-abc");
+  });
+
+  it("rejects http sourceUrl on media", () => {
+    const input = basePackage();
+    input.media = [
+      {
+        id: "hero",
+        path: "hero.jpg",
+        alt: "Hero",
+        sourceUrl: "http://example.com/a.jpg",
+      },
+    ];
+    const result = safeParsePackageJson(input);
+    assert.equal(result.success, false);
+  });
+
   it("lists only free widgets in the allowlist", () => {
     assert.ok(FREE_WIDGET_SET.has("heading"));
     assert.equal(FREE_WIDGET_SET.has("form"), false);
@@ -160,15 +255,16 @@ describe("parsePackageJson", () => {
     assert.equal(result.success, false);
   });
 
-  it("accepts css js and html snippets", () => {
+  it("accepts css js html and php snippets", () => {
     const input = basePackage();
     input.snippets = [
       { title: "A", code: "body{}", type: "css", location: "header" },
       { title: "B", code: "console.log(1)", type: "js", location: "footer" },
       { title: "C", code: "<div></div>", type: "html", location: "everywhere" },
+      { title: "D", code: "<?php // ok", type: "php", location: "everywhere" },
     ];
     const pkg = parsePackageJson(input);
-    assert.equal(pkg.snippets.length, 3);
+    assert.equal(pkg.snippets.length, 4);
   });
 });
 

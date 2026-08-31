@@ -1,7 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { CORE_PLUGIN_SLUGS } from "@ctw/schema";
+import { CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG } from "@ctw/schema";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -70,21 +70,33 @@ export type InitResult = {
 /**
  * Scaffold a starter ctw-package.json, media folder, and Claude Code skill.
  */
-export function initProject(projectRoot: string, themeSlug: string, themeName: string): InitResult {
+export function initProject(
+  projectRoot: string,
+  themeSlug: string,
+  themeName: string,
+  options?: { woocommerce?: boolean },
+): InitResult {
   const root = resolve(projectRoot);
   const packagePath = join(root, "ctw-package.json");
   const mediaDir = join(root, "media");
   mkdirSync(mediaDir, { recursive: true });
 
   if (!existsSync(packagePath)) {
-    writeFileSync(packagePath, starterPackageJson(themeSlug, themeName), "utf8");
+    writeFileSync(
+      packagePath,
+      starterPackageJson(themeSlug, themeName, options?.woocommerce === true),
+      "utf8",
+    );
   }
 
   const skill = installSkill(root);
   return { packagePath, skill, mediaDir };
 }
 
-function starterPackageJson(themeSlug: string, themeName: string): string {
+function starterPackageJson(themeSlug: string, themeName: string, wooEnabled: boolean): string {
+  const plugins = wooEnabled
+    ? [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG]
+    : [...CORE_PLUGIN_SLUGS];
   const body = {
     version: 1,
     theme: {
@@ -138,8 +150,8 @@ function starterPackageJson(themeSlug: string, themeName: string): string {
     ],
     forms: [],
     snippets: [],
-    woocommerce: { enabled: false },
-    plugins: [...CORE_PLUGIN_SLUGS],
+    woocommerce: { enabled: wooEnabled },
+    plugins,
   };
   return `${JSON.stringify(body, null, 2)}\n`;
 }

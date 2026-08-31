@@ -38,6 +38,9 @@ describe("ctw CLI", () => {
     assert.equal(result.status, 0);
     assert.match(result.stdout, /npx -y github:md786-dotcom\/claude-to-wordpress-native skill/);
     assert.match(result.stdout, /plugin-zip/);
+    assert.match(result.stdout, /--woocommerce/);
+    assert.match(result.stdout, /media fetch/);
+    assert.match(result.stdout, /products add/);
   });
 
   it("writes plugin-zip into the project directory", () => {
