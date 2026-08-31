@@ -1,0 +1,18 @@
+{
+  "name": "ctw/native",
+  "description": "CTW Native WordPress plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5",
+    "phpstan/phpstan": "^2.1",
+    "phpmd/phpmd": "^2.15"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CTW_Native\\Tests\\": "tests/"
+    }
+  }
+}

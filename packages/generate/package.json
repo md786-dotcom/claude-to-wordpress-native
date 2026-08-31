@@ -1,0 +1,33 @@
+{
+  "name": "@ctw/generate",
+  "version": "0.1.0",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --import tsx --test tests/**/*.test.ts",
+    "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test tests/**/*.test.ts",
+    "stryker": "stryker run"
+  },
+  "dependencies": {
+    "@ctw/schema": "0.1.0",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^9.0.1",
+    "@stryker-mutator/typescript-checker": "^9.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

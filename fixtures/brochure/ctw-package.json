@@ -1,0 +1,228 @@
+{
+  "version": 1,
+  "theme": {
+    "slug": "clearflow-child",
+    "name": "Clearflow Child",
+    "colors": {
+      "primary": "#0B3D91"
+    },
+    "typography": {
+      "headingFont": "Georgia",
+      "bodyFont": "Helvetica"
+    },
+    "menus": [
+      {
+        "location": "menu-1",
+        "name": "Primary",
+        "items": [
+          { "title": "Home", "pageSlug": "home" },
+          { "title": "Services", "pageSlug": "services" },
+          { "title": "Contact", "pageSlug": "contact" }
+        ]
+      }
+    ]
+  },
+  "media": [],
+  "pages": [
+    {
+      "title": "Home",
+      "slug": "home",
+      "isFrontPage": true,
+      "template": "elementor_header_footer",
+      "elements": [
+        {
+          "id": "home001",
+          "elType": "container",
+          "widgetType": null,
+          "isInner": false,
+          "settings": {
+            "flex_direction": "column",
+            "flex_align_items": "center"
+          },
+          "elements": [
+            {
+              "id": "home002",
+              "elType": "widget",
+              "widgetType": "heading",
+              "isInner": false,
+              "settings": {
+                "title": "Clearflow Plumbing",
+                "header_size": "h1"
+              },
+              "elements": []
+            },
+            {
+              "id": "home003",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "isInner": false,
+              "settings": {
+                "editor": "<p>Trusted plumbing in Austin, TX.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "home004",
+              "elType": "widget",
+              "widgetType": "button",
+              "isInner": false,
+              "settings": {
+                "text": "Contact us",
+                "link": { "url": "/contact/" }
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Services",
+      "slug": "services",
+      "isFrontPage": false,
+      "template": "elementor_header_footer",
+      "elements": [
+        {
+          "id": "svc001",
+          "elType": "container",
+          "widgetType": null,
+          "isInner": false,
+          "settings": {},
+          "elements": [
+            {
+              "id": "svc002",
+              "elType": "widget",
+              "widgetType": "heading",
+              "isInner": false,
+              "settings": { "title": "Services" },
+              "elements": []
+            },
+            {
+              "id": "svc003",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "isInner": false,
+              "settings": {
+                "icon_list": [
+                  { "text": "Emergency repairs" },
+                  { "text": "Water heater install" },
+                  { "text": "Drain cleaning" }
+                ]
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Contact",
+      "slug": "contact",
+      "isFrontPage": false,
+      "template": "elementor_header_footer",
+      "elements": [
+        {
+          "id": "ctc001",
+          "elType": "container",
+          "widgetType": null,
+          "isInner": false,
+          "settings": {},
+          "elements": [
+            {
+              "id": "ctc002",
+              "elType": "widget",
+              "widgetType": "heading",
+              "isInner": false,
+              "settings": { "title": "Contact" },
+              "elements": []
+            },
+            {
+              "id": "ctc003",
+              "elType": "widget",
+              "widgetType": "shortcode",
+              "isInner": false,
+              "settings": {
+                "shortcode": "[metform form_id=\"contact\"]"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "header": {
+    "title": "Site Header",
+    "elements": [
+      {
+        "id": "hdr001",
+        "elType": "container",
+        "widgetType": null,
+        "isInner": false,
+        "settings": {},
+        "elements": [
+          {
+            "id": "hdr002",
+            "elType": "widget",
+            "widgetType": "heading",
+            "isInner": false,
+            "settings": { "title": "Clearflow Plumbing" },
+            "elements": []
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "title": "Site Footer",
+    "elements": [
+      {
+        "id": "ftr001",
+        "elType": "container",
+        "widgetType": null,
+        "isInner": false,
+        "settings": {},
+        "elements": [
+          {
+            "id": "ftr002",
+            "elType": "widget",
+            "widgetType": "text-editor",
+            "isInner": false,
+            "settings": {
+              "editor": "<p>© Clearflow Plumbing</p>"
+            },
+            "elements": []
+          }
+        ]
+      }
+    ]
+  },
+  "forms": [
+    {
+      "title": "Contact",
+      "slug": "contact",
+      "fields": [
+        { "name": "name", "label": "Name", "type": "text", "required": true, "options": [] },
+        { "name": "email", "label": "Email", "type": "email", "required": true, "options": [] },
+        { "name": "message", "label": "Message", "type": "textarea", "required": true, "options": [] }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "title": "Heading letter spacing",
+      "type": "css",
+      "location": "header",
+      "code": "h1,h2,h3{letter-spacing:0.02em;}"
+    }
+  ],
+  "woocommerce": {
+    "enabled": false
+  },
+  "plugins": [
+    "elementor",
+    "elementskit-lite",
+    "metform",
+    "insert-headers-and-footers"
+  ]
+}

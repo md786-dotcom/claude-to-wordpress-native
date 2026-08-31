@@ -1,0 +1,22 @@
+Claude-to-WordPress Native
+Copyright (C) 2026 md786-dotcom
+
+This project is licensed under GPL-2.0-or-later.
+
+Third-party attributions:
+
+Hello Elementor theme
+  Copyright Elementor Ltd.
+  License: GPL-3.0-or-later
+  https://github.com/elementor/hello-theme
+  This project requires Hello Elementor as a parent theme installed from
+  wordpress.org. Hello Elementor source is not vendored in this repository
+  or in generated child theme ZIPs.
+
+EMCP Tools / elementor-mcp (patterns adapted)
+  Copyright MSR Builds and contributors
+  License: GPL-2.0-or-later
+  https://github.com/msrbuilds/elementor-mcp
+  Elementor Free document JSON factory and persist patterns are adapted,
+  not copied wholesale. No Freemius, Pro submodule, or live MCP stack is
+  included.
