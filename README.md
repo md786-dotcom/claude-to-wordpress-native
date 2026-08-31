@@ -20,6 +20,17 @@ npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
 
 This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload Plugin**.
 
+Pull images from Unsplash/Pexels/direct https into `./media` (optional `--package` updates `media[]`):
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native media fetch \
+  --url "https://images.unsplash.com/photo-…" \
+  --id hero \
+  --package ./ctw-package.json
+```
+
+Or set `media[].sourceUrl` and run `media sync` / `generate` (auto-fetches missing files).
+
 Scaffold a starter package, media folder, and skill:
 
 ```bash
@@ -72,6 +83,15 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 5. Hand the site to the client.
 
 Re-import is refused while generated pages exist. Wipe first to regenerate. Wipe does not delete Customizer Additional CSS.
+
+## Media
+
+| Source | How |
+| --- | --- |
+| Local / Claude-attached files | Copy into `./media/`, list in `media[]`, reference `{ "id": "<media.id>", "url": "" }` on image widgets |
+| Unsplash / Pexels / https | `media fetch --url … --id …` or `media[].sourceUrl` + `media sync` / `generate` |
+
+Only `https://` image URLs. Remotes are downloaded into `./media/` before the child ZIP is built — live CDN URLs are not left in Elementor settings.
 
 ## Local monorepo
 

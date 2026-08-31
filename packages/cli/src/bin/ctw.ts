@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
 import { generateChildThemeZip, readPackageFromFile } from "@ctw/generate";
+import { fetchIntoPackage, syncPackageMedia } from "../media-fetch.js";
 import { packPluginZip } from "../plugin-zip.js";
 import { initProject, installSkill } from "../skill.js";
 
@@ -12,17 +13,20 @@ function printHelp(): void {
       "Simple start (GitHub main — not on npm yet):",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native media fetch --url https://images.unsplash.com/... --id hero",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Acme Child\" --slug acme-child",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Shop Child\" --slug shop-child --woocommerce",
-      "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
+      "  media fetch        Download an https image (Unsplash/Pexels/direct) into ./media",
+      "  media sync         Download all package media[].sourceUrl files that are missing",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
       "  validate           Validate a ctw-package.json without writing a ZIP",
-      "  generate           Emit a Hello Elementor child theme ZIP",
+      "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
       "",
@@ -83,6 +87,82 @@ function runPluginZip(args: string[]): number {
   }
 }
 
+async function runMedia(args: string[]): Promise<number> {
+  const [sub, ...rest] = args;
+  if (sub === "fetch") {
+    return runMediaFetch(rest);
+  }
+  if (sub === "sync") {
+    return runMediaSync(rest);
+  }
+  process.stderr.write("Usage: media fetch|sync …\n");
+  return 1;
+}
+
+async function runMediaFetch(args: string[]): Promise<number> {
+  const url = readFlag(args, "--url");
+  const id = readFlag(args, "--id");
+  if (url === undefined || id === undefined) {
+    process.stderr.write("Missing --url or --id.\n");
+    return 1;
+  }
+  const cwd = resolve(readFlag(args, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve(cwd, readFlag(args, "--media") ?? "media");
+  const packagePath = readFlag(args, "--package");
+  const alt = readFlag(args, "--alt");
+  const relativePath = readFlag(args, "--path");
+  try {
+    const result = await fetchIntoPackage({
+      url,
+      id,
+      mediaRoot,
+      ...(alt !== undefined ? { alt } : {}),
+      ...(relativePath !== undefined ? { relativePath } : {}),
+      ...(packagePath !== undefined
+        ? { packagePath: resolve(cwd, packagePath) }
+        : {}),
+    });
+    process.stdout.write(`Downloaded ${result.relativePath} → ${mediaRoot}\n`);
+    if (result.packagePath !== undefined) {
+      process.stdout.write(`Updated media[] in ${result.packagePath}\n`);
+    }
+    process.stdout.write(
+      `In Elementor trees use settings.image = { "id": "${id}", "url": "" }\n`,
+    );
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`media fetch failed: ${message}\n`);
+    return 1;
+  }
+}
+
+async function runMediaSync(args: string[]): Promise<number> {
+  const packagePath = readFlag(args, "--package");
+  if (packagePath === undefined) {
+    process.stderr.write("Missing --package.\n");
+    return 1;
+  }
+  const cwd = resolve(readFlag(args, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve(cwd, readFlag(args, "--media") ?? "media");
+  const force = args.includes("--force");
+  try {
+    const pkg = readPackageFromFile(resolve(cwd, packagePath));
+    const result = await syncPackageMedia({ pkg, mediaRoot, force });
+    process.stdout.write(
+      `Media sync: downloaded ${String(result.downloaded.length)}, skipped ${String(result.skipped.length)}\n`,
+    );
+    for (const path of result.downloaded) {
+      process.stdout.write(`  + ${path}\n`);
+    }
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`media sync failed: ${message}\n`);
+    return 1;
+  }
+}
+
 function runInit(args: string[]): number {
   const root = resolve(readFlag(args, "--cwd") ?? process.cwd());
   const name = readFlag(args, "--name") ?? "Site Child";
@@ -101,7 +181,7 @@ function runInit(args: string[]): number {
     process.stdout.write("WooCommerce enabled in package (plugins includes woocommerce).\n");
   }
   process.stdout.write(
-    "Next: edit ctw-package.json (or ask Claude Code), then run generate.\n",
+    "Next: add images (media fetch or copy into media/), edit ctw-package.json, then generate.\n",
   );
   return 0;
 }
@@ -125,7 +205,7 @@ function runValidate(args: string[]): number {
   }
 }
 
-function runGenerate(args: string[]): number {
+async function runGenerate(args: string[]): Promise<number> {
   const packagePath = readFlag(args, "--package");
   const outPath = readFlag(args, "--out");
   const mediaRoot = readFlag(args, "--media");
@@ -134,10 +214,33 @@ function runGenerate(args: string[]): number {
     return 1;
   }
   try {
+    const resolvedPackage = resolve(packagePath);
+    const pkg = readPackageFromFile(resolvedPackage);
+    const resolvedMedia =
+      mediaRoot !== undefined
+        ? resolve(mediaRoot)
+        : pkg.media.length > 0
+          ? resolve("media")
+          : undefined;
+
+    if (pkg.media.length > 0 && resolvedMedia === undefined) {
+      process.stderr.write("Package declares media but --media was not set.\n");
+      return 1;
+    }
+
+    if (resolvedMedia !== undefined && pkg.media.length > 0) {
+      const sync = await syncPackageMedia({ pkg, mediaRoot: resolvedMedia });
+      if (sync.downloaded.length > 0) {
+        process.stdout.write(
+          `Fetched ${String(sync.downloaded.length)} media file(s) into ${resolvedMedia}\n`,
+        );
+      }
+    }
+
     const result = generateChildThemeZip({
-      packagePath: resolve(packagePath),
+      packagePath: resolvedPackage,
       outputPath: resolve(outPath),
-      ...(mediaRoot !== undefined ? { mediaRoot: resolve(mediaRoot) } : {}),
+      ...(resolvedMedia !== undefined ? { mediaRoot: resolvedMedia } : {}),
     });
     process.stdout.write(
       `Wrote ${result.outputPath} for theme ${result.package.theme.slug}\n`,
@@ -153,7 +256,7 @@ function runGenerate(args: string[]): number {
   }
 }
 
-function main(argv: string[]): number {
+async function main(argv: string[]): Promise<number> {
   if (argv.includes("--help") || argv.includes("-h") || argv.length === 0) {
     printHelp();
     return 0;
@@ -165,6 +268,8 @@ function main(argv: string[]): number {
       return runSkill(rest);
     case "plugin-zip":
       return runPluginZip(rest);
+    case "media":
+      return runMedia(rest);
     case "init":
       return runInit(rest);
     case "validate":
@@ -178,4 +283,5 @@ function main(argv: string[]): number {
   }
 }
 
-process.exitCode = main(process.argv.slice(2));
+const code = await main(process.argv.slice(2));
+process.exitCode = code;
