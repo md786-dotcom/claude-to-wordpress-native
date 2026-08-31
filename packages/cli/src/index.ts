@@ -12,3 +12,12 @@ export {
   type PackPluginOptions,
   type PackPluginResult,
 } from "./plugin-zip.js";
+export {
+  downloadMediaFile,
+  fetchIntoPackage,
+  guessMediaFilename,
+  syncPackageMedia,
+  type FetchIntoPackageOptions,
+  type FetchLike,
+  type SyncMediaResult,
+} from "./media-fetch.js";

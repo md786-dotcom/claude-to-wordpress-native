@@ -74,6 +74,13 @@ export const mediaItemSchema = z.object({
   id: z.string().min(1).max(64),
   path: relativePath,
   alt: z.string().max(200).default(""),
+  sourceUrl: z
+    .string()
+    .url()
+    .refine((value) => value.startsWith("https://"), {
+      message: "sourceUrl must be an https URL",
+    })
+    .optional(),
 });
 
 export type ElementNode = {

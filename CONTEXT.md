@@ -4,6 +4,10 @@
 
 The single shared definition of what a legal `ctw-package.json` may contain for Free Elementor widgets, core plugins, WooCommerce gate, WPCode snippet types, and wordpress.org plugin main files. Source of truth: `packages/schema/contract/ctw-contract.json`. Synced into TypeScript constants and `CTW_Native\Contract\Package_Contract`.
 
+## Media asset
+
+A file under `./media/` registered in `media[]` with a package-local `id` and relative `path`. Optional `sourceUrl` (https only) is provenance plus a download hint for `media fetch` / `media sync` / `generate`. Elementor Free image controls reference `{ "id": "<media.id>", "url": "" }` until the plugin rewrites them to WordPress attachments.
+
 ## Child theme artifact
 
 The Hello Elementor child theme ZIP emitted by `@ctw/generate` (`generateChildThemeZip`): theme kit, optional Woo templates, media, `style.css` with `Template: hello-elementor`, and embedded `ctw-package.json`.

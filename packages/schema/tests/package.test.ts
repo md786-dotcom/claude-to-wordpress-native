@@ -148,6 +148,34 @@ describe("parsePackageJson", () => {
     assert.equal(result.success, false);
   });
 
+  it("accepts https sourceUrl on media", () => {
+    const input = basePackage();
+    input.media = [
+      {
+        id: "hero",
+        path: "hero.jpg",
+        alt: "Hero",
+        sourceUrl: "https://images.unsplash.com/photo-abc",
+      },
+    ];
+    const pkg = parsePackageJson(input);
+    assert.equal(pkg.media[0]?.sourceUrl, "https://images.unsplash.com/photo-abc");
+  });
+
+  it("rejects http sourceUrl on media", () => {
+    const input = basePackage();
+    input.media = [
+      {
+        id: "hero",
+        path: "hero.jpg",
+        alt: "Hero",
+        sourceUrl: "http://example.com/a.jpg",
+      },
+    ];
+    const result = safeParsePackageJson(input);
+    assert.equal(result.success, false);
+  });
+
   it("lists only free widgets in the allowlist", () => {
     assert.ok(FREE_WIDGET_SET.has("heading"));
     assert.equal(FREE_WIDGET_SET.has("form"), false);
