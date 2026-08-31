@@ -73,7 +73,8 @@ final class Setup_Page {
 
 		echo '<p>Install Hello Elementor and the declared free plugins, then import <code>ctw-package.json</code> from the active child theme.</p>';
 		echo '<p>Theme changes automatically purge WordPress, Elementor, and common page caches so the newly activated theme is shown.</p>';
-		echo '<p><strong>Claude Code</strong> generates the child ZIP. Claude cannot edit this site after import.</p>';
+		echo '<p>After uploading or activating a <strong>new Claude theme</strong>: click <strong>Wipe generated content</strong>, then <strong>Import package (one-shot)</strong>.</p>';
+		echo '<p><strong>Claude Code</strong> generates the child ZIP. Claude cannot edit this site after import. Theme quality depends on the Claude model and prompt; this plugin bridges Claude output to Elementor Free editing.</p>';
 
 		echo '<h2>Stack status</h2><ul>';
 		foreach ( $rows as $row ) {

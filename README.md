@@ -4,6 +4,8 @@ Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** Z
 
 Claude Code only. Claude does not edit the site after install.
 
+**Disclaimer:** The quality of the generated theme depends on the Claude model and the prompt. This tool/skill is a bridge between Claude-generated output and Elementor Free editing compatibility.
+
 ## Quick start (Claude Code)
 
 The package is **not on the npm registry yet**. Install and run from GitHub **main**:
@@ -84,9 +86,23 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
 
+### After uploading or activating a new Claude theme
+
+Whenever you upload/activate a new or regenerated child theme from Claude:
+
+1. Open **CTW Native → Setup**.
+2. Click **Wipe generated content** (required if a previous import exists; does not delete Customizer Additional CSS).
+3. Click **Import package (one-shot)** to load the new theme package into Elementor.
+
 Activating any theme (CTW child or not) automatically purges WordPress, Elementor, and common page caches so the new theme is shown.
 
-Re-import is refused while generated pages exist. Wipe first to regenerate. Wipe does not delete Customizer Additional CSS.
+Re-import is refused while generated pages exist. Wipe first to regenerate.
+
+## Supported Elementor Free widgets
+
+`heading`, `image`, `text-editor`, `video`, `button`, `divider`, `spacer`, `google_maps`, `icon`, `image-box`, `icon-box`, `star-rating`, `image-carousel`, `image-gallery`, `icon-list`, `counter`, `progress`, `testimonial`, `tabs`, `accordion`, `toggle`, `social-icons`, `alert`, `html`, `shortcode`, `menu-anchor`, `sidebar`.
+
+Layout uses Elementor `container` (`content_width: full`). Forms → MetForm. Header/footer → ElementsKit.
 
 ## Media
 
