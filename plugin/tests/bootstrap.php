@@ -14,6 +14,7 @@ define( 'CTW_NATIVE_URL', 'http://example.test/wp-content/plugins/ctw-native/' )
 require_once dirname( __DIR__ ) . '/includes/contract/class-package-contract.php';
 require_once dirname( __DIR__ ) . '/includes/elementor/class-widget-allowlist.php';
 require_once dirname( __DIR__ ) . '/includes/elementor/class-tree-validator.php';
+require_once dirname( __DIR__ ) . '/includes/elementor/class-full-width.php';
 require_once dirname( __DIR__ ) . '/includes/import/class-package-reader.php';
 require_once dirname( __DIR__ ) . '/includes/import/class-import-guard.php';
 require_once dirname( __DIR__ ) . '/includes/stack/class-parent-theme.php';

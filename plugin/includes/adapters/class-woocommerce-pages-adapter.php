@@ -97,6 +97,7 @@ final class WooCommerce_Pages_Adapter {
 				'widgetType' => null,
 				'isInner'    => false,
 				'settings'   => array(
+					'content_width'  => 'full',
 					'flex_direction' => 'column',
 					'gap'            => array(
 						'unit' => 'px',

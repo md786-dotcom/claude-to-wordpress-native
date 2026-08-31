@@ -82,7 +82,8 @@ final class Document_Writer {
 	 * @param string|null               $page_template Page template or null.
 	 */
 	private static function persist_meta( int $post_id, array $elements, string $template_type, ?string $page_template ): void {
-		$json = wp_json_encode( $elements );
+		$elements = Full_Width::ensure_tree( $elements );
+		$json     = wp_json_encode( $elements );
 		update_post_meta( $post_id, '_elementor_edit_mode', 'builder' );
 		update_post_meta( $post_id, '_elementor_template_type', $template_type );
 		update_post_meta( $post_id, '_elementor_data', wp_slash( $json ) );
