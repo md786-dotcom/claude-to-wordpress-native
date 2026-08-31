@@ -6,23 +6,17 @@
   "description": "Claude Code toolchain that emits Hello Elementor child themes with Elementor Free pages",
   "license": "GPL-2.0-or-later",
   "bin": {
-    "ctw": "./packages/cli/dist/bin/ctw.js",
-    "claude-to-wordpress-native": "./packages/cli/dist/bin/ctw.js"
+    "ctw": "./dist/ctw.mjs",
+    "claude-to-wordpress-native": "./dist/ctw.mjs"
   },
   "files": [
-    "packages/cli/dist",
+    "dist/ctw.mjs",
     "packages/cli/skill-assets",
-    "packages/cli/package.json",
-    "packages/generate/dist",
-    "packages/generate/package.json",
-    "packages/schema/dist",
-    "packages/schema/contract",
-    "packages/schema/package.json",
-    "scripts",
     "skills",
     "theme-kit",
     "plugin",
     "fixtures",
+    "scripts/ensure-cli-bundle.mjs",
     "NOTICE",
     "LICENSE",
     "README.md"
@@ -31,7 +25,8 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "node scripts/ensure-cli-bundle.mjs",
+    "bundle": "node scripts/bundle-cli.mjs",
     "build": "npm run build -w @ctw/schema && npm run build -w @ctw/generate && npm run build -w @ctw/cli",
     "test": "npm run test -w @ctw/schema && npm run test -w @ctw/generate && npm run test -w @ctw/cli",
     "test:coverage": "npm run test:coverage -w @ctw/schema && npm run test:coverage -w @ctw/generate && npm run test:coverage -w @ctw/cli",
@@ -39,12 +34,13 @@
     "typecheck": "tsc -b packages/schema packages/generate packages/cli",
     "knip": "knip",
     "stryker": "npm run stryker -w @ctw/schema && npm run stryker -w @ctw/generate",
-    "ctw": "node packages/cli/dist/bin/ctw.js",
+    "ctw": "node dist/ctw.mjs",
     "prepack": "npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@types/node": "^22.13.10",
+    "esbuild": "^0.25.1",
     "eslint": "^9.22.0",
     "eslint-plugin-sonarjs": "^3.0.2",
     "knip": "^5.46.0",

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { after, describe, it } from "node:test";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
-const bin = join(root, "packages/cli/dist/bin/ctw.js");
+const bin = join(root, "dist/ctw.mjs");
 const fixturePackage = join(root, "fixtures/brochure/ctw-package.json");
 
 function run(
@@ -36,7 +36,7 @@ describe("ctw CLI", () => {
   it("prints help", () => {
     const result = run(["--help"]);
     assert.equal(result.status, 0);
-    assert.match(result.stdout, /npx github:md786-dotcom\/claude-to-wordpress-native skill/);
+    assert.match(result.stdout, /npx -y github:md786-dotcom\/claude-to-wordpress-native skill/);
   });
 
   it("rejects unknown commands", () => {

@@ -6,24 +6,25 @@ Claude Code only. No Cursor. No Claude Desktop. Claude does not edit the site af
 
 ## Quick start (Claude Code)
 
-The package is **not on the npm registry yet**. Install and run from GitHub:
+The package is **not on the npm registry yet**. Install and run from GitHub **main**:
 
 ```bash
-npx github:md786-dotcom/claude-to-wordpress-native skill
+npx -y github:md786-dotcom/claude-to-wordpress-native skill
 ```
 
 Scaffold a starter package, media folder, and skill:
 
 ```bash
-npx github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 ```
 
 Generate the child theme ZIP:
 
 ```bash
-npx github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
+npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
+The CLI ships as a self-contained `dist/ctw.mjs` bundle so unpublished workspace packages are not required at runtime.
 From a local clone of this repo:
 
 ```bash

@@ -16,4 +16,4 @@ Build a brochure site for a local plumbing company named "Clearflow Plumbing" in
 
 ## Deliverable
 
-`ctw-package.json` + media + ZIP from `npx github:md786-dotcom/claude-to-wordpress-native generate`.
+`ctw-package.json` + media + ZIP from `npx -y github:md786-dotcom/claude-to-wordpress-native generate`.
