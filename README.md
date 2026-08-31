@@ -2,7 +2,7 @@
 
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs Hello Elementor and the declared free stack, then imports pages so **Edit with Elementor** works.
 
-Claude Code only. No Cursor. No Claude Desktop. Claude does not edit the site after install.
+Claude Code only. Claude does not edit the site after install.
 
 ## Quick start (Claude Code)
 
