@@ -20,6 +20,13 @@ describe("skill assets", () => {
     assert.match(markdown, /plugin-zip/);
     assert.match(markdown, /fontawesome-free|Font Awesome Free/i);
     assert.match(markdown, /cdn\.jsdelivr\.net/i);
+    assert.match(markdown, /Wipe generated content/i);
+    assert.match(markdown, /Import package \(one-shot\)/i);
+    assert.match(markdown, /depends on the Claude model/i);
+    assert.match(markdown, /bridge between Claude/i);
+    assert.match(markdown, /Supported Elementor Free widgets/i);
+    assert.match(markdown, /google_maps/);
+    assert.match(markdown, /social-icons/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
   });
 });

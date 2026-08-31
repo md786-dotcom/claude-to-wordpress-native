@@ -7,6 +7,8 @@ description: Generate Hello Elementor child theme ZIPs with Elementor Free pages
 
 You generate an offline site package. You do **not** edit a live WordPress site after install.
 
+**Disclaimer:** Theme quality depends on the Claude model and the prompt. This skill/tool is a bridge between Claude-generated output and Elementor Free editing compatibility — it does not guarantee design quality on its own.
+
 ## Install this skill (once per project)
 
 ```bash
@@ -139,6 +141,42 @@ Rules:
 - Do **not** load the full **Web Awesome** component CDN (`ka-f.webawesome.com` / `<wa-icon>`) for Elementor Free trees — that is a separate web-component stack and does not drive Elementor’s icon controls. Prefer FA Free CSS above.
 - One CDN snippet per package is enough; do not duplicate it.
 
+## Supported Elementor Free widgets
+
+Use **only** these `widgetType` values (plus `elType: "container"` for layout). Never emit Pro, Woo Elementor, Theme Builder, or other widgets.
+
+| widgetType | Notes |
+| --- | --- |
+| `heading` | |
+| `image` | Reference media via `{ "id": "<media.id>", "url": "" }` |
+| `text-editor` | |
+| `video` | |
+| `button` | |
+| `divider` | |
+| `spacer` | |
+| `google_maps` | |
+| `icon` | Needs Font Awesome Free CDN snippet |
+| `image-box` | |
+| `icon-box` | Needs Font Awesome Free CDN snippet |
+| `star-rating` | |
+| `image-carousel` | |
+| `image-gallery` | |
+| `icon-list` | Needs Font Awesome Free CDN snippet |
+| `counter` | |
+| `progress` | |
+| `testimonial` | |
+| `tabs` | |
+| `accordion` | |
+| `toggle` | |
+| `social-icons` | Needs Font Awesome Free CDN snippet |
+| `alert` | |
+| `html` | |
+| `shortcode` | Prefer for Woo shop/cart/checkout |
+| `menu-anchor` | |
+| `sidebar` | |
+
+Forms → MetForm (`forms[]`). Header/footer → ElementsKit (`header` / `footer`). Not Elementor form or Theme Builder.
+
 ## Output
 
 1. Write valid `ctw-package.json` (version 1).
@@ -150,13 +188,25 @@ npx -y github:md786-dotcom/claude-to-wordpress-native generate \
   --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
 ```
 
-4. Tell the web developer: `plugin-zip` → upload plugin → upload child ZIP → **CTW Native → Setup** (Install WooCommerce if needed) → import once.
+4. Tell the web developer the install / re-import steps below.
+
+## After uploading or activating a new Claude theme
+
+Claude cannot edit the live site. After the developer uploads and activates a new (or regenerated) child theme ZIP:
+
+1. Open **CTW Native → Setup** in WordPress.
+2. Click **Wipe generated content** (required whenever generated pages already exist; wipe does not delete Customizer Additional CSS).
+3. Click **Import package (one-shot)** to apply the new theme’s `ctw-package.json`.
+
+First-time sites (nothing imported yet): skip wipe, install the stack if needed, then **Import package (one-shot)** once.
+
+Always tell the developer: upload/activate child theme → **CTW Native → Wipe generated content** → **Import package (one-shot)**.
 
 ## Package rules
 
 - Parent: Hello Elementor (`Template: hello-elementor`).
 - Exactly one `isFrontPage: true`.
-- Elementor Free allowlist only. Forms → MetForm. Header/footer → ElementsKit.
+- Elementor Free allowlist only (see table above). Forms → MetForm. Header/footer → ElementsKit.
 - Containers: always `"content_width": "full"` (never boxed).
 - Brochure: `woocommerce.enabled: false` and omit woo from `plugins`, products, and woo pages.
 
@@ -167,7 +217,3 @@ npx -y github:md786-dotcom/claude-to-wordpress-native generate \
 - Shop / cart / checkout: Elementor pages assigned as WooCommerce pages (plus native single/archive templates)
 - Extra CSS: Appearance → Customize → Additional CSS
 - Snippets: WPCode
-
-## After install
-
-Claude cannot edit the live site. Import is one-shot; wipe before regenerate.
