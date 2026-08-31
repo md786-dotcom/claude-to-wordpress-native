@@ -1,0 +1,110 @@
+<?php
+/**
+ * Reads ctw-package.json from the active child theme.
+ *
+ * @package CTW_Native
+ */
+
+namespace CTW_Native\Import;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Package reader.
+ */
+final class Package_Reader {
+
+	public const FILENAME = 'ctw-package.json';
+
+	/**
+	 * Absolute path to package in active stylesheet, or empty.
+	 */
+	public static function path(): string {
+		$path = trailingslashit( get_stylesheet_directory() ) . self::FILENAME;
+		return is_readable( $path ) ? $path : '';
+	}
+
+	/**
+	 * @return array<string,mixed>|\WP_Error
+	 */
+	public static function read() {
+		$path = self::path();
+		if ( '' === $path ) {
+			return new \WP_Error( 'ctw_no_package', 'ctw-package.json was not found in the active child theme.' );
+		}
+		$raw = file_get_contents( $path );
+		if ( false === $raw ) {
+			return new \WP_Error( 'ctw_read_fail', 'Could not read ctw-package.json.' );
+		}
+		$data = json_decode( $raw, true );
+		if ( ! is_array( $data ) ) {
+			return new \WP_Error( 'ctw_bad_json', 'ctw-package.json is not valid JSON.' );
+		}
+		$check = self::validate_shape( $data );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+		return $data;
+	}
+
+	/**
+	 * Lightweight shape checks (full Zod validation happens in the CLI).
+	 *
+	 * @param array<string,mixed> $data Package.
+	 * @return true|\WP_Error
+	 */
+	public static function validate_shape( array $data ) {
+		if ( ! isset( $data['version'] ) || 1 !== (int) $data['version'] ) {
+			return new \WP_Error( 'ctw_version', 'Package version must be 1.' );
+		}
+		if ( empty( $data['theme'] ) || ! is_array( $data['theme'] ) ) {
+			return new \WP_Error( 'ctw_theme', 'Package theme is required.' );
+		}
+		if ( empty( $data['pages'] ) || ! is_array( $data['pages'] ) ) {
+			return new \WP_Error( 'ctw_pages', 'Package pages are required.' );
+		}
+		if ( isset( $data['snippets'] ) && is_array( $data['snippets'] ) ) {
+			foreach ( $data['snippets'] as $snippet ) {
+				if ( ! is_array( $snippet ) ) {
+					continue;
+				}
+				$type = isset( $snippet['type'] ) ? (string) $snippet['type'] : '';
+				if ( 'php' === $type ) {
+					return new \WP_Error( 'ctw_php_snippet', 'PHP snippets are rejected.' );
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param array<string,mixed> $data Package.
+	 */
+	public static function woo_enabled( array $data ): bool {
+		if ( empty( $data['woocommerce'] ) || ! is_array( $data['woocommerce'] ) ) {
+			return false;
+		}
+		return ! empty( $data['woocommerce']['enabled'] );
+	}
+
+	/**
+	 * Declared plugin slugs for the installer.
+	 *
+	 * @param array<string,mixed> $data Package.
+	 * @return list<string>
+	 */
+	public static function declared_plugins( array $data ): array {
+		$plugins = array(
+			'elementor',
+			'elementskit-lite',
+			'metform',
+			'insert-headers-and-footers',
+		);
+		if ( self::woo_enabled( $data ) ) {
+			$plugins[] = 'woocommerce';
+		}
+		return $plugins;
+	}
+}

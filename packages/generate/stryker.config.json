@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/stryker",
+  "packageManager": "npm",
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npm run test -w @ctw/generate"
+  },
+  "mutate": ["src/**/*.ts", "!src/bin/**/*.ts"],
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "coverageAnalysis": "perTest",
+  "thresholds": {
+    "high": 80,
+    "low": 70,
+    "break": 70
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "claude-to-wordpress-native",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Claude Code toolchain that emits Hello Elementor child themes with Elementor Free pages",
+  "license": "GPL-2.0-or-later",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @ctw/schema && npm run build -w @ctw/generate",
+    "test": "npm run test -w @ctw/schema && npm run test -w @ctw/generate",
+    "test:coverage": "npm run test:coverage -w @ctw/schema && npm run test:coverage -w @ctw/generate",
+    "lint": "eslint \"packages/*/src/**/*.ts\" \"packages/*/tests/**/*.ts\"",
+    "typecheck": "tsc -b packages/schema packages/generate",
+    "knip": "knip",
+    "stryker": "npm run stryker -w @ctw/schema && npm run stryker -w @ctw/generate",
+    "ctw": "node packages/generate/dist/bin/ctw.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "eslint-plugin-sonarjs": "^3.0.2",
+    "knip": "^5.46.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
