@@ -36,7 +36,7 @@ describe("ctw CLI", () => {
   it("prints help", () => {
     const result = run(["--help"]);
     assert.equal(result.status, 0);
-    assert.match(result.stdout, /npx -y github:md786-dotcom\/claude-to-wordpress-native skill/);
+    assert.match(result.stdout, /npx -y claude-to-wordpress-native skill/);
     assert.match(result.stdout, /plugin-zip/);
     assert.match(result.stdout, /--woocommerce/);
     assert.match(result.stdout, /media fetch/);

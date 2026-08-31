@@ -12,21 +12,21 @@ You generate an offline site package. You do **not** edit a live WordPress site 
 ## Install this skill (once per project)
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native skill
+npx -y claude-to-wordpress-native skill
 ```
 
 ```bash
 # Brochure
-npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+npx -y claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 
 # Shop
-npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
+npx -y claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
 ```
 
 Write the WordPress plugin ZIP (upload under **Plugins → Add New → Upload Plugin**):
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
+npx -y claude-to-wordpress-native plugin-zip
 ```
 
 From a local clone of this repo, use `npm run ctw -- plugin-zip` instead.
@@ -36,7 +36,7 @@ From a local clone of this repo, use `npm run ctw -- plugin-zip` instead.
 Ship real files under `./media/` and list them in `media[]`. Prefer downloading remotes before generate.
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native media fetch \
+npx -y claude-to-wordpress-native media fetch \
   --url "https://images.unsplash.com/photo-…" --id hero --alt "Hero" \
   --package ./ctw-package.json --media ./media
 ```
@@ -101,7 +101,7 @@ Example outer container:
 Only these fields: **name**, **price**, **description**, **image** (via Unsplash/Pexels https URL). Cap is **4**.
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native products add \
+npx -y claude-to-wordpress-native products add \
   --name "Ceramic Mug" \
   --price 18.00 \
   --description "Matte glaze, 12oz" \
@@ -184,7 +184,7 @@ Forms → MetForm (`forms[]`). Header/footer → ElementsKit (`header` / `footer
 3. Generate:
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native generate \
+npx -y claude-to-wordpress-native generate \
   --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
 ```
 

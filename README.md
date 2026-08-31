@@ -8,16 +8,14 @@ Claude Code only. Claude does not edit the site after install.
 
 ## Quick start (Claude Code)
 
-The package is **not on the npm registry yet**. Install and run from GitHub **main**:
-
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native skill
+npx -y claude-to-wordpress-native skill
 ```
 
 Write an uploadable WordPress plugin ZIP into the current project:
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
+npx -y claude-to-wordpress-native plugin-zip
 ```
 
 This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload Plugin**.
@@ -25,7 +23,7 @@ This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload 
 Pull images from Unsplash/Pexels/direct https into `./media` (optional `--package` updates `media[]`):
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native media fetch \
+npx -y claude-to-wordpress-native media fetch \
   --url "https://images.unsplash.com/photo-…" \
   --id hero \
   --package ./ctw-package.json
@@ -36,18 +34,21 @@ Or set `media[].sourceUrl` and run `media sync` / `generate` (auto-fetches missi
 Scaffold a starter package, media folder, and skill:
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
+npx -y claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 # Shop scaffold:
-# npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
+# npx -y claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
 ```
 
 Generate the child theme ZIP:
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
+npx -y claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
 The CLI ships as a self-contained `dist/ctw.mjs` bundle so unpublished workspace packages are not required at runtime.
+
+Also available as `npx -y ctw …` after global install (`npm install -g claude-to-wordpress-native`).
+
 From a local clone of this repo:
 
 ```bash
@@ -80,8 +81,8 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 
 ## Web-dev flow
 
-1. Run `npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
-2. In Claude Code, run the GitHub `npx` skill (or `init`), then generate a site ZIP.
+1. Run `npx -y claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
+2. In Claude Code, run `npx -y claude-to-wordpress-native skill` (or `init`), then generate a site ZIP.
 3. Upload and activate the child theme (`Template: hello-elementor`).
 4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
@@ -125,6 +126,15 @@ npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./b
 Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
 
 Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package.json`.
+
+## Publish (maintainers)
+
+```bash
+npm login
+npm publish
+```
+
+Preview the tarball first: `npm pack --dry-run` / `npm publish --dry-run`. Name `claude-to-wordpress-native@version` cannot be reused after publish.
 
 ## Plugins installed by setup
 
