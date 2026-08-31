@@ -27,7 +27,11 @@ describe("skill assets", () => {
     assert.match(markdown, /Supported Elementor Free widgets/i);
     assert.match(markdown, /google_maps/);
     assert.match(markdown, /social-icons/);
+    assert.match(markdown, /claude-to-wordpress-native check/);
+    assert.match(markdown, /Do not.*escape special characters|child combinator/i);
+    assert.match(markdown, /e-con-inner/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
+    assert.ok(existsSync(join(skillAssetsDir(), "check", "SKILL.md")));
   });
 });
 
@@ -45,6 +49,9 @@ describe("installSkill", () => {
     const first = installSkill(root);
     assert.equal(first.created, true);
     assert.ok(existsSync(join(first.targetDir, "SKILL.md")));
+    assert.ok(existsSync(join(root, ".claude/skills/ctw-native-check/SKILL.md")));
+    const checkMd = readFileSync(join(root, ".claude/skills/ctw-native-check/SKILL.md"), "utf8");
+    assert.match(checkMd, /ctw-native-check/);
     const second = installSkill(root);
     assert.equal(second.created, false);
   });

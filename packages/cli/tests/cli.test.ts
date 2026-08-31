@@ -41,6 +41,7 @@ describe("ctw CLI", () => {
     assert.match(result.stdout, /--woocommerce/);
     assert.match(result.stdout, /media fetch/);
     assert.match(result.stdout, /products add/);
+    assert.match(result.stdout, /\bcheck\b/);
   });
 
   it("writes plugin-zip into the project directory", () => {
@@ -73,6 +74,13 @@ describe("ctw CLI", () => {
     const result = run(["validate", "--package", fixturePackage]);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Valid package/);
+    assert.match(result.stdout, /CSS check passed/);
+  });
+
+  it("check is an alias of validate", () => {
+    const result = run(["check", "--package", fixturePackage]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /CSS check passed/);
   });
 
   it("fails validate without --package", () => {
@@ -89,6 +97,47 @@ describe("ctw CLI", () => {
     const result = run(["validate", "--package", bad]);
     assert.equal(result.status, 1);
     assert.match(result.stderr, /Invalid package/);
+  });
+
+  it("fails check on truncated CSS snippets", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "ctw-css-"));
+    dirs.push(cwd);
+    const pkg = join(cwd, "ctw-package.json");
+    writeFileSync(
+      pkg,
+      JSON.stringify({
+        version: 1,
+        theme: { slug: "demo-child", name: "Demo Child" },
+        pages: [
+          {
+            title: "Home",
+            slug: "home",
+            isFrontPage: true,
+            elements: [
+              {
+                id: "c1",
+                elType: "container",
+                widgetType: null,
+                settings: { content_width: "full" },
+                elements: [],
+              },
+            ],
+          },
+        ],
+        snippets: [
+          {
+            title: "Hero",
+            type: "css",
+            location: "header",
+            code: ".grid-2 > .e-con-inner,.grid-2{grid-template-columns:1fr !important;",
+          },
+        ],
+      }),
+      "utf8",
+    );
+    const result = run(["check", "--package", pkg]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /unclosed \{/);
   });
 
   it("rejects invalid slug on init", () => {

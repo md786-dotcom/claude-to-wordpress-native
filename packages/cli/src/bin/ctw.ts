@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
-import { generateChildThemeZip, readPackageFromFile } from "@ctw/generate";
+import {
+  checkPackageCss,
+  formatCssIssues,
+  generateChildThemeZip,
+  readPackageFromFile,
+} from "@ctw/generate";
 import { fetchIntoPackage, syncPackageMedia } from "../media-fetch.js";
 import { packPluginZip } from "../plugin-zip.js";
 import { addDummyProduct, MAX_DUMMY_PRODUCTS } from "../products.js";
@@ -30,7 +35,8 @@ function printHelp(): void {
         ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
-      "  validate           Validate a ctw-package.json without writing a ZIP",
+      "  validate           Validate a ctw-package.json (schema + CSS) without writing a ZIP",
+      "  check              Same as validate; run before generate (Claude: /ctw-native-check)",
       "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
@@ -239,8 +245,13 @@ function runValidate(args: string[]): number {
   }
   try {
     const pkg = readPackageFromFile(resolve(packagePath));
+    const cssIssues = checkPackageCss(pkg);
+    if (cssIssues.length > 0) {
+      process.stderr.write(`${formatCssIssues(cssIssues)}\n`);
+      return 1;
+    }
     process.stdout.write(
-      `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)})\n`,
+      `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)}; CSS check passed)\n`,
     );
     return 0;
   } catch (error) {
@@ -320,6 +331,7 @@ async function main(argv: string[]): Promise<number> {
     case "init":
       return runInit(rest);
     case "validate":
+    case "check":
       return runValidate(rest);
     case "generate":
       return runGenerate(rest);

@@ -1,6 +1,6 @@
 ---
 name: ctw-native
-description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode snippets (css/js/html/php), or Font Awesome Free icons via CDN.
+description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode snippets (css/js/html/php), Font Awesome Free icons via CDN, or CSS/package checks before generate (/ctw-native-check).
 ---
 
 # CTW Native (Claude Code)
@@ -119,6 +119,35 @@ This downloads the image into `./media/`, registers `media[]`, and appends `wooc
 - Use `php` only for small site helpers that WPCode would run (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
 - Never emit remote code loaders or destructive admin scripts.
 - Locations: `header` | `footer` | `everywhere`.
+- Put **layout CSS** (grids, hero splits, `.e-con-inner`) in a `type: "css"` snippet with `location: "header"`. Do not put that CSS in an Elementor `html` widget.
+
+### CSS must parse (run `check` before generate)
+
+WPCode prints `type: "css"` as real CSS. The child combinator `>` is valid. **Do not** “escape special characters” in selectors:
+
+| Wrong | Why | Right |
+| --- | --- | --- |
+| `.grid-2 \> .e-con-inner` or `.grid-2 &gt; .e-con-inner` | Escaping `>` changes the selector. It will not match. | `.grid-2 .e-con-inner, .grid-2 { … }` |
+| `{grid-template-columns:1fr !important;` | Truncated rule (missing `}`) | Close every `{` with `}` |
+| `<style>…</style>` inside `type: "css"` | WPCode wraps CSS for you | Raw CSS only |
+
+Prefer descendant targeting so Elementor inner wrappers still receive the grid:
+
+```css
+.grid-2,
+.grid-2 .e-con-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+```
+
+After writing or changing snippets, **always** run:
+
+```bash
+npx -y claude-to-wordpress-native check --package ./ctw-package.json
+```
+
+Fix every error and re-run until exit 0. The `/ctw-native-check` skill is this same loop. `generate` refuses a ZIP when CSS check fails.
 
 ## Icons (Font Awesome Free via CDN)
 
@@ -181,14 +210,20 @@ Forms → MetForm (`forms[]`). Header/footer → ElementsKit (`header` / `footer
 
 1. Write valid `ctw-package.json` (version 1).
 2. Ensure media files exist (fetch/sync/products add).
-3. Generate:
+3. Run `check` and fix CSS/schema errors until it passes:
+
+```bash
+npx -y claude-to-wordpress-native check --package ./ctw-package.json
+```
+
+4. Generate (blocked until check passes):
 
 ```bash
 npx -y claude-to-wordpress-native generate \
   --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
 ```
 
-4. Tell the web developer the install / re-import steps below.
+5. Tell the web developer the install / re-import steps below.
 
 ## After uploading or activating a new Claude theme
 

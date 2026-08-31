@@ -125,7 +125,7 @@ npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./b
 
 Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
 
-Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package.json`.
+Validate schema and CSS snippets without writing a ZIP: `npm run ctw -- check --package ./ctw-package.json` (`validate` is the same command). `generate` refuses a ZIP when CSS check fails (unclosed `{`, HTML-escaped `>` combinators, `<style>` wrappers on `type: "css"`).
 
 ## Publish (maintainers)
 
