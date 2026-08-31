@@ -6,7 +6,7 @@ var __export = (target, all) => {
 };
 
 // packages/cli/src/bin/ctw.ts
-import { resolve as resolve3 } from "node:path";
+import { resolve as resolve4 } from "node:path";
 
 // packages/generate/dist/generate.js
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -5159,35 +5159,104 @@ function generateChildThemeZip(options) {
   return { bytes, package: pkg, outputPath };
 }
 
-// packages/cli/src/skill.ts
-import { cpSync, existsSync as existsSync2, mkdirSync as mkdirSync2, readFileSync as readFileSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import { dirname as dirname3, join as join3, resolve as resolve2 } from "node:path";
+// packages/cli/src/plugin-zip.ts
+import { mkdirSync as mkdirSync2, readdirSync as readdirSync2, readFileSync as readFileSync3, statSync as statSync2, writeFileSync as writeFileSync2 } from "node:fs";
+import { dirname as dirname3, join as join3, relative as relative2, resolve as resolve2 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 var here2 = dirname3(fileURLToPath2(import.meta.url));
+var SKIP_DIR_NAMES = /* @__PURE__ */ new Set([
+  "vendor",
+  "tests",
+  "node_modules",
+  ".git",
+  ".phpunit.cache",
+  ".phpstan"
+]);
+var SKIP_FILE_NAMES = /* @__PURE__ */ new Set([
+  ".gitignore",
+  "composer.lock",
+  "phpunit.xml",
+  "infection.log"
+]);
+function findPluginSourceDir() {
+  const candidates = [
+    join3(here2, "../../../plugin"),
+    join3(here2, "../../plugin"),
+    join3(here2, "../plugin")
+  ];
+  for (const dir of candidates) {
+    if (statSync2(join3(dir, "ctw-native.php"), { throwIfNoEntry: false })?.isFile()) {
+      return dir;
+    }
+  }
+  throw new Error("plugin/ source not found next to the CLI package.");
+}
+function packPluginZip(options) {
+  const pluginRoot = resolve2(options.pluginRoot ?? findPluginSourceDir());
+  const main2 = join3(pluginRoot, "ctw-native.php");
+  if (!statSync2(main2, { throwIfNoEntry: false })?.isFile()) {
+    throw new Error(`Missing ctw-native.php in ${pluginRoot}`);
+  }
+  const files = {};
+  collectFiles(pluginRoot, pluginRoot, files);
+  const fileCount = Object.keys(files).length;
+  if (fileCount === 0) {
+    throw new Error("No plugin files to pack.");
+  }
+  const bytes = zipSync(files, { level: 6 });
+  const outputPath = resolve2(options.outputPath);
+  mkdirSync2(dirname3(outputPath), { recursive: true });
+  writeFileSync2(outputPath, bytes);
+  return { outputPath, fileCount };
+}
+function collectFiles(absDir, pluginRoot, out) {
+  for (const entry of readdirSync2(absDir)) {
+    if (SKIP_DIR_NAMES.has(entry) || SKIP_FILE_NAMES.has(entry)) {
+      continue;
+    }
+    const full = join3(absDir, entry);
+    const stats = statSync2(full);
+    if (stats.isDirectory()) {
+      collectFiles(full, pluginRoot, out);
+      continue;
+    }
+    if (!stats.isFile()) {
+      continue;
+    }
+    const rel = relative2(pluginRoot, full).replaceAll("\\", "/");
+    out[`ctw-native/${rel}`] = readFileSync3(full);
+  }
+}
+
+// packages/cli/src/skill.ts
+import { cpSync, existsSync as existsSync2, mkdirSync as mkdirSync3, readFileSync as readFileSync4, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname4, join as join4, resolve as resolve3 } from "node:path";
+import { fileURLToPath as fileURLToPath3 } from "node:url";
+var here3 = dirname4(fileURLToPath3(import.meta.url));
 function packageRoot() {
-  let dir = here2;
+  let dir = here3;
   for (let i = 0; i < 8; i += 1) {
-    const pkgPath = join3(dir, "package.json");
+    const pkgPath = join4(dir, "package.json");
     if (existsSync2(pkgPath)) {
-      const name = JSON.parse(readFileSync3(pkgPath, "utf8")).name;
+      const name = JSON.parse(readFileSync4(pkgPath, "utf8")).name;
       if (name === "@ctw/cli" || name === "claude-to-wordpress-native") {
         return dir;
       }
     }
-    dir = resolve2(dir, "..");
+    dir = resolve3(dir, "..");
   }
-  return resolve2(here2, "..");
+  return resolve3(here3, "..");
 }
 function skillAssetsDir() {
   const root = packageRoot();
   const candidates = [
-    join3(root, "skill-assets"),
-    join3(root, "packages/cli/skill-assets"),
-    join3(root, "skills/ctw-native"),
-    join3(root, "../../skills/ctw-native")
+    join4(root, "skill-assets"),
+    join4(root, "packages/cli/skill-assets"),
+    join4(root, "skills/ctw-native"),
+    join4(root, "../../skills/ctw-native")
   ];
   for (const dir of candidates) {
-    if (existsSync2(join3(dir, "SKILL.md"))) {
+    if (existsSync2(join4(dir, "SKILL.md"))) {
       return dir;
     }
   }
@@ -5196,20 +5265,20 @@ function skillAssetsDir() {
   );
 }
 function installSkill(projectRoot) {
-  const targetDir = join3(resolve2(projectRoot), ".claude", "skills", "ctw-native");
+  const targetDir = join4(resolve3(projectRoot), ".claude", "skills", "ctw-native");
   const source = skillAssetsDir();
-  const existed = existsSync2(join3(targetDir, "SKILL.md"));
-  mkdirSync2(targetDir, { recursive: true });
+  const existed = existsSync2(join4(targetDir, "SKILL.md"));
+  mkdirSync3(targetDir, { recursive: true });
   cpSync(source, targetDir, { recursive: true });
   return { targetDir, created: !existed };
 }
 function initProject(projectRoot, themeSlug, themeName) {
-  const root = resolve2(projectRoot);
-  const packagePath = join3(root, "ctw-package.json");
-  const mediaDir = join3(root, "media");
-  mkdirSync2(mediaDir, { recursive: true });
+  const root = resolve3(projectRoot);
+  const packagePath = join4(root, "ctw-package.json");
+  const mediaDir = join4(root, "media");
+  mkdirSync3(mediaDir, { recursive: true });
   if (!existsSync2(packagePath)) {
-    writeFileSync2(packagePath, starterPackageJson(themeSlug, themeName), "utf8");
+    writeFileSync3(packagePath, starterPackageJson(themeSlug, themeName), "utf8");
   }
   const skill = installSkill(root);
   return { packagePath, skill, mediaDir };
@@ -5283,11 +5352,13 @@ function printHelp() {
       "",
       "Simple start (GitHub main \u2014 not on npm yet):",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
       '  npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child',
       "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
+      "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "  validate           Validate a ctw-package.json without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP",
@@ -5308,7 +5379,7 @@ function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
 }
 function runSkill(args) {
-  const root = resolve3(readFlag(args, "--cwd") ?? process.cwd());
+  const root = resolve4(readFlag(args, "--cwd") ?? process.cwd());
   const result = installSkill(root);
   process.stdout.write(
     result.created ? `Installed Claude Code skill at ${result.targetDir}
@@ -5320,8 +5391,28 @@ function runSkill(args) {
   );
   return 0;
 }
+function runPluginZip(args) {
+  const cwd = resolve4(readFlag(args, "--cwd") ?? process.cwd());
+  const outPath = resolve4(cwd, readFlag(args, "--out") ?? "ctw-native.zip");
+  try {
+    const result = packPluginZip({ outputPath: outPath });
+    process.stdout.write(
+      `Wrote ${result.outputPath} (${String(result.fileCount)} files)
+`
+    );
+    process.stdout.write(
+      "In WordPress: Plugins \u2192 Add New \u2192 Upload Plugin \u2192 choose this ZIP \u2192 Activate.\n"
+    );
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`plugin-zip failed: ${message}
+`);
+    return 1;
+  }
+}
 function runInit(args) {
-  const root = resolve3(readFlag(args, "--cwd") ?? process.cwd());
+  const root = resolve4(readFlag(args, "--cwd") ?? process.cwd());
   const name = readFlag(args, "--name") ?? "Site Child";
   const slug2 = readFlag(args, "--slug") ?? slugify(name);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug2)) {
@@ -5347,7 +5438,7 @@ function runValidate(args) {
     return 1;
   }
   try {
-    const pkg = readPackageFromFile(resolve3(packagePath));
+    const pkg = readPackageFromFile(resolve4(packagePath));
     process.stdout.write(
       `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)})
 `
@@ -5370,16 +5461,16 @@ function runGenerate(args) {
   }
   try {
     const result = generateChildThemeZip({
-      packagePath: resolve3(packagePath),
-      outputPath: resolve3(outPath),
-      ...mediaRoot !== void 0 ? { mediaRoot: resolve3(mediaRoot) } : {}
+      packagePath: resolve4(packagePath),
+      outputPath: resolve4(outPath),
+      ...mediaRoot !== void 0 ? { mediaRoot: resolve4(mediaRoot) } : {}
     });
     process.stdout.write(
       `Wrote ${result.outputPath} for theme ${result.package.theme.slug}
 `
     );
     process.stdout.write(
-      "Install ctw-native in WordPress, upload this ZIP, open CTW Native \u2192 Setup, import once.\n"
+      "Install ctw-native (npx \u2026 plugin-zip), upload the child ZIP, open CTW Native \u2192 Setup, import once.\n"
     );
     return 0;
   } catch (error) {
@@ -5398,6 +5489,8 @@ function main(argv) {
   switch (command) {
     case "skill":
       return runSkill(rest);
+    case "plugin-zip":
+      return runPluginZip(rest);
     case "init":
       return runInit(rest);
     case "validate":

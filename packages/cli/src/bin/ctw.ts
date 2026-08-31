@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
 import { generateChildThemeZip, readPackageFromFile } from "@ctw/generate";
+import { packPluginZip } from "../plugin-zip.js";
 import { initProject, installSkill } from "../skill.js";
 
 function printHelp(): void {
@@ -10,11 +11,13 @@ function printHelp(): void {
       "",
       "Simple start (GitHub main — not on npm yet):",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Acme Child\" --slug acme-child",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
+      "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "  validate           Validate a ctw-package.json without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP",
@@ -53,6 +56,25 @@ function runSkill(args: string[]): number {
     "In Claude Code, ask for a WordPress / Elementor site. The skill will guide package creation.\n",
   );
   return 0;
+}
+
+function runPluginZip(args: string[]): number {
+  const cwd = resolve(readFlag(args, "--cwd") ?? process.cwd());
+  const outPath = resolve(cwd, readFlag(args, "--out") ?? "ctw-native.zip");
+  try {
+    const result = packPluginZip({ outputPath: outPath });
+    process.stdout.write(
+      `Wrote ${result.outputPath} (${String(result.fileCount)} files)\n`,
+    );
+    process.stdout.write(
+      "In WordPress: Plugins → Add New → Upload Plugin → choose this ZIP → Activate.\n",
+    );
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`plugin-zip failed: ${message}\n`);
+    return 1;
+  }
 }
 
 function runInit(args: string[]): number {
@@ -110,7 +132,7 @@ function runGenerate(args: string[]): number {
       `Wrote ${result.outputPath} for theme ${result.package.theme.slug}\n`,
     );
     process.stdout.write(
-      "Install ctw-native in WordPress, upload this ZIP, open CTW Native → Setup, import once.\n",
+      "Install ctw-native (npx … plugin-zip), upload the child ZIP, open CTW Native → Setup, import once.\n",
     );
     return 0;
   } catch (error) {
@@ -130,6 +152,8 @@ function main(argv: string[]): number {
   switch (command) {
     case "skill":
       return runSkill(rest);
+    case "plugin-zip":
+      return runPluginZip(rest);
     case "init":
       return runInit(rest);
     case "validate":
