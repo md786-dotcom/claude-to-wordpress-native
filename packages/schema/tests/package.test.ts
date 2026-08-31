@@ -171,3 +171,25 @@ describe("parsePackageJson", () => {
     assert.equal(pkg.snippets.length, 3);
   });
 });
+
+describe("package contract source", () => {
+  it("matches generated FREE_WIDGET_TYPES and CORE_PLUGIN_SLUGS", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { dirname, join } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+    const contract = JSON.parse(
+      readFileSync(join(root, "contract/ctw-contract.json"), "utf8"),
+    ) as {
+      freeWidgets: string[];
+      corePlugins: string[];
+      wooPlugin: string;
+      snippetTypes: string[];
+    };
+    const { FREE_WIDGET_TYPES, SNIPPET_TYPES } = await import("../src/index.js");
+    assert.deepEqual([...FREE_WIDGET_TYPES], contract.freeWidgets);
+    assert.deepEqual([...CORE_PLUGIN_SLUGS], contract.corePlugins);
+    assert.equal(WOO_PLUGIN_SLUG, contract.wooPlugin);
+    assert.deepEqual([...SNIPPET_TYPES], contract.snippetTypes);
+  });
+});

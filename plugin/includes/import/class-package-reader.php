@@ -7,6 +7,8 @@
 
 namespace CTW_Native\Import;
 
+use CTW_Native\Contract\Package_Contract;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -74,6 +76,9 @@ final class Package_Reader {
 				if ( 'php' === $type ) {
 					return new \WP_Error( 'ctw_php_snippet', 'PHP snippets are rejected.' );
 				}
+				if ( '' !== $type && ! Package_Contract::is_snippet_type( $type ) ) {
+					return new \WP_Error( 'ctw_bad_snippet', 'Snippet type is not allowed: ' . $type );
+				}
 			}
 		}
 		return true;
@@ -96,15 +101,6 @@ final class Package_Reader {
 	 * @return list<string>
 	 */
 	public static function declared_plugins( array $data ): array {
-		$plugins = array(
-			'elementor',
-			'elementskit-lite',
-			'metform',
-			'insert-headers-and-footers',
-		);
-		if ( self::woo_enabled( $data ) ) {
-			$plugins[] = 'woocommerce';
-		}
-		return $plugins;
+		return Package_Contract::declared_plugins( self::woo_enabled( $data ) );
 	}
 }

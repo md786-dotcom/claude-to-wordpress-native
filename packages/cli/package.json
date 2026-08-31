@@ -27,7 +27,8 @@
     "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test-coverage-include=\"**/packages/cli/src/**\" --test-coverage-include=\"**/packages/cli/dist/**\" --test-coverage-exclude=\"**/packages/cli/tests/**\" --test tests/**/*.test.ts"
   },
   "dependencies": {
-    "@ctw/generate": "0.1.0"
+    "@ctw/generate": "0.1.0",
+    "@ctw/schema": "0.1.0"
   },
   "devDependencies": {
     "tsx": "^4.19.3",

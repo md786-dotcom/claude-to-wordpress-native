@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "license": "GPL-2.0-or-later",
   "type": "module",
-  "bin": {
-    "ctw-generate": "./dist/bin/ctw.js"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,7 +15,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node ../../scripts/chmod-ctw.mjs",
+    "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --import tsx --test tests/**/*.test.ts",
     "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test tests/**/*.test.ts",
     "stryker": "stryker run"

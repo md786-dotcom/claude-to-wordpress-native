@@ -11,6 +11,10 @@ export type GenerateOptions = {
   themeKitRoot?: string;
 };
 
+/**
+ * Deep emit entry: validated package path → Hello Elementor child ZIP on disk.
+ * Owns kit merge, Woo gate, media embed, and theme headers via buildChildThemeZip.
+ */
 export function generateChildThemeZip(options: GenerateOptions): {
   bytes: Uint8Array;
   package: CtwPackage;

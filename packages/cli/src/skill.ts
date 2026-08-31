@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CORE_PLUGIN_SLUGS } from "@ctw/schema";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -135,12 +136,7 @@ function starterPackageJson(themeSlug: string, themeName: string): string {
     forms: [],
     snippets: [],
     woocommerce: { enabled: false },
-    plugins: [
-      "elementor",
-      "elementskit-lite",
-      "metform",
-      "insert-headers-and-footers",
-    ],
+    plugins: [...CORE_PLUGIN_SLUGS],
   };
   return `${JSON.stringify(body, null, 2)}\n`;
 }

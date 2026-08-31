@@ -7,6 +7,7 @@
 
 namespace CTW_Native\Adapters;
 
+use CTW_Native\Elementor\Document_Writer;
 use CTW_Native\Import\Media_Sideloader;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,13 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Creates ElementsKit templates when the plugin is active.
+ * Elementor tree persistence goes through Document_Writer (Free validation).
  */
 final class ElementsKit_Adapter {
 
 	/**
-	 * @param mixed           $template Header/footer payload or null.
-	 * @param string          $type     header|footer.
-	 * @param Media_Sideloader $media   Media rewriter.
+	 * @param mixed            $template Header/footer payload or null.
+	 * @param string           $type     header|footer.
+	 * @param Media_Sideloader $media    Media rewriter.
 	 * @return int|\WP_Error Template post ID or 0 when skipped.
 	 */
 	public static function import_template( $template, string $type, Media_Sideloader $media ) {
@@ -48,12 +50,15 @@ final class ElementsKit_Adapter {
 			return $post_id;
 		}
 
+		$written = Document_Writer::write_elementor_data( (int) $post_id, $elements, 'section', null );
+		if ( is_wp_error( $written ) ) {
+			wp_delete_post( (int) $post_id, true );
+			return $written;
+		}
+
 		update_post_meta( (int) $post_id, 'elementskit_template_type', $type );
 		update_post_meta( (int) $post_id, 'elementskit_template_activation', 'yes' );
 		update_post_meta( (int) $post_id, 'elementskit_template_condition', array( 'entire_site' ) );
-		update_post_meta( (int) $post_id, '_elementor_edit_mode', 'builder' );
-		update_post_meta( (int) $post_id, '_elementor_data', wp_slash( wp_json_encode( $elements ) ) );
-		update_post_meta( (int) $post_id, '_elementor_template_type', 'section' );
 
 		return (int) $post_id;
 	}

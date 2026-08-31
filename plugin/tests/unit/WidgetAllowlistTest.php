@@ -1,13 +1,13 @@
 <?php
 /**
- * Widget allowlist tests.
+ * Widget allowlist and tree validator tests.
  *
  * @package CTW_Native
  */
 
+use CTW_Native\Contract\Package_Contract;
 use CTW_Native\Elementor\Widget_Allowlist;
 use CTW_Native\Elementor\Tree_Validator;
-use CTW_Native\Elementor\Element_Factory;
 use PHPUnit\Framework\TestCase;
 
 final class WidgetAllowlistTest extends TestCase {
@@ -18,6 +18,10 @@ final class WidgetAllowlistTest extends TestCase {
 
 	public function test_form_is_rejected(): void {
 		$this->assertFalse( Widget_Allowlist::is_allowed( 'form' ) );
+	}
+
+	public function test_contract_matches_allowlist(): void {
+		$this->assertSame( Package_Contract::free_widgets(), Widget_Allowlist::all() );
 	}
 
 	public function test_tree_rejects_pro_widget(): void {
@@ -52,14 +56,38 @@ final class WidgetAllowlistTest extends TestCase {
 		$this->assertTrue( Tree_Validator::validate( $tree ) );
 	}
 
-	public function test_factory_rejects_pro_widget(): void {
-		$result = Element_Factory::widget( 'form', array() );
+	public function test_tree_rejects_widget_children(): void {
+		$tree = array(
+			array(
+				'elType'     => 'widget',
+				'widgetType' => 'heading',
+				'settings'   => array(),
+				'elements'   => array(
+					array(
+						'elType'     => 'widget',
+						'widgetType' => 'button',
+						'settings'   => array(),
+						'elements'   => array(),
+					),
+				),
+			),
+		);
+		$result = Tree_Validator::validate( $tree );
 		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertSame( 'ctw_widget_children', $result->get_error_code() );
 	}
 
-	public function test_factory_builds_heading(): void {
-		$result = Element_Factory::widget( 'heading', array( 'title' => 'X' ) );
-		$this->assertIsArray( $result );
-		$this->assertSame( 'heading', $result['widgetType'] );
+	public function test_tree_rejects_container_with_widget_type(): void {
+		$tree = array(
+			array(
+				'elType'     => 'container',
+				'widgetType' => 'heading',
+				'settings'   => array(),
+				'elements'   => array(),
+			),
+		);
+		$result = Tree_Validator::validate( $tree );
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertSame( 'ctw_container_widget', $result->get_error_code() );
 	}
 }

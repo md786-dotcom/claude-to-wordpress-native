@@ -12,12 +12,14 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "contract"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "node --import tsx --test tests/**/*.test.ts",
-    "test:coverage": "node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test tests/**/*.test.ts",
+    "sync-contract": "node ../../scripts/sync-contract.mjs",
+    "build": "npm run sync-contract && tsc -p tsconfig.json",
+    "test": "npm run sync-contract && node --import tsx --test tests/**/*.test.ts",
+    "test:coverage": "npm run sync-contract && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test tests/**/*.test.ts",
     "stryker": "stryker run"
   },
   "dependencies": {

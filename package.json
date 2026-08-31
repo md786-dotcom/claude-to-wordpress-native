@@ -16,6 +16,7 @@
     "packages/generate/dist",
     "packages/generate/package.json",
     "packages/schema/dist",
+    "packages/schema/contract",
     "packages/schema/package.json",
     "scripts",
     "skills",

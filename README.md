@@ -69,6 +69,8 @@ npm run build
 npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./brochure.zip
 ```
 
+Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
+
 Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package.json`.
 
 ## Plugins installed by setup

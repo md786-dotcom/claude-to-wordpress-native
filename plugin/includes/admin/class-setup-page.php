@@ -7,6 +7,7 @@
 
 namespace CTW_Native\Admin;
 
+use CTW_Native\Contract\Package_Contract;
 use CTW_Native\Import\Import_Guard;
 use CTW_Native\Import\Importer;
 use CTW_Native\Import\Package_Reader;
@@ -58,7 +59,7 @@ final class Setup_Page {
 
 		$package = Package_Reader::read();
 		$plugins = is_wp_error( $package )
-			? array( 'elementor', 'elementskit-lite', 'metform', 'insert-headers-and-footers' )
+			? Package_Contract::core_plugins()
 			: Package_Reader::declared_plugins( $package );
 
 		$installer = new Stack_Installer();
@@ -124,7 +125,7 @@ final class Setup_Page {
 		$this->verify( 'ctw_native_install', 'install_plugins' );
 		$package = Package_Reader::read();
 		$plugins = is_wp_error( $package )
-			? array( 'elementor', 'elementskit-lite', 'metform', 'insert-headers-and-footers' )
+			? Package_Contract::core_plugins()
 			: Package_Reader::declared_plugins( $package );
 		$installer = new Stack_Installer();
 		$result    = $installer->install_all( $plugins );

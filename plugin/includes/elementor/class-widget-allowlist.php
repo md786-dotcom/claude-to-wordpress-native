@@ -7,61 +7,28 @@
 
 namespace CTW_Native\Elementor;
 
+use CTW_Native\Contract\Package_Contract;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Rejects Pro / unknown widgets.
+ * Rejects Pro / unknown widgets. Delegates to Package_Contract.
  */
 final class Widget_Allowlist {
-
-	/**
-	 * Allowed free widget types.
-	 *
-	 * @var list<string>
-	 */
-	private const ALLOWED = array(
-		'heading',
-		'image',
-		'text-editor',
-		'video',
-		'button',
-		'divider',
-		'spacer',
-		'google_maps',
-		'icon',
-		'image-box',
-		'icon-box',
-		'star-rating',
-		'image-carousel',
-		'image-gallery',
-		'icon-list',
-		'counter',
-		'progress',
-		'testimonial',
-		'tabs',
-		'accordion',
-		'toggle',
-		'social-icons',
-		'alert',
-		'html',
-		'shortcode',
-		'menu-anchor',
-		'sidebar',
-	);
 
 	/**
 	 * @return list<string>
 	 */
 	public static function all(): array {
-		return self::ALLOWED;
+		return Package_Contract::free_widgets();
 	}
 
 	/**
 	 * @param string $widget_type Widget type slug.
 	 */
 	public static function is_allowed( string $widget_type ): bool {
-		return in_array( $widget_type, self::ALLOWED, true );
+		return Package_Contract::is_free_widget( $widget_type );
 	}
 }

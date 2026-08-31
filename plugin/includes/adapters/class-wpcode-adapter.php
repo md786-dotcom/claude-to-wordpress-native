@@ -7,6 +7,8 @@
 
 namespace CTW_Native\Adapters;
 
+use CTW_Native\Contract\Package_Contract;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,8 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Creates WPCode snippets when the plugin is active.
  */
 final class WPCode_Adapter {
-
-	private const ALLOWED = array( 'css', 'js', 'html' );
 
 	/**
 	 * @param mixed $snippets Snippet list.
@@ -33,7 +33,7 @@ final class WPCode_Adapter {
 				continue;
 			}
 			$type = isset( $snippet['type'] ) ? (string) $snippet['type'] : '';
-			if ( ! in_array( $type, self::ALLOWED, true ) ) {
+			if ( ! Package_Contract::is_snippet_type( $type ) ) {
 				return new \WP_Error( 'ctw_php_snippet', 'Only css, js, and html snippets are allowed.' );
 			}
 			$title    = isset( $snippet['title'] ) ? (string) $snippet['title'] : 'Snippet';

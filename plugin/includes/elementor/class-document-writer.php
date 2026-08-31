@@ -1,6 +1,6 @@
 <?php
 /**
- * Persists Elementor Free page documents.
+ * Persists Elementor Free documents (pages and ElementsKit trees).
  *
  * Adapted from EMCP Tools document persist patterns (GPL-2.0-or-later).
  *
@@ -21,10 +21,10 @@ final class Document_Writer {
 	/**
 	 * Create or update a page with Elementor Free data.
 	 *
-	 * @param string                $title    Title.
-	 * @param string                $slug     Slug.
+	 * @param string                    $title    Title.
+	 * @param string                    $slug     Slug.
 	 * @param list<array<string,mixed>> $elements Element tree.
-	 * @param int                   $post_id  Existing post id or 0.
+	 * @param int                       $post_id  Existing post id or 0.
 	 * @return int|\WP_Error Post ID.
 	 */
 	public static function write_page( string $title, string $slug, array $elements, int $post_id = 0 ) {
@@ -53,20 +53,42 @@ final class Document_Writer {
 		}
 
 		$id = (int) $result;
-		self::write_meta( $id, $elements );
+		self::persist_meta( $id, $elements, 'wp-page', 'elementor_header_footer' );
 		return $id;
 	}
 
 	/**
-	 * @param int                       $post_id  Post ID.
-	 * @param list<array<string,mixed>> $elements Tree.
+	 * Validate Free tree and write Elementor meta for any post type.
+	 *
+	 * @param int                       $post_id         Post ID.
+	 * @param list<array<string,mixed>> $elements        Tree.
+	 * @param string                    $template_type   Elementor template type (wp-page|section).
+	 * @param string|null               $page_template   Optional _wp_page_template.
+	 * @return true|\WP_Error
 	 */
-	public static function write_meta( int $post_id, array $elements ): void {
+	public static function write_elementor_data( int $post_id, array $elements, string $template_type, ?string $page_template = null ) {
+		$valid = Tree_Validator::validate( $elements );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		self::persist_meta( $post_id, $elements, $template_type, $page_template );
+		return true;
+	}
+
+	/**
+	 * @param int                       $post_id       Post ID.
+	 * @param list<array<string,mixed>> $elements      Tree.
+	 * @param string                    $template_type Template type.
+	 * @param string|null               $page_template Page template or null.
+	 */
+	private static function persist_meta( int $post_id, array $elements, string $template_type, ?string $page_template ): void {
 		$json = wp_json_encode( $elements );
 		update_post_meta( $post_id, '_elementor_edit_mode', 'builder' );
-		update_post_meta( $post_id, '_elementor_template_type', 'wp-page' );
+		update_post_meta( $post_id, '_elementor_template_type', $template_type );
 		update_post_meta( $post_id, '_elementor_data', wp_slash( $json ) );
 		update_post_meta( $post_id, '_elementor_version', '0.4' );
-		update_post_meta( $post_id, '_wp_page_template', 'elementor_header_footer' );
+		if ( null !== $page_template ) {
+			update_post_meta( $post_id, '_wp_page_template', $page_template );
+		}
 	}
 }

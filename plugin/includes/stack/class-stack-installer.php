@@ -7,6 +7,8 @@
 
 namespace CTW_Native\Stack;
 
+use CTW_Native\Contract\Package_Contract;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,19 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Stack installer.
  */
 final class Stack_Installer {
-
-	/**
-	 * Plugin slug => main file relative to wp-content/plugins.
-	 *
-	 * @var array<string,string>
-	 */
-	private const PLUGIN_MAINS = array(
-		'elementor'                  => 'elementor/elementor.php',
-		'woocommerce'                => 'woocommerce/woocommerce.php',
-		'elementskit-lite'           => 'elementskit-lite/elementskit-lite.php',
-		'metform'                    => 'metform/metform.php',
-		'insert-headers-and-footers' => 'insert-headers-and-footers/ihaf.php',
-	);
 
 	/**
 	 * Install and activate Hello parent + plugin list.
@@ -98,10 +87,10 @@ final class Stack_Installer {
 	 * @return true|\WP_Error
 	 */
 	private function ensure_plugin( string $slug ) {
-		if ( ! isset( self::PLUGIN_MAINS[ $slug ] ) ) {
+		$main = Package_Contract::plugin_main( $slug );
+		if ( '' === $main ) {
 			return new \WP_Error( 'ctw_unknown_plugin', 'Unknown plugin slug: ' . $slug );
 		}
-		$main = self::PLUGIN_MAINS[ $slug ];
 
 		if ( ! $this->plugin_installed( $main ) ) {
 			$api = plugins_api(
@@ -160,7 +149,7 @@ final class Stack_Installer {
 			'detail' => Parent_Theme::is_hello_family_active() ? 'Active family' : 'Installed or missing',
 		);
 		foreach ( $plugin_slugs as $slug ) {
-			$main = self::PLUGIN_MAINS[ $slug ] ?? '';
+			$main = Package_Contract::plugin_main( $slug );
 			$ok   = '' !== $main && $this->plugin_installed( $main ) && is_plugin_active( $main );
 			$rows[] = array(
 				'label'  => $slug,

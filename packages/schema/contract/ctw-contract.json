@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "freeWidgets": [
+    "heading",
+    "image",
+    "text-editor",
+    "video",
+    "button",
+    "divider",
+    "spacer",
+    "google_maps",
+    "icon",
+    "image-box",
+    "icon-box",
+    "star-rating",
+    "image-carousel",
+    "image-gallery",
+    "icon-list",
+    "counter",
+    "progress",
+    "testimonial",
+    "tabs",
+    "accordion",
+    "toggle",
+    "social-icons",
+    "alert",
+    "html",
+    "shortcode",
+    "menu-anchor",
+    "sidebar"
+  ],
+  "corePlugins": [
+    "elementor",
+    "elementskit-lite",
+    "metform",
+    "insert-headers-and-footers"
+  ],
+  "wooPlugin": "woocommerce",
+  "snippetTypes": ["css", "js", "html"],
+  "pluginMains": {
+    "elementor": "elementor/elementor.php",
+    "elementskit-lite": "elementskit-lite/elementskit-lite.php",
+    "metform": "metform/metform.php",
+    "insert-headers-and-footers": "insert-headers-and-footers/ihaf.php",
+    "woocommerce": "woocommerce/woocommerce.php"
+  }
+}
