@@ -72,6 +72,7 @@ final class Setup_Page {
 		}
 
 		echo '<p>Install Hello Elementor and the declared free plugins, then import <code>ctw-package.json</code> from the active child theme.</p>';
+		echo '<p>Theme changes automatically purge WordPress, Elementor, and common page caches so the newly activated theme is shown.</p>';
 		echo '<p><strong>Claude Code</strong> generates the child ZIP. Claude cannot edit this site after import.</p>';
 
 		echo '<h2>Stack status</h2><ul>';

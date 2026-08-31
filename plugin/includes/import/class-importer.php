@@ -13,6 +13,7 @@ use CTW_Native\Adapters\MetForm_Adapter;
 use CTW_Native\Adapters\WooCommerce_Pages_Adapter;
 use CTW_Native\Adapters\WooCommerce_Products_Adapter;
 use CTW_Native\Adapters\WPCode_Adapter;
+use CTW_Native\Cache\Cache_Purger;
 use CTW_Native\Elementor\Document_Writer;
 use CTW_Native\Stack\Parent_Theme;
 
@@ -130,6 +131,7 @@ final class Importer {
 		Menu_Adapter::import_menus( $package, $created['pages'] );
 
 		Import_Guard::mark_done( $created );
+		Cache_Purger::purge( 'import' );
 
 		return array(
 			'ok'      => true,
