@@ -1,6 +1,6 @@
 <?php
 /**
- * WPCode adapter — CSS / JS / HTML only.
+ * WPCode adapter — CSS / JS / HTML / PHP.
  *
  * @package CTW_Native
  */
@@ -34,7 +34,7 @@ final class WPCode_Adapter {
 			}
 			$type = isset( $snippet['type'] ) ? (string) $snippet['type'] : '';
 			if ( ! Package_Contract::is_snippet_type( $type ) ) {
-				return new \WP_Error( 'ctw_php_snippet', 'Only css, js, and html snippets are allowed.' );
+				return new \WP_Error( 'ctw_bad_snippet', 'Snippet type is not allowed: ' . $type );
 			}
 			$title    = isset( $snippet['title'] ) ? (string) $snippet['title'] : 'Snippet';
 			$code     = isset( $snippet['code'] ) ? (string) $snippet['code'] : '';

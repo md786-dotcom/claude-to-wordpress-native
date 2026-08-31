@@ -70,10 +70,14 @@ describe("buildChildThemeZip", () => {
     assert.equal(zipContains(zip, "demo-child/woocommerce/archive-product.php"), false);
   });
 
-  it("includes woocommerce templates only when enabled", () => {
+  it("includes woocommerce templates and design tokens when enabled", () => {
     const pkg = readPackageFromJsonText(samplePackage(true));
     const zip = buildChildThemeZip({ package: pkg });
     assert.equal(zipContains(zip, "demo-child/woocommerce/archive-product.php"), true);
+    assert.equal(zipContains(zip, "demo-child/woocommerce/single-product.php"), true);
+    const php = readZipText(zip, "demo-child/functions.php");
+    assert.match(php, /--ctw-primary/);
+    assert.match(php, /\.woocommerce/);
   });
 
   it("writes a zip file via generateChildThemeZip", () => {

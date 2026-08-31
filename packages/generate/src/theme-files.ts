@@ -45,10 +45,68 @@ Text Domain: ${pkg.theme.slug}
 `;
 }
 
+/**
+ * Build :root CSS custom properties from package theme tokens.
+ */
+function designTokenCss(pkg: CtwPackage): string {
+  const lines: string[] = [];
+  const { colors, typography } = pkg.theme;
+  if (colors.primary !== undefined) {
+    lines.push(`  --ctw-primary: ${colors.primary};`);
+  }
+  if (colors.secondary !== undefined) {
+    lines.push(`  --ctw-secondary: ${colors.secondary};`);
+  }
+  if (colors.text !== undefined) {
+    lines.push(`  --ctw-text: ${colors.text};`);
+  }
+  if (colors.background !== undefined) {
+    lines.push(`  --ctw-background: ${colors.background};`);
+  }
+  if (typography.headingFont !== undefined) {
+    lines.push(`  --ctw-heading-font: ${typography.headingFont}, system-ui, sans-serif;`);
+  }
+  if (typography.bodyFont !== undefined) {
+    lines.push(`  --ctw-body-font: ${typography.bodyFont}, system-ui, sans-serif;`);
+  }
+  if (lines.length === 0) {
+    return "";
+  }
+  const root = `:root {\n${lines.join("\n")}\n}`;
+  const woo = pkg.woocommerce.enabled
+    ? [
+        "",
+        "/* WooCommerce surfaces follow package tokens */",
+        ".woocommerce, .woocommerce-page, .ctw-woo-archive, .ctw-woo-single, .ctw-woo-cart, .ctw-woo-checkout {",
+        "  color: var(--ctw-text, inherit);",
+        "  background-color: var(--ctw-background, transparent);",
+        "  font-family: var(--ctw-body-font, inherit);",
+        "}",
+        ".woocommerce h1, .woocommerce h2, .woocommerce h3,",
+        ".ctw-woo-archive h1, .ctw-woo-single h1, .ctw-woo-cart h1, .ctw-woo-checkout h1 {",
+        "  font-family: var(--ctw-heading-font, inherit);",
+        "  color: var(--ctw-primary, inherit);",
+        "}",
+        ".woocommerce a.button, .woocommerce button.button, .woocommerce input.button,",
+        ".woocommerce #respond input#submit, .woocommerce span.onsale {",
+        "  background-color: var(--ctw-primary, #111) !important;",
+        "  color: #fff !important;",
+        "  border-radius: 2px;",
+        "}",
+        ".woocommerce a.button:hover, .woocommerce button.button:hover {",
+        "  background-color: var(--ctw-secondary, var(--ctw-primary, #111)) !important;",
+        "}",
+        ".woocommerce div.product p.price, .woocommerce div.product span.price,",
+        ".woocommerce ul.products li.product .price {",
+        "  color: var(--ctw-secondary, var(--ctw-primary, inherit));",
+        "}",
+      ].join("\n")
+    : "";
+  return `${root}${woo}`;
+}
+
 export function functionsPhp(pkg: CtwPackage): string {
-  const primary = pkg.theme.colors.primary ?? "";
-  const cssValue =
-    primary === "" ? "" : `:root { --ctw-primary: ${primary}; }`;
+  const cssValue = designTokenCss(pkg).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
   return [
     "<?php",
@@ -78,10 +136,10 @@ export function functionsPhp(pkg: CtwPackage): string {
     "add_action( 'wp_enqueue_scripts', 'ctw_child_scripts_styles', 20 );",
     "",
     "/**",
-    " * Optional design tokens from the package.",
+    " * Design tokens (colors / fonts) and WooCommerce surface styles from the package.",
     " */",
     "function ctw_child_inline_tokens(): void {",
-    `\t$css = '${cssValue.replace(/'/g, "\\'")}';`,
+    `\t$css = '${cssValue}';`,
     "\tif ( '' === $css ) {",
     "\t\treturn;",
     "\t}",

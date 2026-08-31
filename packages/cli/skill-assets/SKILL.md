@@ -1,6 +1,6 @@
 ---
 name: ctw-native
-description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use when the user asks for a WordPress site, Elementor theme, CTW package, WooCommerce shop, or ecommerce theme.
+description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, or WPCode snippets (css/js/html/php).
 ---
 
 # CTW Native (Claude Code)
@@ -9,49 +9,47 @@ You generate an offline site package. You do **not** edit a live WordPress site 
 
 ## Install this skill (once per project)
 
-This package is **not published to npm** yet. Always use GitHub **main**:
-
 ```bash
 npx -y github:md786-dotcom/claude-to-wordpress-native skill
 ```
 
-Scaffold a starter package + skill:
-
 ```bash
-# Brochure (default)
+# Brochure
 npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 
-# Shop / WooCommerce
+# Shop
 npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
-```
-
-Do **not** run `npx claude-to-wordpress-native` — that name 404s on the public registry until publish.
-Do **not** pin the old feature branch; use `main`.
-
-Write the WordPress plugin ZIP (upload under Plugins → Add New → Upload Plugin):
-
-```bash
 npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
 ```
 
-## Output
+## Media and images
 
-1. Write a valid `ctw-package.json` (version 1).
-2. Put media files under a media directory referenced by `media[].path`.
-3. Run:
+Ship real files under `./media/` and list them in `media[]`. Prefer downloading remotes before generate.
 
 ```bash
-npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
+npx -y github:md786-dotcom/claude-to-wordpress-native media fetch \
+  --url "https://images.unsplash.com/photo-…" --id hero --alt "Hero" \
+  --package ./ctw-package.json --media ./media
 ```
 
-4. Tell the web developer to: run `plugin-zip`, upload `ctw-native.zip`, upload the child ZIP, open **CTW Native → Setup**, toggle **Install WooCommerce** if needed, install stack, import once.
+Or set `media[].sourceUrl` (https only) and let `generate` / `media sync` pull missing files.
+
+Elementor image controls: `{ "id": "<media.id>", "url": "" }`.
 
 ## WooCommerce / shop packages
 
-When the brief is a shop, store, or ecommerce site, **always** enable WooCommerce in the package. Do both of these together:
+When the brief is a shop or ecommerce site:
 
 ```json
-"woocommerce": { "enabled": true },
+"woocommerce": {
+  "enabled": true,
+  "products": [],
+  "pages": {
+    "shop": { "title": "Shop", "elements": [ /* Free Elementor tree */ ] },
+    "cart": { "title": "Cart", "elements": [ /* … */ ] },
+    "checkout": { "title": "Checkout", "elements": [ /* … */ ] }
+  }
+},
 "plugins": [
   "elementor",
   "elementskit-lite",
@@ -61,32 +59,69 @@ When the brief is a shop, store, or ecommerce site, **always** enable WooCommerc
 ]
 ```
 
-Rules:
+### Branding (colors, fonts, layouts)
 
-- Brochure / local business / marketing sites → `"woocommerce": { "enabled": false }` and **omit** `woocommerce` from `plugins`.
-- Shop briefs → `enabled: true` **and** include `"woocommerce"` in `plugins` (schema rejects a mismatch).
-- Scaffold with `init --woocommerce` when starting a shop project.
-- Never use Woo Elementor widgets, Woo Theme Builder, or Pro widgets. Shop UI uses native WooCommerce PHP templates from the child theme kit.
-- Products, cart, and checkout are managed in WordPress after import (the package does not ship a product catalog).
-- On the WordPress site, **CTW Native → Setup** has an **Install WooCommerce** checkbox. If the package already enables Woo, the switch stays on and Setup installs it with the stack. Humans can also turn the switch on for brochure packages if they decide to add a shop later.
+1. Set `theme.colors` (`primary`, `secondary`, `text`, `background`) and `theme.typography` (`headingFont`, `bodyFont`). Generate emits CSS variables and WooCommerce surface styles into the child theme.
+2. Build **shop / cart / checkout** as Free Elementor trees under `woocommerce.pages.*`. Use `heading`, `text-editor`, `container`, `button`, `image`, and **`shortcode`** widgets:
+   - Shop: `[products limit="4" columns="2"]`
+   - Cart: `[woocommerce_cart]`
+   - Checkout: `[woocommerce_checkout]`
+3. Match layout spacing, headings, and copy to the project brief. Never use Woo Elementor widgets, Theme Builder, or Pro.
+4. **Single product + product archives** use the child theme PHP templates (`woocommerce/single-product.php`, `archive-product.php`) styled by the emitted tokens. Do not invent Pro single-product builders.
+5. If you omit a `woocommerce.pages` entry, Setup import creates a default heading + shortcode page and assigns the WooCommerce page option.
+
+### Dummy products (max 4)
+
+Only these fields: **name**, **price**, **description**, **image** (via Unsplash/Pexels https URL). Cap is **4**.
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native products add \
+  --name "Ceramic Mug" \
+  --price 18.00 \
+  --description "Matte glaze, 12oz" \
+  --image-url "https://images.unsplash.com/photo-…" \
+  --package ./ctw-package.json \
+  --media ./media
+```
+
+This downloads the image into `./media/`, registers `media[]`, and appends `woocommerce.products[]` with `imageMediaId`. The WordPress importer creates simple products on import.
+
+## WPCode snippets
+
+`snippets[]` supports `css` | `js` | `html` | **`php`** for WPCode (Insert Headers and Footers / WPCode).
+
+- Use `php` only for small site helpers that WPCode would run (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
+- Never emit remote code loaders or destructive admin scripts.
+- Locations: `header` | `footer` | `everywhere`.
+
+## Output
+
+1. Write valid `ctw-package.json` (version 1).
+2. Ensure media files exist (fetch/sync/products add).
+3. Generate:
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native generate \
+  --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
+```
+
+4. Tell the web developer: `plugin-zip` → upload plugin → upload child ZIP → **CTW Native → Setup** (Install WooCommerce if needed) → import once.
 
 ## Package rules
 
-- Parent is always Hello Elementor (`Template: hello-elementor` in generated `style.css`).
-- Exactly one page with `isFrontPage: true`.
-- Elementor widgets: Free allowlist only (`heading`, `image`, `text-editor`, `button`, `container`, …). Never `form`, Woo widgets, Theme Builder, or Pro custom CSS.
-- Forms → MetForm entries in `forms[]`.
-- Header/footer → ElementsKit payloads in `header` / `footer`.
-- Snippets → WPCode `css` | `js` | `html` only. Never `php`.
-- Always include plugins: `elementor`, `elementskit-lite`, `metform`, `insert-headers-and-footers` (plus `woocommerce` when enabled).
+- Parent: Hello Elementor (`Template: hello-elementor`).
+- Exactly one `isFrontPage: true`.
+- Elementor Free allowlist only. Forms → MetForm. Header/footer → ElementsKit.
+- Brochure: `woocommerce.enabled: false` and omit woo from `plugins`, products, and woo pages.
 
-## Client editing (document this)
+## Client editing
 
-- Pages/posts: Edit with Elementor
+- Pages/posts: Elementor Free
 - Header/footer: ElementsKit
-- Shop: WooCommerce PHP templates (if enabled)
+- Shop / cart / checkout: Elementor pages assigned as WooCommerce pages (plus native single/archive templates)
 - Extra CSS: Appearance → Customize → Additional CSS
+- Snippets: WPCode
 
 ## After install
 
-Claude cannot edit the site. Humans edit in WordPress. Import is one-shot; wipe before regenerate.
+Claude cannot edit the live site. Import is one-shot; wipe before regenerate.

@@ -160,8 +160,34 @@ export const snippetSchema = z.object({
   location: z.enum(["header", "footer", "everywhere"]).default("everywhere"),
 });
 
+/** Dummy WooCommerce product — name, price, description, image only. */
+export const wooProductSchema = z.object({
+  name: z.string().min(1).max(120),
+  price: z
+    .string()
+    .regex(/^\d+(?:\.\d{1,2})?$/, "price must be a number string like 19.99"),
+  description: z.string().max(2000).default(""),
+  imageMediaId: z.string().min(1).max(64),
+});
+
+/** Brandable Woo system page built with Free Elementor + shortcodes. */
+export const wooSystemPageSchema = z.object({
+  title: z.string().min(1).max(200),
+  elements: z.array(elementNodeSchema).min(1),
+});
+
+export const wooPagesSchema = z
+  .object({
+    shop: wooSystemPageSchema.optional(),
+    cart: wooSystemPageSchema.optional(),
+    checkout: wooSystemPageSchema.optional(),
+  })
+  .default({});
+
 export const wooSchema = z.object({
   enabled: z.boolean().default(false),
+  products: z.array(wooProductSchema).max(4).default([]),
+  pages: wooPagesSchema,
 });
 
 export const packageSchema = z
@@ -196,16 +222,6 @@ export const packageSchema = z
       });
     }
 
-    for (const snippet of pkg.snippets) {
-      if ((snippet.type as string) === "php") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "php snippets are rejected",
-          path: ["snippets"],
-        });
-      }
-    }
-
     const required = new Set<string>(CORE_PLUGIN_SLUGS);
     if (pkg.woocommerce.enabled) {
       required.add(WOO_PLUGIN_SLUG);
@@ -226,6 +242,38 @@ export const packageSchema = z
         path: ["plugins"],
       });
     }
+
+    if (!pkg.woocommerce.enabled) {
+      if (pkg.woocommerce.products.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "woocommerce.products require woocommerce.enabled true",
+          path: ["woocommerce", "products"],
+        });
+      }
+      if (
+        pkg.woocommerce.pages.shop !== undefined ||
+        pkg.woocommerce.pages.cart !== undefined ||
+        pkg.woocommerce.pages.checkout !== undefined
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "woocommerce.pages require woocommerce.enabled true",
+          path: ["woocommerce", "pages"],
+        });
+      }
+    }
+
+    const mediaIds = new Set(pkg.media.map((item) => item.id));
+    pkg.woocommerce.products.forEach((product, index) => {
+      if (!mediaIds.has(product.imageMediaId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `product imageMediaId "${product.imageMediaId}" must match a media[].id`,
+          path: ["woocommerce", "products", index, "imageMediaId"],
+        });
+      }
+    });
   });
 
 export type CtwPackage = z.infer<typeof packageSchema>;
@@ -233,6 +281,8 @@ export type CtwPage = z.infer<typeof pageSchema>;
 export type CtwElementNode = ElementNode;
 export type CtwMediaItem = z.infer<typeof mediaItemSchema>;
 export type CtwSnippet = z.infer<typeof snippetSchema>;
+export type CtwWooProduct = z.infer<typeof wooProductSchema>;
+export type CtwWooSystemPage = z.infer<typeof wooSystemPageSchema>;
 
 /**
  * Parse JSON into a typed package. Narrows at the boundary via Zod.

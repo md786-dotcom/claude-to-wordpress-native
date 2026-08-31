@@ -71,7 +71,8 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 | --- | --- |
 | Pages and posts | **Edit with Elementor** (Free widgets only) |
 | Header and footer | **ElementsKit** Header Footer |
-| Shop / cart / archives | Native **WooCommerce** PHP templates (only if `woocommerce.enabled`) |
+| Shop / cart / checkout | Elementor Free pages + shortcodes (assigned as Woo pages); single/archive use child PHP templates |
+| Dummy products | Up to 4 via `products add` / `woocommerce.products` (name, price, description, image) |
 | Extra CSS | **Appearance → Customize → Additional CSS** |
 
 ## Web-dev flow
@@ -109,7 +110,7 @@ Validate without writing a ZIP: `npm run ctw -- validate --package ./ctw-package
 
 Always: Elementor, ElementsKit Lite, MetForm, WPCode (`insert-headers-and-footers`).
 
-Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on.
+Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode snippets (`css` | `js` | `html` | `php`).
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
 

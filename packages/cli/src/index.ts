@@ -21,3 +21,9 @@ export {
   type FetchLike,
   type SyncMediaResult,
 } from "./media-fetch.js";
+export {
+  addDummyProduct,
+  MAX_DUMMY_PRODUCTS,
+  type AddProductOptions,
+  type AddProductResult,
+} from "./products.js";

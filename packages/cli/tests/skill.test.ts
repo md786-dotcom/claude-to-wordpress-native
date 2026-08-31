@@ -17,6 +17,8 @@ describe("skill assets", () => {
     assert.match(markdown, /claude-to-wordpress-native/);
     assert.match(markdown, /--woocommerce/);
     assert.match(markdown, /Install WooCommerce/);
+    assert.match(markdown, /products add/);
+    assert.match(markdown, /type: "php"|`php`/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
   });
 });

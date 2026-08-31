@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { generateChildThemeZip, readPackageFromFile } from "@ctw/generate";
 import { fetchIntoPackage, syncPackageMedia } from "../media-fetch.js";
 import { packPluginZip } from "../plugin-zip.js";
+import { addDummyProduct, MAX_DUMMY_PRODUCTS } from "../products.js";
 import { initProject, installSkill } from "../skill.js";
 
 function printHelp(): void {
@@ -16,6 +17,7 @@ function printHelp(): void {
       "  npx -y github:md786-dotcom/claude-to-wordpress-native media fetch --url https://images.unsplash.com/... --id hero",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Acme Child\" --slug acme-child",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native init --name \"Shop Child\" --slug shop-child --woocommerce",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native products add --name \"Mug\" --price 12.00 --image-url https://images.unsplash.com/... --package ./ctw-package.json",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media",
       "",
       "Commands:",
@@ -23,6 +25,9 @@ function printHelp(): void {
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
       "  media fetch        Download an https image (Unsplash/Pexels/direct) into ./media",
       "  media sync         Download all package media[].sourceUrl files that are missing",
+      "  products add       Add a dummy WooCommerce product (max " +
+        String(MAX_DUMMY_PRODUCTS) +
+        ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
       "  validate           Validate a ctw-package.json without writing a ZIP",
@@ -163,6 +168,46 @@ async function runMediaSync(args: string[]): Promise<number> {
   }
 }
 
+async function runProducts(args: string[]): Promise<number> {
+  const [sub, ...rest] = args;
+  if (sub !== "add") {
+    process.stderr.write("Usage: products add --name … --price … --image-url … --package …\n");
+    return 1;
+  }
+  const name = readFlag(rest, "--name");
+  const price = readFlag(rest, "--price");
+  const imageUrl = readFlag(rest, "--image-url");
+  const packagePath = readFlag(rest, "--package");
+  if (name === undefined || price === undefined || imageUrl === undefined || packagePath === undefined) {
+    process.stderr.write("Missing --name, --price, --image-url, or --package.\n");
+    return 1;
+  }
+  const cwd = resolve(readFlag(rest, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve(cwd, readFlag(rest, "--media") ?? "media");
+  const description = readFlag(rest, "--description");
+  const imageMediaId = readFlag(rest, "--image-id");
+  try {
+    const result = await addDummyProduct({
+      packagePath: resolve(cwd, packagePath),
+      mediaRoot,
+      name,
+      price,
+      imageUrl,
+      ...(description !== undefined ? { description } : {}),
+      ...(imageMediaId !== undefined ? { imageMediaId } : {}),
+    });
+    process.stdout.write(
+      `Added product "${result.product.name}" (${String(result.count)}/${String(MAX_DUMMY_PRODUCTS)})\n`,
+    );
+    process.stdout.write(`Image ${result.mediaId} → ${result.mediaPath}\n`);
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`products add failed: ${message}\n`);
+    return 1;
+  }
+}
+
 function runInit(args: string[]): number {
   const root = resolve(readFlag(args, "--cwd") ?? process.cwd());
   const name = readFlag(args, "--name") ?? "Site Child";
@@ -270,6 +315,8 @@ async function main(argv: string[]): Promise<number> {
       return runPluginZip(rest);
     case "media":
       return runMedia(rest);
+    case "products":
+      return runProducts(rest);
     case "init":
       return runInit(rest);
     case "validate":

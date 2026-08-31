@@ -36,7 +36,7 @@
     "insert-headers-and-footers"
   ],
   "wooPlugin": "woocommerce",
-  "snippetTypes": ["css", "js", "html"],
+  "snippetTypes": ["css", "js", "html", "php"],
   "pluginMains": {
     "elementor": "elementor/elementor.php",
     "elementskit-lite": "elementskit-lite/elementskit-lite.php",

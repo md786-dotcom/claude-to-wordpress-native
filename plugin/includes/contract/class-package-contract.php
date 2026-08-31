@@ -71,6 +71,7 @@ final class Package_Contract {
 		'css',
 		'js',
 		'html',
+		'php',
 	);
 
 	/**

@@ -6,7 +6,7 @@ var __export = (target, all) => {
 };
 
 // packages/cli/src/bin/ctw.ts
-import { resolve as resolve4 } from "node:path";
+import { resolve as resolve6 } from "node:path";
 
 // packages/generate/dist/generate.js
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -58,7 +58,8 @@ var WOO_PLUGIN_SLUG = "woocommerce";
 var SNIPPET_TYPES = [
   "css",
   "js",
-  "html"
+  "html",
+  "php"
 ];
 
 // node_modules/zod/v3/external.js
@@ -4141,7 +4142,10 @@ var themeSchema = external_exports.object({
 var mediaItemSchema = external_exports.object({
   id: external_exports.string().min(1).max(64),
   path: relativePath,
-  alt: external_exports.string().max(200).default("")
+  alt: external_exports.string().max(200).default(""),
+  sourceUrl: external_exports.string().url().refine((value) => value.startsWith("https://"), {
+    message: "sourceUrl must be an https URL"
+  }).optional()
 });
 var elementNodeSchema = external_exports.lazy(() => external_exports.object({
   id: external_exports.string().min(1).max(16),
@@ -4201,8 +4205,25 @@ var snippetSchema = external_exports.object({
   type: external_exports.enum(SNIPPET_TYPES),
   location: external_exports.enum(["header", "footer", "everywhere"]).default("everywhere")
 });
+var wooProductSchema = external_exports.object({
+  name: external_exports.string().min(1).max(120),
+  price: external_exports.string().regex(/^\d+(?:\.\d{1,2})?$/, "price must be a number string like 19.99"),
+  description: external_exports.string().max(2e3).default(""),
+  imageMediaId: external_exports.string().min(1).max(64)
+});
+var wooSystemPageSchema = external_exports.object({
+  title: external_exports.string().min(1).max(200),
+  elements: external_exports.array(elementNodeSchema).min(1)
+});
+var wooPagesSchema = external_exports.object({
+  shop: wooSystemPageSchema.optional(),
+  cart: wooSystemPageSchema.optional(),
+  checkout: wooSystemPageSchema.optional()
+}).default({});
 var wooSchema = external_exports.object({
-  enabled: external_exports.boolean().default(false)
+  enabled: external_exports.boolean().default(false),
+  products: external_exports.array(wooProductSchema).max(4).default([]),
+  pages: wooPagesSchema
 });
 var packageSchema = external_exports.object({
   version: external_exports.literal(1),
@@ -4232,15 +4253,6 @@ var packageSchema = external_exports.object({
       path: ["pages"]
     });
   }
-  for (const snippet of pkg.snippets) {
-    if (snippet.type === "php") {
-      ctx.addIssue({
-        code: external_exports.ZodIssueCode.custom,
-        message: "php snippets are rejected",
-        path: ["snippets"]
-      });
-    }
-  }
   const required = new Set(CORE_PLUGIN_SLUGS);
   if (pkg.woocommerce.enabled) {
     required.add(WOO_PLUGIN_SLUG);
@@ -4261,6 +4273,32 @@ var packageSchema = external_exports.object({
       path: ["plugins"]
     });
   }
+  if (!pkg.woocommerce.enabled) {
+    if (pkg.woocommerce.products.length > 0) {
+      ctx.addIssue({
+        code: external_exports.ZodIssueCode.custom,
+        message: "woocommerce.products require woocommerce.enabled true",
+        path: ["woocommerce", "products"]
+      });
+    }
+    if (pkg.woocommerce.pages.shop !== void 0 || pkg.woocommerce.pages.cart !== void 0 || pkg.woocommerce.pages.checkout !== void 0) {
+      ctx.addIssue({
+        code: external_exports.ZodIssueCode.custom,
+        message: "woocommerce.pages require woocommerce.enabled true",
+        path: ["woocommerce", "pages"]
+      });
+    }
+  }
+  const mediaIds = new Set(pkg.media.map((item) => item.id));
+  pkg.woocommerce.products.forEach((product, index) => {
+    if (!mediaIds.has(product.imageMediaId)) {
+      ctx.addIssue({
+        code: external_exports.ZodIssueCode.custom,
+        message: `product imageMediaId "${product.imageMediaId}" must match a media[].id`,
+        path: ["woocommerce", "products", index, "imageMediaId"]
+      });
+    }
+  });
 });
 function parsePackageJson(input) {
   return packageSchema.parse(input);
@@ -4306,9 +4344,64 @@ Text Domain: ${pkg.theme.slug}
 /* Appearance \u2192 Customize \u2192 Additional CSS remains available. Do not dequeue wp-custom-css. */
 `;
 }
+function designTokenCss(pkg) {
+  const lines = [];
+  const { colors, typography } = pkg.theme;
+  if (colors.primary !== void 0) {
+    lines.push(`  --ctw-primary: ${colors.primary};`);
+  }
+  if (colors.secondary !== void 0) {
+    lines.push(`  --ctw-secondary: ${colors.secondary};`);
+  }
+  if (colors.text !== void 0) {
+    lines.push(`  --ctw-text: ${colors.text};`);
+  }
+  if (colors.background !== void 0) {
+    lines.push(`  --ctw-background: ${colors.background};`);
+  }
+  if (typography.headingFont !== void 0) {
+    lines.push(`  --ctw-heading-font: ${typography.headingFont}, system-ui, sans-serif;`);
+  }
+  if (typography.bodyFont !== void 0) {
+    lines.push(`  --ctw-body-font: ${typography.bodyFont}, system-ui, sans-serif;`);
+  }
+  if (lines.length === 0) {
+    return "";
+  }
+  const root = `:root {
+${lines.join("\n")}
+}`;
+  const woo = pkg.woocommerce.enabled ? [
+    "",
+    "/* WooCommerce surfaces follow package tokens */",
+    ".woocommerce, .woocommerce-page, .ctw-woo-archive, .ctw-woo-single, .ctw-woo-cart, .ctw-woo-checkout {",
+    "  color: var(--ctw-text, inherit);",
+    "  background-color: var(--ctw-background, transparent);",
+    "  font-family: var(--ctw-body-font, inherit);",
+    "}",
+    ".woocommerce h1, .woocommerce h2, .woocommerce h3,",
+    ".ctw-woo-archive h1, .ctw-woo-single h1, .ctw-woo-cart h1, .ctw-woo-checkout h1 {",
+    "  font-family: var(--ctw-heading-font, inherit);",
+    "  color: var(--ctw-primary, inherit);",
+    "}",
+    ".woocommerce a.button, .woocommerce button.button, .woocommerce input.button,",
+    ".woocommerce #respond input#submit, .woocommerce span.onsale {",
+    "  background-color: var(--ctw-primary, #111) !important;",
+    "  color: #fff !important;",
+    "  border-radius: 2px;",
+    "}",
+    ".woocommerce a.button:hover, .woocommerce button.button:hover {",
+    "  background-color: var(--ctw-secondary, var(--ctw-primary, #111)) !important;",
+    "}",
+    ".woocommerce div.product p.price, .woocommerce div.product span.price,",
+    ".woocommerce ul.products li.product .price {",
+    "  color: var(--ctw-secondary, var(--ctw-primary, inherit));",
+    "}"
+  ].join("\n") : "";
+  return `${root}${woo}`;
+}
 function functionsPhp(pkg) {
-  const primary = pkg.theme.colors.primary ?? "";
-  const cssValue = primary === "" ? "" : `:root { --ctw-primary: ${primary}; }`;
+  const cssValue = designTokenCss(pkg).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
   return [
     "<?php",
     "/**",
@@ -4337,10 +4430,10 @@ function functionsPhp(pkg) {
     "add_action( 'wp_enqueue_scripts', 'ctw_child_scripts_styles', 20 );",
     "",
     "/**",
-    " * Optional design tokens from the package.",
+    " * Design tokens (colors / fonts) and WooCommerce surface styles from the package.",
     " */",
     "function ctw_child_inline_tokens(): void {",
-    `	$css = '${cssValue.replace(/'/g, "\\'")}';`,
+    `	$css = '${cssValue}';`,
     "	if ( '' === $css ) {",
     "		return;",
     "	}",
@@ -5159,11 +5252,153 @@ function generateChildThemeZip(options) {
   return { bytes, package: pkg, outputPath };
 }
 
+// packages/cli/src/media-fetch.ts
+import { createWriteStream, existsSync as existsSync2, mkdirSync as mkdirSync2, readFileSync as readFileSync3, writeFileSync as writeFileSync2 } from "node:fs";
+import { dirname as dirname3, extname, join as join3, resolve as resolve2 } from "node:path";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
+var EXT_BY_MIME = {
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/svg+xml": ".svg",
+  "image/avif": ".avif"
+};
+function guessMediaFilename(url, contentType, id) {
+  const mime = (contentType ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+  const fromMime = EXT_BY_MIME[mime];
+  let ext = fromMime ?? "";
+  if (ext === "") {
+    try {
+      const pathname = new URL(url).pathname;
+      const raw = extname(pathname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg", ".avif"].includes(raw)) {
+        ext = raw === ".jpeg" ? ".jpg" : raw;
+      }
+    } catch {
+    }
+  }
+  if (ext === "") {
+    ext = ".jpg";
+  }
+  const safeId = id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
+  return `${safeId || "image"}${ext}`;
+}
+async function downloadMediaFile(options) {
+  if (!options.url.startsWith("https://")) {
+    throw new Error("Only https image URLs are allowed.");
+  }
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const response = await fetchImpl(options.url, {
+    redirect: "follow",
+    headers: {
+      "user-agent": "claude-to-wordpress-native/0.1 (+https://github.com/md786-dotcom/claude-to-wordpress-native)",
+      accept: "image/*,*/*;q=0.8"
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`Download failed (${String(response.status)}): ${options.url}`);
+  }
+  const type = response.headers.get("content-type") ?? "";
+  if (type !== "" && !type.startsWith("image/") && !type.startsWith("application/octet-stream")) {
+    throw new Error(`URL did not return an image (content-type: ${type})`);
+  }
+  const dest = resolve2(options.mediaRoot, options.relativePath);
+  if (options.relativePath.includes("..") || options.relativePath.startsWith("/")) {
+    throw new Error("Invalid media path.");
+  }
+  mkdirSync2(dirname3(dest), { recursive: true });
+  if (response.body === null) {
+    const buf = Buffer.from(await response.arrayBuffer());
+    writeFileSync2(dest, buf);
+  } else {
+    await pipeline(Readable.fromWeb(response.body), createWriteStream(dest));
+  }
+  return dest;
+}
+async function syncPackageMedia(options) {
+  const mediaRoot = resolve2(options.mediaRoot);
+  mkdirSync2(mediaRoot, { recursive: true });
+  const downloaded = [];
+  const skipped = [];
+  for (const item of options.pkg.media) {
+    const dest = join3(mediaRoot, item.path);
+    if (!options.force && existsSync2(dest)) {
+      skipped.push(item.path);
+      continue;
+    }
+    if (item.sourceUrl === void 0) {
+      if (!existsSync2(dest)) {
+        throw new Error(
+          `Media file missing and no sourceUrl: ${item.path} (id=${item.id}). Place the file under ${mediaRoot} or set sourceUrl.`
+        );
+      }
+      skipped.push(item.path);
+      continue;
+    }
+    await downloadMediaFile({
+      url: item.sourceUrl,
+      mediaRoot,
+      relativePath: item.path,
+      ...options.fetchImpl !== void 0 ? { fetchImpl: options.fetchImpl } : {}
+    });
+    downloaded.push(item.path);
+  }
+  return { downloaded, skipped };
+}
+async function fetchIntoPackage(options) {
+  if (!options.url.startsWith("https://")) {
+    throw new Error("Only https image URLs are allowed.");
+  }
+  const mediaRoot = resolve2(options.mediaRoot);
+  mkdirSync2(mediaRoot, { recursive: true });
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const head = await fetchImpl(options.url, {
+    redirect: "follow",
+    headers: {
+      "user-agent": "claude-to-wordpress-native/0.1 (+https://github.com/md786-dotcom/claude-to-wordpress-native)",
+      accept: "image/*,*/*;q=0.8"
+    }
+  });
+  if (!head.ok) {
+    throw new Error(`Download failed (${String(head.status)}): ${options.url}`);
+  }
+  const contentType = head.headers.get("content-type");
+  const relativePath2 = options.relativePath ?? guessMediaFilename(options.url, contentType, options.id);
+  const dest = resolve2(mediaRoot, relativePath2);
+  mkdirSync2(dirname3(dest), { recursive: true });
+  if (head.body === null) {
+    writeFileSync2(dest, Buffer.from(await head.arrayBuffer()));
+  } else {
+    await pipeline(Readable.fromWeb(head.body), createWriteStream(dest));
+  }
+  if (options.packagePath === void 0) {
+    return { relativePath: relativePath2 };
+  }
+  const packagePath = resolve2(options.packagePath);
+  const raw = JSON.parse(readFileSync3(packagePath, "utf8"));
+  const pkg = parsePackageJson(raw);
+  const nextItem = {
+    id: options.id,
+    path: relativePath2,
+    alt: options.alt ?? "",
+    sourceUrl: options.url
+  };
+  const media = pkg.media.filter((item) => item.id !== options.id);
+  media.push(nextItem);
+  const updated = { ...pkg, media };
+  writeFileSync2(packagePath, `${JSON.stringify(updated, null, 2)}
+`, "utf8");
+  return { relativePath: relativePath2, packagePath };
+}
+
 // packages/cli/src/plugin-zip.ts
-import { mkdirSync as mkdirSync2, readdirSync as readdirSync2, readFileSync as readFileSync3, statSync as statSync2, writeFileSync as writeFileSync2 } from "node:fs";
-import { dirname as dirname3, join as join3, relative as relative2, resolve as resolve2 } from "node:path";
+import { mkdirSync as mkdirSync3, readdirSync as readdirSync2, readFileSync as readFileSync4, statSync as statSync2, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname4, join as join4, relative as relative2, resolve as resolve3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
-var here2 = dirname3(fileURLToPath2(import.meta.url));
+var here2 = dirname4(fileURLToPath2(import.meta.url));
 var SKIP_DIR_NAMES = /* @__PURE__ */ new Set([
   "vendor",
   "tests",
@@ -5180,20 +5415,20 @@ var SKIP_FILE_NAMES = /* @__PURE__ */ new Set([
 ]);
 function findPluginSourceDir() {
   const candidates = [
-    join3(here2, "../../../plugin"),
-    join3(here2, "../../plugin"),
-    join3(here2, "../plugin")
+    join4(here2, "../../../plugin"),
+    join4(here2, "../../plugin"),
+    join4(here2, "../plugin")
   ];
   for (const dir of candidates) {
-    if (statSync2(join3(dir, "ctw-native.php"), { throwIfNoEntry: false })?.isFile()) {
+    if (statSync2(join4(dir, "ctw-native.php"), { throwIfNoEntry: false })?.isFile()) {
       return dir;
     }
   }
   throw new Error("plugin/ source not found next to the CLI package.");
 }
 function packPluginZip(options) {
-  const pluginRoot = resolve2(options.pluginRoot ?? findPluginSourceDir());
-  const main2 = join3(pluginRoot, "ctw-native.php");
+  const pluginRoot = resolve3(options.pluginRoot ?? findPluginSourceDir());
+  const main2 = join4(pluginRoot, "ctw-native.php");
   if (!statSync2(main2, { throwIfNoEntry: false })?.isFile()) {
     throw new Error(`Missing ctw-native.php in ${pluginRoot}`);
   }
@@ -5204,9 +5439,9 @@ function packPluginZip(options) {
     throw new Error("No plugin files to pack.");
   }
   const bytes = zipSync(files, { level: 6 });
-  const outputPath = resolve2(options.outputPath);
-  mkdirSync2(dirname3(outputPath), { recursive: true });
-  writeFileSync2(outputPath, bytes);
+  const outputPath = resolve3(options.outputPath);
+  mkdirSync3(dirname4(outputPath), { recursive: true });
+  writeFileSync3(outputPath, bytes);
   return { outputPath, fileCount };
 }
 function collectFiles(absDir, pluginRoot, out) {
@@ -5214,7 +5449,7 @@ function collectFiles(absDir, pluginRoot, out) {
     if (SKIP_DIR_NAMES.has(entry) || SKIP_FILE_NAMES.has(entry)) {
       continue;
     }
-    const full = join3(absDir, entry);
+    const full = join4(absDir, entry);
     const stats = statSync2(full);
     if (stats.isDirectory()) {
       collectFiles(full, pluginRoot, out);
@@ -5224,39 +5459,98 @@ function collectFiles(absDir, pluginRoot, out) {
       continue;
     }
     const rel = relative2(pluginRoot, full).replaceAll("\\", "/");
-    out[`ctw-native/${rel}`] = readFileSync3(full);
+    out[`ctw-native/${rel}`] = readFileSync4(full);
   }
 }
 
+// packages/cli/src/products.ts
+import { readFileSync as readFileSync5, writeFileSync as writeFileSync4 } from "node:fs";
+import { resolve as resolve4 } from "node:path";
+var MAX_DUMMY_PRODUCTS = 4;
+async function addDummyProduct(options) {
+  if (!options.imageUrl.startsWith("https://")) {
+    throw new Error("Product images must use https URLs (Unsplash, Pexels, or direct).");
+  }
+  if (!/^\d+(?:\.\d{1,2})?$/.test(options.price)) {
+    throw new Error("price must look like 19.99");
+  }
+  const packagePath = resolve4(options.packagePath);
+  const raw = JSON.parse(readFileSync5(packagePath, "utf8"));
+  const pkg = parsePackageJson(raw);
+  if (!pkg.woocommerce.enabled) {
+    throw new Error("Enable woocommerce.enabled (and list woocommerce in plugins) before adding products.");
+  }
+  if (pkg.woocommerce.products.length >= MAX_DUMMY_PRODUCTS) {
+    throw new Error(`Dummy products are capped at ${String(MAX_DUMMY_PRODUCTS)}.`);
+  }
+  const mediaId = options.imageMediaId ?? `product-${String(pkg.woocommerce.products.length + 1)}-${slugify(options.name)}`.slice(0, 64);
+  const fetched = await fetchIntoPackage({
+    url: options.imageUrl,
+    id: mediaId,
+    alt: options.name,
+    mediaRoot: options.mediaRoot,
+    packagePath,
+    ...options.fetchImpl !== void 0 ? { fetchImpl: options.fetchImpl } : {}
+  });
+  const nextRaw = JSON.parse(readFileSync5(packagePath, "utf8"));
+  const nextPkg = parsePackageJson(nextRaw);
+  const product = {
+    name: options.name,
+    price: options.price,
+    description: options.description ?? "",
+    imageMediaId: mediaId
+  };
+  const products = [...nextPkg.woocommerce.products, product];
+  const updated = {
+    ...nextPkg,
+    woocommerce: {
+      ...nextPkg.woocommerce,
+      products
+    }
+  };
+  writeFileSync4(packagePath, `${JSON.stringify(updated, null, 2)}
+`, "utf8");
+  return {
+    product,
+    mediaId,
+    mediaPath: fetched.relativePath,
+    packagePath,
+    count: products.length
+  };
+}
+function slugify(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32);
+}
+
 // packages/cli/src/skill.ts
-import { cpSync, existsSync as existsSync2, mkdirSync as mkdirSync3, readFileSync as readFileSync4, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname4, join as join4, resolve as resolve3 } from "node:path";
+import { cpSync, existsSync as existsSync3, mkdirSync as mkdirSync4, readFileSync as readFileSync6, writeFileSync as writeFileSync5 } from "node:fs";
+import { dirname as dirname5, join as join5, resolve as resolve5 } from "node:path";
 import { fileURLToPath as fileURLToPath3 } from "node:url";
-var here3 = dirname4(fileURLToPath3(import.meta.url));
+var here3 = dirname5(fileURLToPath3(import.meta.url));
 function packageRoot() {
   let dir = here3;
   for (let i = 0; i < 8; i += 1) {
-    const pkgPath = join4(dir, "package.json");
-    if (existsSync2(pkgPath)) {
-      const name = JSON.parse(readFileSync4(pkgPath, "utf8")).name;
+    const pkgPath = join5(dir, "package.json");
+    if (existsSync3(pkgPath)) {
+      const name = JSON.parse(readFileSync6(pkgPath, "utf8")).name;
       if (name === "@ctw/cli" || name === "claude-to-wordpress-native") {
         return dir;
       }
     }
-    dir = resolve3(dir, "..");
+    dir = resolve5(dir, "..");
   }
-  return resolve3(here3, "..");
+  return resolve5(here3, "..");
 }
 function skillAssetsDir() {
   const root = packageRoot();
   const candidates = [
-    join4(root, "skill-assets"),
-    join4(root, "packages/cli/skill-assets"),
-    join4(root, "skills/ctw-native"),
-    join4(root, "../../skills/ctw-native")
+    join5(root, "skill-assets"),
+    join5(root, "packages/cli/skill-assets"),
+    join5(root, "skills/ctw-native"),
+    join5(root, "../../skills/ctw-native")
   ];
   for (const dir of candidates) {
-    if (existsSync2(join4(dir, "SKILL.md"))) {
+    if (existsSync3(join5(dir, "SKILL.md"))) {
       return dir;
     }
   }
@@ -5265,20 +5559,20 @@ function skillAssetsDir() {
   );
 }
 function installSkill(projectRoot) {
-  const targetDir = join4(resolve3(projectRoot), ".claude", "skills", "ctw-native");
+  const targetDir = join5(resolve5(projectRoot), ".claude", "skills", "ctw-native");
   const source = skillAssetsDir();
-  const existed = existsSync2(join4(targetDir, "SKILL.md"));
-  mkdirSync3(targetDir, { recursive: true });
+  const existed = existsSync3(join5(targetDir, "SKILL.md"));
+  mkdirSync4(targetDir, { recursive: true });
   cpSync(source, targetDir, { recursive: true });
   return { targetDir, created: !existed };
 }
 function initProject(projectRoot, themeSlug, themeName, options) {
-  const root = resolve3(projectRoot);
-  const packagePath = join4(root, "ctw-package.json");
-  const mediaDir = join4(root, "media");
-  mkdirSync3(mediaDir, { recursive: true });
-  if (!existsSync2(packagePath)) {
-    writeFileSync3(
+  const root = resolve5(projectRoot);
+  const packagePath = join5(root, "ctw-package.json");
+  const mediaDir = join5(root, "media");
+  mkdirSync4(mediaDir, { recursive: true });
+  if (!existsSync3(packagePath)) {
+    writeFileSync5(
       packagePath,
       starterPackageJson(themeSlug, themeName, options?.woocommerce === true),
       "utf8"
@@ -5358,17 +5652,22 @@ function printHelp() {
       "Simple start (GitHub main \u2014 not on npm yet):",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native skill",
       "  npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip",
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native media fetch --url https://images.unsplash.com/... --id hero",
       '  npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" --slug acme-child',
       '  npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce',
-      "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip",
+      '  npx -y github:md786-dotcom/claude-to-wordpress-native products add --name "Mug" --price 12.00 --image-url https://images.unsplash.com/... --package ./ctw-package.json',
+      "  npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media",
       "",
       "Commands:",
       "  skill              Install the Claude Code skill into .claude/skills/ctw-native",
       "  plugin-zip         Write ctw-native.zip (WordPress uploadable plugin) to the project dir",
+      "  media fetch        Download an https image (Unsplash/Pexels/direct) into ./media",
+      "  media sync         Download all package media[].sourceUrl files that are missing",
+      "  products add       Add a dummy WooCommerce product (max " + String(MAX_DUMMY_PRODUCTS) + ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
       "  validate           Validate a ctw-package.json without writing a ZIP",
-      "  generate           Emit a Hello Elementor child theme ZIP",
+      "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
       ""
@@ -5385,11 +5684,11 @@ function readFlag(args, name) {
 function hasFlag(args, name) {
   return args.includes(name);
 }
-function slugify(name) {
+function slugify2(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
 }
 function runSkill(args) {
-  const root = resolve4(readFlag(args, "--cwd") ?? process.cwd());
+  const root = resolve6(readFlag(args, "--cwd") ?? process.cwd());
   const result = installSkill(root);
   process.stdout.write(
     result.created ? `Installed Claude Code skill at ${result.targetDir}
@@ -5402,8 +5701,8 @@ function runSkill(args) {
   return 0;
 }
 function runPluginZip(args) {
-  const cwd = resolve4(readFlag(args, "--cwd") ?? process.cwd());
-  const outPath = resolve4(cwd, readFlag(args, "--out") ?? "ctw-native.zip");
+  const cwd = resolve6(readFlag(args, "--cwd") ?? process.cwd());
+  const outPath = resolve6(cwd, readFlag(args, "--out") ?? "ctw-native.zip");
   try {
     const result = packPluginZip({ outputPath: outPath });
     process.stdout.write(
@@ -5421,10 +5720,130 @@ function runPluginZip(args) {
     return 1;
   }
 }
+async function runMedia(args) {
+  const [sub, ...rest] = args;
+  if (sub === "fetch") {
+    return runMediaFetch(rest);
+  }
+  if (sub === "sync") {
+    return runMediaSync(rest);
+  }
+  process.stderr.write("Usage: media fetch|sync \u2026\n");
+  return 1;
+}
+async function runMediaFetch(args) {
+  const url = readFlag(args, "--url");
+  const id = readFlag(args, "--id");
+  if (url === void 0 || id === void 0) {
+    process.stderr.write("Missing --url or --id.\n");
+    return 1;
+  }
+  const cwd = resolve6(readFlag(args, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve6(cwd, readFlag(args, "--media") ?? "media");
+  const packagePath = readFlag(args, "--package");
+  const alt = readFlag(args, "--alt");
+  const relativePath2 = readFlag(args, "--path");
+  try {
+    const result = await fetchIntoPackage({
+      url,
+      id,
+      mediaRoot,
+      ...alt !== void 0 ? { alt } : {},
+      ...relativePath2 !== void 0 ? { relativePath: relativePath2 } : {},
+      ...packagePath !== void 0 ? { packagePath: resolve6(cwd, packagePath) } : {}
+    });
+    process.stdout.write(`Downloaded ${result.relativePath} \u2192 ${mediaRoot}
+`);
+    if (result.packagePath !== void 0) {
+      process.stdout.write(`Updated media[] in ${result.packagePath}
+`);
+    }
+    process.stdout.write(
+      `In Elementor trees use settings.image = { "id": "${id}", "url": "" }
+`
+    );
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`media fetch failed: ${message}
+`);
+    return 1;
+  }
+}
+async function runMediaSync(args) {
+  const packagePath = readFlag(args, "--package");
+  if (packagePath === void 0) {
+    process.stderr.write("Missing --package.\n");
+    return 1;
+  }
+  const cwd = resolve6(readFlag(args, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve6(cwd, readFlag(args, "--media") ?? "media");
+  const force = args.includes("--force");
+  try {
+    const pkg = readPackageFromFile(resolve6(cwd, packagePath));
+    const result = await syncPackageMedia({ pkg, mediaRoot, force });
+    process.stdout.write(
+      `Media sync: downloaded ${String(result.downloaded.length)}, skipped ${String(result.skipped.length)}
+`
+    );
+    for (const path of result.downloaded) {
+      process.stdout.write(`  + ${path}
+`);
+    }
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`media sync failed: ${message}
+`);
+    return 1;
+  }
+}
+async function runProducts(args) {
+  const [sub, ...rest] = args;
+  if (sub !== "add") {
+    process.stderr.write("Usage: products add --name \u2026 --price \u2026 --image-url \u2026 --package \u2026\n");
+    return 1;
+  }
+  const name = readFlag(rest, "--name");
+  const price = readFlag(rest, "--price");
+  const imageUrl = readFlag(rest, "--image-url");
+  const packagePath = readFlag(rest, "--package");
+  if (name === void 0 || price === void 0 || imageUrl === void 0 || packagePath === void 0) {
+    process.stderr.write("Missing --name, --price, --image-url, or --package.\n");
+    return 1;
+  }
+  const cwd = resolve6(readFlag(rest, "--cwd") ?? process.cwd());
+  const mediaRoot = resolve6(cwd, readFlag(rest, "--media") ?? "media");
+  const description = readFlag(rest, "--description");
+  const imageMediaId = readFlag(rest, "--image-id");
+  try {
+    const result = await addDummyProduct({
+      packagePath: resolve6(cwd, packagePath),
+      mediaRoot,
+      name,
+      price,
+      imageUrl,
+      ...description !== void 0 ? { description } : {},
+      ...imageMediaId !== void 0 ? { imageMediaId } : {}
+    });
+    process.stdout.write(
+      `Added product "${result.product.name}" (${String(result.count)}/${String(MAX_DUMMY_PRODUCTS)})
+`
+    );
+    process.stdout.write(`Image ${result.mediaId} \u2192 ${result.mediaPath}
+`);
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`products add failed: ${message}
+`);
+    return 1;
+  }
+}
 function runInit(args) {
-  const root = resolve4(readFlag(args, "--cwd") ?? process.cwd());
+  const root = resolve6(readFlag(args, "--cwd") ?? process.cwd());
   const name = readFlag(args, "--name") ?? "Site Child";
-  const slug2 = readFlag(args, "--slug") ?? slugify(name);
+  const slug2 = readFlag(args, "--slug") ?? slugify2(name);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug2)) {
     process.stderr.write("Invalid --slug. Use lowercase kebab-case.\n");
     return 1;
@@ -5442,7 +5861,7 @@ function runInit(args) {
     process.stdout.write("WooCommerce enabled in package (plugins includes woocommerce).\n");
   }
   process.stdout.write(
-    "Next: edit ctw-package.json (or ask Claude Code), then run generate.\n"
+    "Next: add images (media fetch or copy into media/), edit ctw-package.json, then generate.\n"
   );
   return 0;
 }
@@ -5453,7 +5872,7 @@ function runValidate(args) {
     return 1;
   }
   try {
-    const pkg = readPackageFromFile(resolve4(packagePath));
+    const pkg = readPackageFromFile(resolve6(packagePath));
     process.stdout.write(
       `Valid package for theme ${pkg.theme.slug} (${pkg.pages.length} pages, woo=${String(pkg.woocommerce.enabled)})
 `
@@ -5466,7 +5885,7 @@ function runValidate(args) {
     return 1;
   }
 }
-function runGenerate(args) {
+async function runGenerate(args) {
   const packagePath = readFlag(args, "--package");
   const outPath = readFlag(args, "--out");
   const mediaRoot = readFlag(args, "--media");
@@ -5475,10 +5894,26 @@ function runGenerate(args) {
     return 1;
   }
   try {
+    const resolvedPackage = resolve6(packagePath);
+    const pkg = readPackageFromFile(resolvedPackage);
+    const resolvedMedia = mediaRoot !== void 0 ? resolve6(mediaRoot) : pkg.media.length > 0 ? resolve6("media") : void 0;
+    if (pkg.media.length > 0 && resolvedMedia === void 0) {
+      process.stderr.write("Package declares media but --media was not set.\n");
+      return 1;
+    }
+    if (resolvedMedia !== void 0 && pkg.media.length > 0) {
+      const sync = await syncPackageMedia({ pkg, mediaRoot: resolvedMedia });
+      if (sync.downloaded.length > 0) {
+        process.stdout.write(
+          `Fetched ${String(sync.downloaded.length)} media file(s) into ${resolvedMedia}
+`
+        );
+      }
+    }
     const result = generateChildThemeZip({
-      packagePath: resolve4(packagePath),
-      outputPath: resolve4(outPath),
-      ...mediaRoot !== void 0 ? { mediaRoot: resolve4(mediaRoot) } : {}
+      packagePath: resolvedPackage,
+      outputPath: resolve6(outPath),
+      ...resolvedMedia !== void 0 ? { mediaRoot: resolvedMedia } : {}
     });
     process.stdout.write(
       `Wrote ${result.outputPath} for theme ${result.package.theme.slug}
@@ -5495,7 +5930,7 @@ function runGenerate(args) {
     return 1;
   }
 }
-function main(argv) {
+async function main(argv) {
   if (argv.includes("--help") || argv.includes("-h") || argv.length === 0) {
     printHelp();
     return 0;
@@ -5506,6 +5941,10 @@ function main(argv) {
       return runSkill(rest);
     case "plugin-zip":
       return runPluginZip(rest);
+    case "media":
+      return runMedia(rest);
+    case "products":
+      return runProducts(rest);
     case "init":
       return runInit(rest);
     case "validate":
@@ -5519,4 +5958,5 @@ function main(argv) {
       return 1;
   }
 }
-process.exitCode = main(process.argv.slice(2));
+var code = await main(process.argv.slice(2));
+process.exitCode = code;

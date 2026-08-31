@@ -29,7 +29,7 @@ final class Import_Guard {
 	/**
 	 * Mark import complete and store created IDs for wipe.
 	 *
-	 * @param array{pages?:list<int>,forms?:list<int>,snippets?:list<int>,templates?:list<int>} $ids IDs.
+	 * @param array{pages?:list<int>,forms?:list<int>,snippets?:list<int>,templates?:list<int>,products?:list<int>} $ids IDs.
 	 */
 	public static function mark_done( array $ids ): void {
 		update_option( self::OPTION_DONE, true, false );
@@ -37,7 +37,7 @@ final class Import_Guard {
 	}
 
 	/**
-	 * @return array{pages:list<int>,forms:list<int>,snippets:list<int>,templates:list<int>}
+	 * @return array{pages:list<int>,forms:list<int>,snippets:list<int>,templates:list<int>,products:list<int>}
 	 */
 	public static function created_ids(): array {
 		$raw = get_option( self::OPTION_CREATED, array() );
@@ -49,6 +49,7 @@ final class Import_Guard {
 			'forms'     => self::int_list( $raw['forms'] ?? array() ),
 			'snippets'  => self::int_list( $raw['snippets'] ?? array() ),
 			'templates' => self::int_list( $raw['templates'] ?? array() ),
+			'products'  => self::int_list( $raw['products'] ?? array() ),
 		);
 	}
 
@@ -59,7 +60,7 @@ final class Import_Guard {
 	 */
 	public static function wipe() {
 		$ids = self::created_ids();
-		foreach ( array( 'pages', 'forms', 'snippets', 'templates' ) as $group ) {
+		foreach ( array( 'pages', 'forms', 'snippets', 'templates', 'products' ) as $group ) {
 			foreach ( $ids[ $group ] as $post_id ) {
 				wp_delete_post( $post_id, true );
 			}

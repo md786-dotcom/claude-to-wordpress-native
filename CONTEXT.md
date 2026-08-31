@@ -22,4 +22,4 @@ Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and Elements
 
 ## Stack install
 
-Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`).
+Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`). Shop packages may declare branded shop/cart/checkout Elementor pages, up to four dummy products, and WPCode snippets including `php`.

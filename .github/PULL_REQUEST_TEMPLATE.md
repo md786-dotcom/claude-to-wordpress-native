@@ -16,7 +16,7 @@ State the reason for the change in one short sentence.
 
 - [ ] Each source file has fewer than 500 lines of code.
 - [ ] TypeScript has no `any` or bare `unknown` outside Zod parse boundaries.
-- [ ] PHP snippets from Claude remain rejected.
+- [ ] PHP snippets are allowed only as WPCode `type: "php"` and documented in the skill.
 - [ ] WooCommerce installs only when `woocommerce.enabled` is true.
 - [ ] PR comments use ASD-STE100 plain language.
 

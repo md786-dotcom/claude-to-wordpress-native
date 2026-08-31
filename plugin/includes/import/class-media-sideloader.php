@@ -62,6 +62,16 @@ final class Media_Sideloader {
 	}
 
 	/**
+	 * Attachment for a package media id, or null.
+	 *
+	 * @param string $media_id Package media id.
+	 * @return array{id:int,url:string}|null
+	 */
+	public function attachment_for( string $media_id ) {
+		return $this->map[ $media_id ] ?? null;
+	}
+
+	/**
 	 * Rewrite attachment-like settings in an element tree.
 	 *
 	 * @param list<array<string,mixed>> $elements Tree.

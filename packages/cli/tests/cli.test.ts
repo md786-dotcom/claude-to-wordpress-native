@@ -40,6 +40,7 @@ describe("ctw CLI", () => {
     assert.match(result.stdout, /plugin-zip/);
     assert.match(result.stdout, /--woocommerce/);
     assert.match(result.stdout, /media fetch/);
+    assert.match(result.stdout, /products add/);
   });
 
   it("writes plugin-zip into the project directory", () => {

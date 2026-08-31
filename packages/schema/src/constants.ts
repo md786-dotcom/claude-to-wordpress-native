@@ -55,6 +55,7 @@ export const SNIPPET_TYPES = [
   "css",
   "js",
   "html",
+  "php",
 ] as const;
 
 export type SnippetType = (typeof SNIPPET_TYPES)[number];
