@@ -1,22 +1,45 @@
 {
   "name": "claude-to-wordpress-native",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "Claude Code toolchain that emits Hello Elementor child themes with Elementor Free pages",
   "license": "GPL-2.0-or-later",
+  "bin": {
+    "ctw": "./packages/cli/dist/bin/ctw.js",
+    "claude-to-wordpress-native": "./packages/cli/dist/bin/ctw.js"
+  },
+  "files": [
+    "packages/cli/dist",
+    "packages/cli/skill-assets",
+    "packages/cli/package.json",
+    "packages/generate/dist",
+    "packages/generate/package.json",
+    "packages/schema/dist",
+    "packages/schema/package.json",
+    "scripts",
+    "skills",
+    "theme-kit",
+    "plugin",
+    "fixtures",
+    "NOTICE",
+    "LICENSE",
+    "README.md"
+  ],
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @ctw/schema && npm run build -w @ctw/generate",
-    "test": "npm run test -w @ctw/schema && npm run test -w @ctw/generate",
-    "test:coverage": "npm run test:coverage -w @ctw/schema && npm run test:coverage -w @ctw/generate",
+    "prepare": "npm run build",
+    "build": "npm run build -w @ctw/schema && npm run build -w @ctw/generate && npm run build -w @ctw/cli",
+    "test": "npm run test -w @ctw/schema && npm run test -w @ctw/generate && npm run test -w @ctw/cli",
+    "test:coverage": "npm run test:coverage -w @ctw/schema && npm run test:coverage -w @ctw/generate && npm run test:coverage -w @ctw/cli",
     "lint": "eslint \"packages/*/src/**/*.ts\" \"packages/*/tests/**/*.ts\"",
-    "typecheck": "tsc -b packages/schema packages/generate",
+    "typecheck": "tsc -b packages/schema packages/generate packages/cli",
     "knip": "knip",
     "stryker": "npm run stryker -w @ctw/schema && npm run stryker -w @ctw/generate",
-    "ctw": "node packages/generate/dist/bin/ctw.js"
+    "ctw": "node packages/cli/dist/bin/ctw.js",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
@@ -29,5 +52,20 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "keywords": [
+    "claude-code",
+    "wordpress",
+    "elementor",
+    "hello-elementor",
+    "npx"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/md786-dotcom/claude-to-wordpress-native.git"
+  },
+  "bugs": {
+    "url": "https://github.com/md786-dotcom/claude-to-wordpress-native/issues"
+  },
+  "homepage": "https://github.com/md786-dotcom/claude-to-wordpress-native#readme"
 }

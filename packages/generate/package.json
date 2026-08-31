@@ -4,7 +4,7 @@
   "license": "GPL-2.0-or-later",
   "type": "module",
   "bin": {
-    "ctw": "./dist/bin/ctw.js"
+    "ctw-generate": "./dist/bin/ctw.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

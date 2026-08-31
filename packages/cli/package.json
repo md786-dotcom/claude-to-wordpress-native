@@ -1,0 +1,51 @@
+{
+  "name": "@ctw/cli",
+  "version": "0.1.0",
+  "description": "Claude Code CLI for Claude-to-WordPress Native: skill install, init, and Hello Elementor child ZIP generate",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "bin": {
+    "ctw": "./dist/bin/ctw.js",
+    "claude-to-wordpress-native": "./dist/bin/ctw.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "skill-assets",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/chmod-cli.mjs && node ../../scripts/copy-skill-assets.mjs",
+    "test": "npm run build && node --import tsx --test tests/**/*.test.ts",
+    "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test-coverage-include=\"**/packages/cli/src/**\" --test-coverage-include=\"**/packages/cli/dist/**\" --test-coverage-exclude=\"**/packages/cli/tests/**\" --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "@ctw/generate": "0.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude-code",
+    "wordpress",
+    "elementor",
+    "hello-elementor",
+    "ctw"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/md786-dotcom/claude-to-wordpress-native.git",
+    "directory": "packages/cli"
+  }
+}
