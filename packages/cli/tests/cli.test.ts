@@ -37,6 +37,16 @@ describe("ctw CLI", () => {
     const result = run(["--help"]);
     assert.equal(result.status, 0);
     assert.match(result.stdout, /npx -y github:md786-dotcom\/claude-to-wordpress-native skill/);
+    assert.match(result.stdout, /plugin-zip/);
+  });
+
+  it("writes plugin-zip into the project directory", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "ctw-plugin-cli-"));
+    dirs.push(cwd);
+    const result = run(["plugin-zip", "--cwd", cwd]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(existsSync(join(cwd, "ctw-native.zip")));
+    assert.match(result.stdout, /Wrote /);
   });
 
   it("rejects unknown commands", () => {

@@ -12,6 +12,14 @@ The package is **not on the npm registry yet**. Install and run from GitHub **ma
 npx -y github:md786-dotcom/claude-to-wordpress-native skill
 ```
 
+Write an uploadable WordPress plugin ZIP into the current project:
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
+```
+
+This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload Plugin**.
+
 Scaffold a starter package, media folder, and skill:
 
 ```bash
@@ -55,7 +63,7 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 
 ## Web-dev flow
 
-1. Install and activate the `ctw-native` plugin.
+1. Run `npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip` and upload `ctw-native.zip` (activate the plugin).
 2. In Claude Code, run the GitHub `npx` skill (or `init`), then generate a site ZIP.
 3. Upload and activate the child theme (`Template: hello-elementor`).
 4. Open **CTW Native → Setup**. Install the stack (WooCommerce only if the package enables it). Import once.

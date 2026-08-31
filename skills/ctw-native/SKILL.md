@@ -24,6 +24,12 @@ npx -y github:md786-dotcom/claude-to-wordpress-native init --name "Acme Child" -
 Do **not** run `npx claude-to-wordpress-native` — that name 404s on the public registry until publish.
 Do **not** pin the old feature branch; use `main`.
 
+Write the WordPress plugin ZIP (upload under Plugins → Add New → Upload Plugin):
+
+```bash
+npx -y github:md786-dotcom/claude-to-wordpress-native plugin-zip
+```
+
 ## Output
 
 1. Write a valid `ctw-package.json` (version 1).
@@ -34,7 +40,7 @@ Do **not** pin the old feature branch; use `main`.
 npx -y github:md786-dotcom/claude-to-wordpress-native generate --package ./ctw-package.json --out ./<theme-slug>.zip --media ./media
 ```
 
-4. Tell the web developer to: install `ctw-native`, upload the child ZIP, open **CTW Native → Setup**, install stack, import once.
+4. Tell the web developer to: run `plugin-zip`, upload `ctw-native.zip`, upload the child ZIP, open **CTW Native → Setup**, install stack, import once.
 
 ## Package rules
 
