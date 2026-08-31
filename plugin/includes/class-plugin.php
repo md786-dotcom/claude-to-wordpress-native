@@ -44,9 +44,10 @@ final class Plugin {
 	}
 
 	/**
-	 * Load admin UI after plugins load.
+	 * Load cache purge hooks and admin UI after plugins load.
 	 */
 	public function boot(): void {
+		Cache\Cache_Purger::register();
 		if ( is_admin() ) {
 			$admin = new Admin\Setup_Page();
 			$admin->register();

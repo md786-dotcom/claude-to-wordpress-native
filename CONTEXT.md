@@ -23,3 +23,7 @@ Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and Elements
 ## Stack install
 
 Installing Hello Elementor (parent) and declared free plugins from wordpress.org via the setup UI. WooCommerce is included when the package sets `woocommerce.enabled`, or when the Setup **Install WooCommerce** switch is on (`ctw_native_install_woocommerce`). Shop packages may declare branded shop/cart/checkout Elementor pages, up to four dummy products, and WPCode snippets including `php`.
+
+## Cache purge
+
+`CTW_Native\Cache\Cache_Purger` hooks `after_switch_theme` (any theme) and also runs after a successful package import. It flushes object cache, theme cache, rewrite rules, Elementor file CSS when present, and common page-cache plugins so the newly activated theme is what visitors see.

@@ -84,6 +84,8 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 4. Open **CTW Native → Setup**. Use the **Install WooCommerce** switch when you need a shop (auto-on if the package enables it). Install the stack. Import once.
 5. Hand the site to the client.
 
+Activating any theme (CTW child or not) automatically purges WordPress, Elementor, and common page caches so the new theme is shown.
+
 Re-import is refused while generated pages exist. Wipe first to regenerate. Wipe does not delete Customizer Additional CSS.
 
 ## Media
