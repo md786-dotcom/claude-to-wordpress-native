@@ -15,9 +15,18 @@
         "location": "menu-1",
         "name": "Primary",
         "items": [
-          { "title": "Home", "pageSlug": "home" },
-          { "title": "Services", "pageSlug": "services" },
-          { "title": "Contact", "pageSlug": "contact" }
+          {
+            "title": "Home",
+            "pageSlug": "home"
+          },
+          {
+            "title": "Services",
+            "pageSlug": "services"
+          },
+          {
+            "title": "Contact",
+            "pageSlug": "contact"
+          }
         ]
       }
     ]
@@ -37,7 +46,8 @@
           "isInner": false,
           "settings": {
             "flex_direction": "column",
-            "flex_align_items": "center"
+            "flex_align_items": "center",
+            "content_width": "full"
           },
           "elements": [
             {
@@ -68,7 +78,9 @@
               "isInner": false,
               "settings": {
                 "text": "Contact us",
-                "link": { "url": "/contact/" }
+                "link": {
+                  "url": "/contact/"
+                }
               },
               "elements": []
             }
@@ -87,14 +99,18 @@
           "elType": "container",
           "widgetType": null,
           "isInner": false,
-          "settings": {},
+          "settings": {
+            "content_width": "full"
+          },
           "elements": [
             {
               "id": "svc002",
               "elType": "widget",
               "widgetType": "heading",
               "isInner": false,
-              "settings": { "title": "Services" },
+              "settings": {
+                "title": "Services"
+              },
               "elements": []
             },
             {
@@ -104,9 +120,15 @@
               "isInner": false,
               "settings": {
                 "icon_list": [
-                  { "text": "Emergency repairs" },
-                  { "text": "Water heater install" },
-                  { "text": "Drain cleaning" }
+                  {
+                    "text": "Emergency repairs"
+                  },
+                  {
+                    "text": "Water heater install"
+                  },
+                  {
+                    "text": "Drain cleaning"
+                  }
                 ]
               },
               "elements": []
@@ -126,14 +148,18 @@
           "elType": "container",
           "widgetType": null,
           "isInner": false,
-          "settings": {},
+          "settings": {
+            "content_width": "full"
+          },
           "elements": [
             {
               "id": "ctc002",
               "elType": "widget",
               "widgetType": "heading",
               "isInner": false,
-              "settings": { "title": "Contact" },
+              "settings": {
+                "title": "Contact"
+              },
               "elements": []
             },
             {
@@ -159,14 +185,18 @@
         "elType": "container",
         "widgetType": null,
         "isInner": false,
-        "settings": {},
+        "settings": {
+          "content_width": "full"
+        },
         "elements": [
           {
             "id": "hdr002",
             "elType": "widget",
             "widgetType": "heading",
             "isInner": false,
-            "settings": { "title": "Clearflow Plumbing" },
+            "settings": {
+              "title": "Clearflow Plumbing"
+            },
             "elements": []
           }
         ]
@@ -181,7 +211,9 @@
         "elType": "container",
         "widgetType": null,
         "isInner": false,
-        "settings": {},
+        "settings": {
+          "content_width": "full"
+        },
         "elements": [
           {
             "id": "ftr002",
@@ -189,7 +221,7 @@
             "widgetType": "text-editor",
             "isInner": false,
             "settings": {
-              "editor": "<p>© Clearflow Plumbing</p>"
+              "editor": "<p>\u00a9 Clearflow Plumbing</p>"
             },
             "elements": []
           }
@@ -202,9 +234,27 @@
       "title": "Contact",
       "slug": "contact",
       "fields": [
-        { "name": "name", "label": "Name", "type": "text", "required": true, "options": [] },
-        { "name": "email", "label": "Email", "type": "email", "required": true, "options": [] },
-        { "name": "message", "label": "Message", "type": "textarea", "required": true, "options": [] }
+        {
+          "name": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "options": []
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true,
+          "options": []
+        },
+        {
+          "name": "message",
+          "label": "Message",
+          "type": "textarea",
+          "required": true,
+          "options": []
+        }
       ]
     }
   ],

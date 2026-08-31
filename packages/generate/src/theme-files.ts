@@ -6,6 +6,7 @@ import {
   parsePackageJson,
   type CtwPackage,
 } from "@ctw/schema";
+import { ensurePackageFullWidth } from "./full-width.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -151,10 +152,10 @@ export function functionsPhp(pkg: CtwPackage): string {
 }
 
 export function normalizePlugins(pkg: CtwPackage): CtwPackage {
-  return {
+  return ensurePackageFullWidth({
     ...pkg,
     plugins: declaredPlugins(pkg),
-  };
+  });
 }
 
 export function readPackageFromJsonText(text: string): CtwPackage {

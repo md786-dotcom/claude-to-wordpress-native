@@ -4311,6 +4311,67 @@ function declaredPlugins(pkg) {
   return list;
 }
 
+// packages/generate/dist/full-width.js
+function ensureContainerFullWidth(settings) {
+  return {
+    ...settings,
+    content_width: "full"
+  };
+}
+function ensureTreeFullWidth(elements) {
+  return elements.map((node) => ensureNodeFullWidth(node));
+}
+function ensureNodeFullWidth(node) {
+  const next = {
+    ...node,
+    elements: node.elements.map((child) => ensureNodeFullWidth(child))
+  };
+  if (node.elType === "container") {
+    next.settings = ensureContainerFullWidth(node.settings);
+  }
+  return next;
+}
+function ensurePackageFullWidth(pkg) {
+  const pages = pkg.pages.map((page) => ({
+    ...page,
+    elements: ensureTreeFullWidth(page.elements)
+  }));
+  const header = pkg.header === void 0 ? void 0 : { ...pkg.header, elements: ensureTreeFullWidth(pkg.header.elements) };
+  const footer = pkg.footer === void 0 ? void 0 : { ...pkg.footer, elements: ensureTreeFullWidth(pkg.footer.elements) };
+  const wooPages = pkg.woocommerce.pages;
+  const nextWooPages = {
+    ...wooPages,
+    ...wooPages.shop !== void 0 ? {
+      shop: {
+        ...wooPages.shop,
+        elements: ensureTreeFullWidth(wooPages.shop.elements)
+      }
+    } : {},
+    ...wooPages.cart !== void 0 ? {
+      cart: {
+        ...wooPages.cart,
+        elements: ensureTreeFullWidth(wooPages.cart.elements)
+      }
+    } : {},
+    ...wooPages.checkout !== void 0 ? {
+      checkout: {
+        ...wooPages.checkout,
+        elements: ensureTreeFullWidth(wooPages.checkout.elements)
+      }
+    } : {}
+  };
+  return {
+    ...pkg,
+    pages,
+    ...header !== void 0 ? { header } : {},
+    ...footer !== void 0 ? { footer } : {},
+    woocommerce: {
+      ...pkg.woocommerce,
+      pages: nextWooPages
+    }
+  };
+}
+
 // packages/generate/dist/theme-files.js
 var here = dirname(fileURLToPath(import.meta.url));
 function loadThemeKitRoot() {
@@ -4444,10 +4505,10 @@ function functionsPhp(pkg) {
   ].join("\n");
 }
 function normalizePlugins(pkg) {
-  return {
+  return ensurePackageFullWidth({
     ...pkg,
     plugins: declaredPlugins(pkg)
-  };
+  });
 }
 function readPackageFromJsonText(text) {
   const parsed = JSON.parse(text);
@@ -5611,7 +5672,10 @@ function starterPackageJson(themeSlug, themeName, wooEnabled) {
             elType: "container",
             widgetType: null,
             isInner: false,
-            settings: {},
+            settings: {
+              content_width: "full",
+              flex_direction: "column"
+            },
             elements: [
               {
                 id: "home002",

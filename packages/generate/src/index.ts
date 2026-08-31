@@ -1,5 +1,10 @@
 export { generateChildThemeZip, type GenerateOptions } from "./generate.js";
 export {
+  ensureContainerFullWidth,
+  ensurePackageFullWidth,
+  ensureTreeFullWidth,
+} from "./full-width.js";
+export {
   functionsPhp,
   loadThemeKitRoot,
   normalizePlugins,

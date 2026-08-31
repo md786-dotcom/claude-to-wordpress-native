@@ -125,7 +125,10 @@ function starterPackageJson(themeSlug: string, themeName: string, wooEnabled: bo
             elType: "container",
             widgetType: null,
             isInner: false,
-            settings: {},
+            settings: {
+              content_width: "full",
+              flex_direction: "column",
+            },
             elements: [
               {
                 id: "home002",

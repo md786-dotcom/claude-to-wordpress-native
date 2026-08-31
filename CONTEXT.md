@@ -18,7 +18,7 @@ The plugin import path that reads the active child theme package once, sideloads
 
 ## Elementor persistence
 
-Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and ElementsKit templates both go through `Document_Writer` after Free tree validation.
+Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and ElementsKit templates both go through `Document_Writer` after Free tree validation. Containers are forced to Elementor `content_width: full` (never boxed).
 
 ## Stack install
 

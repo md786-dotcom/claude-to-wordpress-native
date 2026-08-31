@@ -15,10 +15,8 @@ describe("skill assets", () => {
     const markdown = readSkillMarkdown();
     assert.match(markdown, /ctw-native/);
     assert.match(markdown, /claude-to-wordpress-native/);
-    assert.match(markdown, /--woocommerce/);
-    assert.match(markdown, /Install WooCommerce/);
-    assert.match(markdown, /products add/);
-    assert.match(markdown, /type: "php"|`php`/);
+    assert.match(markdown, /content_width/);
+    assert.match(markdown, /full width only|never boxed/i);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
   });
 });
@@ -61,10 +59,12 @@ describe("initProject", () => {
       theme: { slug: string };
       woocommerce: { enabled: boolean };
       plugins: string[];
+      pages: Array<{ elements: Array<{ settings?: { content_width?: string } }> }>;
     };
     assert.equal(pkg.theme.slug, "acme-child");
     assert.equal(pkg.woocommerce.enabled, false);
     assert.ok(!pkg.plugins.includes("woocommerce"));
+    assert.equal(pkg.pages[0]?.elements[0]?.settings?.content_width, "full");
   });
 
   it("scaffolds a WooCommerce shop package with --woocommerce options", () => {

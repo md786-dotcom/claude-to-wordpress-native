@@ -62,13 +62,30 @@ When the brief is a shop or ecommerce site:
 ### Branding (colors, fonts, layouts)
 
 1. Set `theme.colors` (`primary`, `secondary`, `text`, `background`) and `theme.typography` (`headingFont`, `bodyFont`). Generate emits CSS variables and WooCommerce surface styles into the child theme.
-2. Build **shop / cart / checkout** as Free Elementor trees under `woocommerce.pages.*`. Use `heading`, `text-editor`, `container`, `button`, `image`, and **`shortcode`** widgets:
+2. **Full width only — never boxed.** Every Elementor `container` must set `"content_width": "full"`. Omitting it makes Elementor Free default to boxed. Do not set `"content_width": "boxed"` or rely on `boxed_width`. Pages already use the `elementor_header_footer` (Elementor Full Width) template.
+3. Build **shop / cart / checkout** as Free Elementor trees under `woocommerce.pages.*`. Use `heading`, `text-editor`, `container`, `button`, `image`, and **`shortcode`** widgets:
    - Shop: `[products limit="4" columns="2"]`
    - Cart: `[woocommerce_cart]`
    - Checkout: `[woocommerce_checkout]`
-3. Match layout spacing, headings, and copy to the project brief. Never use Woo Elementor widgets, Theme Builder, or Pro.
-4. **Single product + product archives** use the child theme PHP templates (`woocommerce/single-product.php`, `archive-product.php`) styled by the emitted tokens. Do not invent Pro single-product builders.
-5. If you omit a `woocommerce.pages` entry, Setup import creates a default heading + shortcode page and assigns the WooCommerce page option.
+4. Match layout spacing, headings, and copy to the project brief. Never use Woo Elementor widgets, Theme Builder, or Pro.
+5. **Single product + product archives** use the child theme PHP templates (`woocommerce/single-product.php`, `archive-product.php`) styled by the emitted tokens. Do not invent Pro single-product builders.
+6. If you omit a `woocommerce.pages` entry, Setup import creates a default heading + shortcode page and assigns the WooCommerce page option.
+
+Example outer container:
+
+```json
+{
+  "id": "home001",
+  "elType": "container",
+  "widgetType": null,
+  "isInner": false,
+  "settings": {
+    "content_width": "full",
+    "flex_direction": "column"
+  },
+  "elements": []
+}
+```
 
 ### Dummy products (max 4)
 
@@ -112,6 +129,7 @@ npx -y github:md786-dotcom/claude-to-wordpress-native generate \
 - Parent: Hello Elementor (`Template: hello-elementor`).
 - Exactly one `isFrontPage: true`.
 - Elementor Free allowlist only. Forms → MetForm. Header/footer → ElementsKit.
+- Containers: always `"content_width": "full"` (never boxed).
 - Brochure: `woocommerce.enabled: false` and omit woo from `plugins`, products, and woo pages.
 
 ## Client editing
