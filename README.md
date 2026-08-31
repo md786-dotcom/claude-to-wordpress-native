@@ -12,6 +12,8 @@ Claude Code only. Claude does not edit the site after install.
 npx -y claude-to-wordpress-native skill
 ```
 
+This installs the skill into `.claude/skills/ctw-native`. In Claude Code, invoke it with `/ctw-native`.
+
 Write an uploadable WordPress plugin ZIP into the current project:
 
 ```bash
@@ -59,7 +61,7 @@ npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
-In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. The skill drives `ctw-package.json` and the generate command.
+In Claude Code, run `/ctw-native` after `skill` or `init`. The skill drives `ctw-package.json` and the generate command.
 
 ## What you get
 
@@ -67,7 +69,7 @@ In Claude Code, ask for a WordPress / Elementor site after `skill` or `init`. Th
 | --- | --- |
 | `plugin/` (`ctw-native`) | One-click stack install + one-shot import |
 | Child theme ZIP from `ctw generate` | Hello child + `ctw-package.json` + media |
-| Claude Code skill | `.claude/skills/ctw-native` via `npx … skill` |
+| Claude Code skill | `.claude/skills/ctw-native` via `npx … skill`; invoke with `/ctw-native` |
 
 ## Client editing surfaces
 
