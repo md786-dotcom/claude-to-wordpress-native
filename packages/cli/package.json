@@ -22,13 +22,13 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node ../../scripts/chmod-cli.mjs && node ../../scripts/copy-skill-assets.mjs",
+    "build": "tsc -p tsconfig.json && node ../../scripts/chmod-cli.mjs && node ../../scripts/copy-skill-assets.mjs && node ../../scripts/bundle-cli.mjs",
     "test": "npm run build && node --import tsx --test tests/**/*.test.ts",
-    "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test-coverage-include=\"**/packages/cli/src/**\" --test-coverage-include=\"**/packages/cli/dist/**\" --test-coverage-exclude=\"**/packages/cli/tests/**\" --test tests/**/*.test.ts"
+    "test:coverage": "npm run build && node --import tsx --experimental-test-coverage --test-coverage-lines=85 --test-coverage-include=\"**/packages/cli/src/**\" --test-coverage-include=\"**/packages/cli/dist/**\" --test-coverage-exclude=\"**/packages/cli/tests/**\" --test-coverage-exclude=\"**/dist/ctw.mjs\" --test tests/**/*.test.ts"
   },
   "dependencies": {
-    "@ctw/generate": "0.1.0",
-    "@ctw/schema": "0.1.0"
+    "@ctw/generate": "file:../generate",
+    "@ctw/schema": "file:../schema"
   },
   "devDependencies": {
     "tsx": "^4.19.3",

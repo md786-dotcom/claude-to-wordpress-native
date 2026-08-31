@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -9,8 +9,21 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Locate theme-kit/ from unbundled package paths or the root CLI bundle.
+ */
 export function loadThemeKitRoot(): string {
-  return join(here, "../../../theme-kit");
+  const candidates = [
+    join(here, "../../../theme-kit"),
+    join(here, "../theme-kit"),
+    join(here, "../../theme-kit"),
+  ];
+  for (const dir of candidates) {
+    if (existsSync(join(dir, "style.css"))) {
+      return dir;
+    }
+  }
+  throw new Error("theme-kit not found next to the CLI package.");
 }
 
 export function styleCss(pkg: CtwPackage): string {

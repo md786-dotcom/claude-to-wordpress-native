@@ -6,15 +6,15 @@ import { CORE_PLUGIN_SLUGS } from "@ctw/schema";
 const here = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Resolve the @ctw/cli package root (works from src/ or dist/).
+ * Resolve the repo or @ctw/cli package root (src, dist, or root bundle).
  */
 function packageRoot(): string {
   let dir = here;
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < 8; i += 1) {
     const pkgPath = join(dir, "package.json");
     if (existsSync(pkgPath)) {
       const name = (JSON.parse(readFileSync(pkgPath, "utf8")) as { name?: string }).name;
-      if (name === "@ctw/cli") {
+      if (name === "@ctw/cli" || name === "claude-to-wordpress-native") {
         return dir;
       }
     }
@@ -28,13 +28,16 @@ function packageRoot(): string {
  */
 export function skillAssetsDir(): string {
   const root = packageRoot();
-  const packaged = join(root, "skill-assets");
-  if (existsSync(join(packaged, "SKILL.md"))) {
-    return packaged;
-  }
-  const fromRepo = join(root, "../../skills/ctw-native");
-  if (existsSync(join(fromRepo, "SKILL.md"))) {
-    return fromRepo;
+  const candidates = [
+    join(root, "skill-assets"),
+    join(root, "packages/cli/skill-assets"),
+    join(root, "skills/ctw-native"),
+    join(root, "../../skills/ctw-native"),
+  ];
+  for (const dir of candidates) {
+    if (existsSync(join(dir, "SKILL.md"))) {
+      return dir;
+    }
   }
   throw new Error(
     "CTW skill assets not found. Reinstall the package or run npm run build in the monorepo.",

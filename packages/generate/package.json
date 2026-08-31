@@ -21,7 +21,7 @@
     "stryker": "stryker run"
   },
   "dependencies": {
-    "@ctw/schema": "0.1.0",
+    "@ctw/schema": "file:../schema",
     "fflate": "^0.8.2"
   },
   "devDependencies": {
