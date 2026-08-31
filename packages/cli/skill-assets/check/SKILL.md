@@ -28,7 +28,9 @@ From a local clone: `npm run ctw -- check --package ./ctw-package.json`.
 
 ## CSS rules (do not “escape” combinators)
 
-WPCode **css** snippets print as real CSS. The child combinator `>` is valid. **Do not** “fix” `.grid-2 > .e-con-inner` by turning `>` into `\>`, `\3e`, or `&gt;` — that changes the selector and it will not match.
+This stack uses **WPCode Free** (`insert-headers-and-footers`), not WPCode Pro. `type: "css"` snippets must use `"location": "header"` or `"footer"` (`everywhere` is PHP-only and fails schema). Never emit `scss`, `blocks`, device rules, or CSS-selector insert locations.
+
+WPCode Free **css** snippets print as real CSS. The child combinator `>` is valid. **Do not** “fix” `.grid-2 > .e-con-inner` by turning `>` into `\>`, `\3e`, or `&gt;` — that changes the selector and it will not match.
 
 Prefer Elementor-safe targeting (inner wrapper plus the container itself):
 

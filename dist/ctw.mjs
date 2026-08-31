@@ -4458,12 +4458,24 @@ var formSchema = external_exports.object({
   slug,
   fields: external_exports.array(formFieldSchema).min(1)
 });
+var snippetLocation = external_exports.enum(["header", "footer", "everywhere"]);
 var snippetSchema = external_exports.object({
   title: external_exports.string().min(1).max(120),
   code: external_exports.string().min(1),
   type: external_exports.enum(SNIPPET_TYPES),
-  location: external_exports.enum(["header", "footer", "everywhere"]).default("everywhere")
-});
+  location: snippetLocation.optional()
+}).superRefine((snippet, ctx) => {
+  if (snippet.type !== "php" && snippet.location === "everywhere") {
+    ctx.addIssue({
+      code: external_exports.ZodIssueCode.custom,
+      message: 'WPCode Free: css, js, and html snippets must use location "header" or "footer". "everywhere" is PHP-only (insert-headers-and-footers).',
+      path: ["location"]
+    });
+  }
+}).transform((snippet) => ({
+  ...snippet,
+  location: snippet.location ?? (snippet.type === "php" ? "everywhere" : "header")
+}));
 var wooProductSchema = external_exports.object({
   name: external_exports.string().min(1).max(120),
   price: external_exports.string().regex(/^\d+(?:\.\d{1,2})?$/, "price must be a number string like 19.99"),

@@ -1,6 +1,6 @@
 ---
 name: ctw-native
-description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode snippets (css/js/html/php), Font Awesome Free icons via CDN, or CSS/package checks before generate (/ctw-native-check).
+description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode Free snippets (css/js/html/php via insert-headers-and-footers, not WPCode Pro), Font Awesome Free icons via CDN, or CSS/package checks before generate (/ctw-native-check).
 ---
 
 # CTW Native (Claude Code)
@@ -112,14 +112,27 @@ npx -y claude-to-wordpress-native products add \
 
 This downloads the image into `./media/`, registers `media[]`, and appends `woocommerce.products[]` with `imageMediaId`. The WordPress importer creates simple products on import.
 
-## WPCode snippets
+## WPCode Free snippets (not Pro)
 
-`snippets[]` supports `css` | `js` | `html` | **`php`** for WPCode (Insert Headers and Footers / WPCode).
+The stack installs **WPCode Free** from wordpress.org (`insert-headers-and-footers`). Do **not** assume WPCode Pro. Do not emit Pro-only snippet types, auto-insert locations, generators, cloud library payloads, or device/conditional rules.
 
-- Use `php` only for small site helpers that WPCode would run (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
-- Never emit remote code loaders or destructive admin scripts.
-- Locations: `header` | `footer` | `everywhere`.
+`snippets[]` types (Free only): `css` | `js` | `html` | **`php`**. Never `scss`, `blocks`, or `universal`.
+
+### Locations (package JSON → WPCode Free)
+
+| Package `location` | `css` / `js` / `html` | `php` |
+| --- | --- | --- |
+| `"header"` | Site Wide Header (`wp_head`) | Site Wide Header |
+| `"footer"` | Site Wide Footer (`wp_footer`) | Site Wide Footer |
+| `"everywhere"` | **Invalid** — `check` / schema fail. Use `"header"`. | Run Everywhere (PHP only) |
+
 - Put **layout CSS** (grids, hero splits, `.e-con-inner`) in a `type: "css"` snippet with `location: "header"`. Do not put that CSS in an Elementor `html` widget.
+- Omit `location` and css/js/html default to `"header"`; php defaults to `"everywhere"`.
+- Use `php` only for small site helpers (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
+- Never emit remote code loaders or destructive admin scripts.
+- Never use Pro auto-insert: CSS-selector “anywhere”, insert after N words, Woo/EDD/MemberPress locations.
+- Never use Pro conditions: device type (desktop/mobile), browser, OS, geo, schedule, Woo rules. Free snippets always run on every device.
+- WPCode Free wraps `type: "css"` in `<style class="wpcode-css-snippet">` for you. Raw CSS only.
 
 ### CSS must parse (run `check` before generate)
 
@@ -251,4 +264,4 @@ Always tell the developer: upload/activate child theme → **CTW Native → Wipe
 - Header/footer: ElementsKit
 - Shop / cart / checkout: Elementor pages assigned as WooCommerce pages (plus native single/archive templates)
 - Extra CSS: Appearance → Customize → Additional CSS
-- Snippets: WPCode
+- Snippets: **WPCode Free** → Code Snippets (wordpress.org `insert-headers-and-footers`). Auto Insert = Site Wide Header/Footer. Not WPCode Pro (no SCSS, Blocks, device rules, or CSS-selector insert).
