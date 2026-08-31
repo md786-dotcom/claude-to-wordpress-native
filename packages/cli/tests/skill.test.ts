@@ -18,6 +18,8 @@ describe("skill assets", () => {
     assert.match(markdown, /content_width/);
     assert.match(markdown, /full width only|never boxed/i);
     assert.match(markdown, /plugin-zip/);
+    assert.match(markdown, /fontawesome-free|Font Awesome Free/i);
+    assert.match(markdown, /cdn\.jsdelivr\.net/i);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
   });
 });

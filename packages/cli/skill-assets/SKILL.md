@@ -1,6 +1,6 @@
 ---
 name: ctw-native
-description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, or WPCode snippets (css/js/html/php).
+description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode snippets (css/js/html/php), or Font Awesome Free icons via CDN.
 ---
 
 # CTW Native (Claude Code)
@@ -117,6 +117,27 @@ This downloads the image into `./media/`, registers `media[]`, and appends `wooc
 - Use `php` only for small site helpers that WPCode would run (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
 - Never emit remote code loaders or destructive admin scripts.
 - Locations: `header` | `footer` | `everywhere`.
+
+## Icons (Font Awesome Free via CDN)
+
+Elementor Free widgets `icon`, `icon-box`, `icon-list`, and `social-icons` need **Font Awesome Free CSS** on the front end. Always ship it as a WPCode **`html`** snippet in **`header`** (do not rely on Elementor’s bundled icons alone).
+
+```json
+{
+  "title": "Font Awesome Free CDN",
+  "type": "html",
+  "location": "header",
+  "code": "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\" />"
+}
+```
+
+Rules:
+
+- Use this **jsDelivr Font Awesome Free** stylesheet only (`@fortawesome/fontawesome-free`). Pin a specific version (e.g. `6.7.2`).
+- In Elementor icon settings use Free classes only, e.g. `fas fa-home`, `far fa-envelope`, `fab fa-instagram` via `selected_icon: { "value": "fas fa-home", "library": "fa-solid" }` (or `fa-regular` / `fa-brands`).
+- Do **not** use Font Awesome Pro kits, kit codes, or paid families.
+- Do **not** load the full **Web Awesome** component CDN (`ka-f.webawesome.com` / `<wa-icon>`) for Elementor Free trees — that is a separate web-component stack and does not drive Elementor’s icon controls. Prefer FA Free CSS above.
+- One CDN snippet per package is enough; do not duplicate it.
 
 ## Output
 
