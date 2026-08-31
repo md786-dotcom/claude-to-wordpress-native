@@ -1,0 +1,4 @@
+{
+  "name": "claude-to-wordpress-native",
+  "install": "npm ci"
+}
