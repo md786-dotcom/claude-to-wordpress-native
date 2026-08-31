@@ -30,6 +30,12 @@ describe("skill assets", () => {
     assert.match(markdown, /claude-to-wordpress-native check/);
     assert.match(markdown, /Do not.*escape special characters|child combinator/i);
     assert.match(markdown, /e-con-inner/);
+    assert.match(markdown, /WPCode Free/);
+    assert.match(markdown, /insert-headers-and-footers/);
+    assert.match(markdown, /not WPCode Pro|Never `scss`/i);
+    const checkMd = readFileSync(join(skillAssetsDir(), "check", "SKILL.md"), "utf8");
+    assert.match(checkMd, /WPCode Free/);
+    assert.match(checkMd, /everywhere.*PHP-only|PHP-only/i);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
     assert.ok(existsSync(join(skillAssetsDir(), "check", "SKILL.md")));
   });

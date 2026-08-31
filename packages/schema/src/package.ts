@@ -153,12 +153,29 @@ export const formSchema = z.object({
   fields: z.array(formFieldSchema).min(1),
 });
 
-export const snippetSchema = z.object({
-  title: z.string().min(1).max(120),
-  code: z.string().min(1),
-  type: z.enum(SNIPPET_TYPES),
-  location: z.enum(["header", "footer", "everywhere"]).default("everywhere"),
-});
+const snippetLocation = z.enum(["header", "footer", "everywhere"]);
+
+export const snippetSchema = z
+  .object({
+    title: z.string().min(1).max(120),
+    code: z.string().min(1),
+    type: z.enum(SNIPPET_TYPES),
+    location: snippetLocation.optional(),
+  })
+  .superRefine((snippet, ctx) => {
+    if (snippet.type !== "php" && snippet.location === "everywhere") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'WPCode Free: css, js, and html snippets must use location "header" or "footer". "everywhere" is PHP-only (insert-headers-and-footers).',
+        path: ["location"],
+      });
+    }
+  })
+  .transform((snippet) => ({
+    ...snippet,
+    location: snippet.location ?? (snippet.type === "php" ? "everywhere" : "header"),
+  }));
 
 /** Dummy WooCommerce product — name, price, description, image only. */
 export const wooProductSchema = z.object({

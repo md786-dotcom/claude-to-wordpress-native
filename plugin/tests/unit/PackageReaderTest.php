@@ -10,6 +10,23 @@ use PHPUnit\Framework\TestCase;
 
 final class PackageReaderTest extends TestCase {
 
+	public function test_rejects_wpcode_pro_snippet_types(): void {
+		$data = array(
+			'version'  => 1,
+			'theme'    => array( 'slug' => 'x', 'name' => 'X' ),
+			'pages'    => array( array( 'title' => 'Home' ) ),
+			'snippets' => array(
+				array(
+					'title' => 'Pro',
+					'type'  => 'scss',
+					'code'  => '$c: #f00;',
+				),
+			),
+		);
+		$result = Package_Reader::validate_shape( $data );
+		$this->assertTrue( is_wp_error( $result ) );
+	}
+
 	public function test_accepts_php_snippets(): void {
 		$data = array(
 			'version'  => 1,

@@ -140,6 +140,47 @@ describe("ctw CLI", () => {
     assert.match(result.stderr, /unclosed \{/);
   });
 
+  it("fails check when css uses everywhere (WPCode Free PHP-only location)", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "ctw-wpcode-free-"));
+    dirs.push(cwd);
+    const pkg = join(cwd, "ctw-package.json");
+    writeFileSync(
+      pkg,
+      JSON.stringify({
+        version: 1,
+        theme: { slug: "demo-child", name: "Demo Child" },
+        pages: [
+          {
+            title: "Home",
+            slug: "home",
+            isFrontPage: true,
+            elements: [
+              {
+                id: "c1",
+                elType: "container",
+                widgetType: null,
+                settings: { content_width: "full" },
+                elements: [],
+              },
+            ],
+          },
+        ],
+        snippets: [
+          {
+            title: "Layout",
+            type: "css",
+            location: "everywhere",
+            code: "body{margin:0;}",
+          },
+        ],
+      }),
+      "utf8",
+    );
+    const result = run(["check", "--package", pkg]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /WPCode Free|everywhere/i);
+  });
+
   it("rejects invalid slug on init", () => {
     const result = run(["init", "--slug", "BAD_SLUG"]);
     assert.equal(result.status, 1);

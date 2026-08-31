@@ -138,9 +138,9 @@ Preview the tarball first: `npm pack --dry-run` / `npm publish --dry-run`. Name 
 
 ## Plugins installed by setup
 
-Always: Elementor, ElementsKit Lite, MetForm, WPCode (`insert-headers-and-footers`).
+Always: Elementor, ElementsKit Lite, MetForm, **WPCode Free** (`insert-headers-and-footers` on wordpress.org — not WPCode Pro).
 
-Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode snippets (`css` | `js` | `html` | `php`).
+Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode Free snippets (`css` | `js` | `html` | `php`). CSS/JS/HTML use `header` or `footer` only; `everywhere` is PHP-only.
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
 

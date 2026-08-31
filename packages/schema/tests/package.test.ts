@@ -79,7 +79,7 @@ describe("parsePackageJson", () => {
     assert.ok(declaredPlugins(pkg).includes(WOO_PLUGIN_SLUG));
   });
 
-  it("accepts php snippets for WPCode", () => {
+  it("accepts php snippets for WPCode Free", () => {
     const input = basePackage();
     input.snippets = [
       {
@@ -91,6 +91,45 @@ describe("parsePackageJson", () => {
     ];
     const pkg = parsePackageJson(input);
     assert.equal(pkg.snippets[0]?.type, "php");
+    assert.equal(pkg.snippets[0]?.location, "everywhere");
+  });
+
+  it("defaults css js html location to header and php to everywhere", () => {
+    const input = basePackage();
+    input.snippets = [
+      { title: "A", code: "body{}", type: "css" },
+      { title: "B", code: "console.log(1)", type: "js" },
+      { title: "C", code: "<div></div>", type: "html" },
+      { title: "D", code: "<?php // ok", type: "php" },
+    ];
+    const pkg = parsePackageJson(input);
+    assert.equal(pkg.snippets[0]?.location, "header");
+    assert.equal(pkg.snippets[1]?.location, "header");
+    assert.equal(pkg.snippets[2]?.location, "header");
+    assert.equal(pkg.snippets[3]?.location, "everywhere");
+  });
+
+  it("rejects everywhere on css js and html for WPCode Free", () => {
+    for (const type of ["css", "js", "html"] as const) {
+      const input = basePackage();
+      input.snippets = [{ title: "Bad", code: "x{}", type, location: "everywhere" }];
+      const result = safeParsePackageJson(input);
+      assert.equal(result.success, false, `${type} everywhere must fail`);
+    }
+  });
+
+  it("rejects WPCode Pro snippet types", () => {
+    const input = basePackage();
+    input.snippets = [
+      {
+        title: "Pro",
+        code: "$c:#f00;",
+        type: "scss",
+        location: "header",
+      } satisfies { [key: string]: JsonValue },
+    ];
+    const result = safeParsePackageJson(input);
+    assert.equal(result.success, false);
   });
 
   it("accepts up to 4 dummy products when woo enabled", () => {
@@ -260,7 +299,7 @@ describe("parsePackageJson", () => {
     input.snippets = [
       { title: "A", code: "body{}", type: "css", location: "header" },
       { title: "B", code: "console.log(1)", type: "js", location: "footer" },
-      { title: "C", code: "<div></div>", type: "html", location: "everywhere" },
+      { title: "C", code: "<div></div>", type: "html", location: "header" },
       { title: "D", code: "<?php // ok", type: "php", location: "everywhere" },
     ];
     const pkg = parsePackageJson(input);
