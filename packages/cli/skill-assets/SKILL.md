@@ -1,6 +1,6 @@
 ---
 name: ctw-native
-description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, WPCode Free snippets (css/js/html/php via insert-headers-and-footers, not WPCode Pro), Font Awesome Free icons via CDN, or CSS/package checks before generate (/ctw-native-check).
+description: Generate Hello Elementor child theme ZIPs with Elementor Free pages for Claude-to-WordPress Native. Use for WordPress, Elementor, WooCommerce shop, media/Unsplash/Pexels, dummy products, custom SVG icons in media, WPCode Free snippets (css/js/html/php via insert-headers-and-footers, not WPCode Pro), or CSS/package checks before generate (/ctw-native-check).
 ---
 
 # CTW Native (Claude Code)
@@ -160,7 +160,7 @@ Fonts and brand colors need no page CSS: set `theme.colors` / `theme.typography`
 
 - Brochure packages (`woocommerce.enabled: false`): **zero** `type: "css"` snippets.
 - Shop packages: `type: "css"` selectors must be `.woocommerce…` or `.ctw-woo-…` only. `!important` is legitimate there.
-- Font Awesome stays a WPCode **`html`** snippet (see Icons). `php` / `js` follow the Free location rules below.
+- Icons: custom SVG in `media[]` only — no Font Awesome, Web Awesome, or icon CDNs. `php` / `js` follow the Free location rules below.
 
 `/ctw-native-check` (`check`) fails the package when these rules are broken.
 
@@ -219,26 +219,42 @@ npx -y claude-to-wordpress-native check --package ./ctw-package.json
 
 Fix every error and re-run until exit 0. The `/ctw-native-check` skill is this same loop. `generate` refuses a ZIP when check fails. There is no `validate` command.
 
-## Icons (Font Awesome Free via CDN)
+## Icons (custom SVG only)
 
-Elementor Free widgets `icon`, `icon-box`, `icon-list`, and `social-icons` need **Font Awesome Free CSS** on the front end. Always ship it as a WPCode **`html`** snippet in **`header`** (do not rely on Elementor’s bundled icons alone).
+Do **not** use Font Awesome, Web Awesome, icon font CDNs, or `fas fa-*` / `fa-solid` classes. Do not ship a WPCode snippet that loads `@fortawesome/fontawesome-free`, Font Awesome kits, or Web Awesome (`webawesome.com`, `<wa-icon>`).
+
+Use **custom SVG files** in `./media/` and list them in `media[]`.
+
+### Preferred patterns
+
+1. **`image` widget** — reference SVG media: `{ "id": "<media.id>", "url": "" }` with `path` ending in `.svg`.
+2. **`html` widget** — inline a small SVG (no `<style>` block): `<svg xmlns="http://www.w3.org/2000/svg" …>…</svg>`.
+3. **`icon` / `icon-box` / `icon-list` / `social-icons`** — prefer `image` + text, or inline SVG in `html`, instead of Elementor icon-font libraries. Text-only `icon-list` rows (no icon glyph) are fine when the brief does not need glyphs.
+
+### Media example
 
 ```json
 {
-  "title": "Font Awesome Free CDN",
-  "type": "html",
-  "location": "header",
-  "code": "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\" />"
+  "id": "icon-phone",
+  "path": "icons/phone.svg",
+  "alt": "Phone"
 }
 ```
 
-Rules:
+```json
+{
+  "id": "svcIcon",
+  "elType": "widget",
+  "widgetType": "image",
+  "isInner": false,
+  "settings": {
+    "image": { "id": "icon-phone", "url": "" }
+  },
+  "elements": []
+}
+```
 
-- Use this **jsDelivr Font Awesome Free** stylesheet only (`@fortawesome/fontawesome-free`). Pin a specific version (e.g. `6.7.2`).
-- In Elementor icon settings use Free classes only, e.g. `fas fa-home`, `far fa-envelope`, `fab fa-instagram` via `selected_icon: { "value": "fas fa-home", "library": "fa-solid" }` (or `fa-regular` / `fa-brands`).
-- Do **not** use Font Awesome Pro kits, kit codes, or paid families.
-- Do **not** load the full **Web Awesome** component CDN (`ka-f.webawesome.com` / `<wa-icon>`) for Elementor Free trees — that is a separate web-component stack and does not drive Elementor’s icon controls. Prefer FA Free CSS above.
-- One CDN snippet per package is enough; do not duplicate it.
+Copy or generate SVGs into `./media/icons/` before `generate`. `check` fails Font Awesome / Web Awesome CDN snippets and `fa-*` icon classes.
 
 ## Supported Elementor Free widgets
 
@@ -254,20 +270,20 @@ Use **only** these `widgetType` values (plus `elType: "container"` for layout). 
 | `divider` | |
 | `spacer` | |
 | `google_maps` | |
-| `icon` | Needs Font Awesome Free CDN snippet |
+| `icon` | Custom SVG via `image` or inline `html` — no icon fonts |
 | `image-box` | |
-| `icon-box` | Needs Font Awesome Free CDN snippet |
+| `icon-box` | Custom SVG via `image` or inline `html` — no icon fonts |
 | `star-rating` | |
 | `image-carousel` | |
 | `image-gallery` | |
-| `icon-list` | Needs Font Awesome Free CDN snippet |
+| `icon-list` | Text-only rows OK; custom SVG via `image`/`html` if icons needed |
 | `counter` | |
 | `progress` | |
 | `testimonial` | |
 | `tabs` | |
 | `accordion` | |
 | `toggle` | |
-| `social-icons` | Needs Font Awesome Free CDN snippet |
+| `social-icons` | Custom SVG links via `image`/`html` — no FA / Web Awesome |
 | `alert` | |
 | `html` | Do not put `<style>` here. Use native Elementor settings. |
 | `shortcode` | Prefer for Woo shop/cart/checkout |

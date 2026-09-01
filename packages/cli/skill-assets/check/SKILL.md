@@ -42,10 +42,11 @@ Automatic findings (fix all of them):
 - `hover_animation`, `motion_fx`, or sticky/motion settings on elements fail.
 - `custom_css` on elements fails (Elementor Free does not print it).
 - `_css_classes` / `css_classes` on elements fails. Use `container_type: "grid"` and native padding/colors/typography.
+- Font Awesome / Web Awesome CDN snippets, `fortawesome` links, or `fa-*` / `fa-solid` icon classes fail. Use custom SVG in `media[]`.
 - `type: "css"` snippets must be **raw CSS** (no `<style>` wrapper).
 - Every `{` must have a matching `}`.
 - Do not HTML-escape CSS (`&gt;`, `&lt;`) or backslash-escape `>`.
 
 WPCode Free **css** snippets print as real CSS. The child combinator `>` is valid in residual Woo CSS. **Do not** turn `>` into `\>`, `\3e`, or `&gt;`.
 
-Font Awesome stays a WPCode **`html`** snippet (`<link>`), not CSS.
+Use custom SVG icons in `media[]` only. Do not use Font Awesome, Web Awesome, or `fa-*` classes.

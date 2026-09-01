@@ -16,6 +16,10 @@ const WOO_CLASS = /\.(?:woocommerce[\w-]*|ctw-woo-[\w-]+)/;
 const NESTED_AT = /^@(?:media|supports|layer|container)\b/i;
 const CSS_CLASS_KEYS = ["_css_classes", "css_classes"] as const;
 const TREE_KEYS = ["shop", "cart", "checkout"] as const;
+const BANNED_ICON_STACK =
+  /fortawesome|fontawesome(?:-free)?|webawesome|ka-f\.webawesome|<wa-icon\b/i;
+const BANNED_ICON_CLASS =
+  /\bfa[srb]?\s+fa-|\bfa-[a-z0-9-]+\b|"fa-solid"|"fa-regular"|"fa-brands"/i;
 
 /**
  * Policy findings that `check` / generate must fail on.
@@ -37,10 +41,11 @@ export function checkPackageStylePolicy(pkg: CtwPackage): CssIssue[] {
     });
   }
   pkg.snippets.forEach((snippet, index) => {
+    const path = `snippets[${String(index)}] "${snippet.title}"`;
+    scanTextForBannedIcons(snippet.code, path, issues);
     if (snippet.type !== "css") {
       return;
     }
-    const path = `snippets[${String(index)}] "${snippet.title}"`;
     if (!pkg.woocommerce.enabled) {
       issues.push({
         path,
@@ -268,9 +273,7 @@ function walkElementPolicy(
             "Do not use motion, sticky, or hover-animation settings that need custom CSS or Pro. Use static native Elementor colors, typography, and borders.",
         });
       }
-      if (typeof value === "string") {
-        scanTextForBannedPseudo(value, `${nodePath} ${key}`, issues);
-      }
+      walkJsonForBannedIcons(value, `${nodePath} ${key}`, issues);
     }
     for (const key of CSS_CLASS_KEYS) {
       const value = settingString(node.settings, key);
@@ -313,4 +316,34 @@ function scanTextForBannedPseudo(text: string, path: string, issues: CssIssue[])
     message:
       "Do not embed :hover / :focus or ::before / ::after CSS in widget content. Use static native Elementor settings. WooCommerce CSS snippets may use pseudo only on .woocommerce / .ctw-woo-* selectors.",
   });
+}
+
+function scanTextForBannedIcons(text: string, path: string, issues: CssIssue[]): void {
+  if (!BANNED_ICON_STACK.test(text) && !BANNED_ICON_CLASS.test(text)) {
+    return;
+  }
+  issues.push({
+    path,
+    message:
+      "Do not use Font Awesome, Web Awesome, or icon CDN classes (fas fa-*, fa-solid). Ship custom SVG files in media[] and reference them from image widgets or inline SVG in html widgets.",
+  });
+}
+
+function walkJsonForBannedIcons(value: JsonValue, path: string, issues: CssIssue[]): void {
+  if (typeof value === "string") {
+    scanTextForBannedPseudo(value, path, issues);
+    scanTextForBannedIcons(value, path, issues);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      walkJsonForBannedIcons(item, `${path}[${String(index)}]`, issues);
+    });
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    for (const [key, child] of Object.entries(value)) {
+      walkJsonForBannedIcons(child, `${path}.${key}`, issues);
+    }
+  }
 }

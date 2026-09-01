@@ -277,6 +277,47 @@ describe("checkPackageCss", () => {
     assert.match(checkPackageCss(pkg)[0]?.message ?? "", /:hover|:focus|::before|not WooCommerce-scoped/);
   });
 
+  it("rejects Font Awesome CDN html snippets", () => {
+    const pkg = readPackageFromJsonText(
+      packageWithSnippets([
+        {
+          title: "FA CDN",
+          type: "html",
+          location: "header",
+          code:
+            '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" />',
+        },
+      ]),
+    );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /Font Awesome|Web Awesome|fa-/i);
+  });
+
+  it("rejects fa-solid selected_icon classes", () => {
+    const pkg = readPackageFromJsonText(
+      packageWithSnippets([], [
+        {
+          title: "Home",
+          slug: "home",
+          isFrontPage: true,
+          template: "elementor_header_footer",
+          elements: [
+            {
+              id: "i1",
+              elType: "widget",
+              widgetType: "icon",
+              isInner: false,
+              settings: {
+                selected_icon: { value: "fas fa-home", library: "fa-solid" },
+              },
+              elements: [],
+            },
+          ],
+        },
+      ]),
+    );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /Font Awesome|fa-/i);
+  });
+
   it("rejects hover_animation on elements", () => {
     const pkg = readPackageFromJsonText(
       packageWithSnippets([], [

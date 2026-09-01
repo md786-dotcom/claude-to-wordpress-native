@@ -18,8 +18,8 @@ describe("skill assets", () => {
     assert.match(markdown, /content_width/);
     assert.match(markdown, /full width only|never boxed/i);
     assert.match(markdown, /plugin-zip/);
-    assert.match(markdown, /fontawesome-free|Font Awesome Free/i);
-    assert.match(markdown, /cdn\.jsdelivr\.net/i);
+    assert.match(markdown, /custom SVG|custom svg/i);
+    assert.doesNotMatch(markdown, /Font Awesome Free via CDN/i);
     assert.match(markdown, /Wipe generated content/i);
     assert.match(markdown, /Import package \(one-shot\)/i);
     assert.match(markdown, /depends on the Claude model/i);
@@ -45,6 +45,7 @@ describe("skill assets", () => {
     assert.match(checkMd, /WooCommerce-only|Woo-only/i);
     assert.match(checkMd, /ElementsKit Free/);
     assert.match(checkMd, /header` or `footer`/i);
+    assert.match(checkMd, /custom SVG|Font Awesome/i);
     assert.doesNotMatch(checkMd, /validate` runs the same/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
     assert.ok(existsSync(join(skillAssetsDir(), "check", "SKILL.md")));
