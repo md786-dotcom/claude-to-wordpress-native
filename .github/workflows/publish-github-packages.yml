@@ -2,6 +2,7 @@ name: Publish GitHub Packages mirror
 
 # Backfill or re-sync npm package to GitHub Packages so the repo Packages sidebar is populated.
 # npmjs.org publishes do not appear there; GitHub Packages (npm.pkg.github.com) does.
+# GitHub Packages requires a scoped name: @owner/claude-to-wordpress-native
 
 on:
   workflow_dispatch:
@@ -26,15 +27,4 @@ jobs:
       - name: Publish to GitHub Packages
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-        run: |
-          {
-            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
-            echo "registry=https://npm.pkg.github.com/"
-          } >> .npmrc
-          npm publish --access public
-      - name: Make GitHub Package public
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -X PATCH "user/packages/npm/claude-to-wordpress-native" \
-            -f visibility=public
+        run: bash .github/scripts/publish-github-packages.sh
