@@ -5,6 +5,7 @@
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin (CTW Native) installs the free stack and imports pages so **Edit with Elementor** works.
 
 [![npm][npm-shield]][npm-url]
+[![License][license-shield]][license-url]
 [![X @mdafanulh][x-shield]][x-url]
 [![npm provenance][provenance-shield]][npm-url]
 [![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
@@ -255,6 +256,8 @@ Patterns adapted from [msrbuilds/elementor-mcp](https://github.com/msrbuilds/ele
 
 [npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat-square&label=npm
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
+[license-shield]: https://img.shields.io/github/license/md786-dotcom/claude-to-wordpress-native?style=flat-square
+[license-url]: LICENSE
 [x-shield]: https://img.shields.io/badge/X-@mdafanulh-000000?style=flat-square&logo=x&logoColor=white
 [x-url]: https://x.com/mdafanulh
 [provenance-shield]: https://img.shields.io/badge/npm-provenance-cb3837?logo=npm&style=flat-square
