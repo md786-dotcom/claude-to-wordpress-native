@@ -259,7 +259,7 @@ Elementor Free document and persist patterns adapted from Mian Shahzad Raza’s 
 
 [npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat-square&label=npm
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
-[license-shield]: https://img.shields.io/github/license/md786-dotcom/claude-to-wordpress-native?style=flat-square
+[license-shield]: https://img.shields.io/badge/license-GPL--2.0--or--later-orange?style=flat-square
 [license-url]: LICENSE
 [wp-shield]: https://img.shields.io/badge/WordPress-6.0%2B-21759B?style=flat-square&logo=wordpress&logoColor=white
 [wp-url]: https://wordpress.org/
