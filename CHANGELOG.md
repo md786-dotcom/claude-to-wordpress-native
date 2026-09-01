@@ -6,6 +6,10 @@ The project uses [Semantic Versioning](https://semver.org/). Git tags use the fo
 
 When a release fixes a publicly known runtime vulnerability that already had a CVE (or similar) at release time, that identifier is listed here.
 
+## Unreleased
+
+- Maintainer publish is local `npm login` and `npm publish`. GitHub Actions publish is optional (`workflow_dispatch` only). Git tags do not start a publish.
+
 ## [0.2.1](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.1) - 2026-09-01
 
 Install: `npx -y claude-to-wordpress-native@0.2.1 skill`
