@@ -1,51 +1,17 @@
 <a id="readme-top"></a>
 
-<div align="center">
+# Claude-to-WordPress Native
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
-[![npm][npm-shield]][npm-url]
-[![X][x-shield]][x-url]
+Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs the free stack and imports pages so **Edit with Elementor** works.
 
-<h1>Claude-to-WordPress Native</h1>
+[![npm][npm-shield]][npm-url] · [@mdafanulh on X][x-url] · [OpenSSF Scorecard][scorecard-url] · [npm provenance][npm-url]
 
-<p>
-  Offline <strong>Claude Code</strong> toolchain that emits a Hello Elementor
-  <strong>child theme</strong> ZIP. A companion plugin installs the free stack
-  and imports pages so <strong>Edit with Elementor</strong> works.
-</p>
-
-<p>
-  <a href="#getting-started">Quick start</a>
-  ·
-  <a href="docs/cli.md">Docs</a>
-  ·
-  <a href="https://www.npmjs.com/package/claude-to-wordpress-native">npm</a>
-  ·
-  <a href="https://github.com/md786-dotcom/claude-to-wordpress-native/issues">Report Bug</a>
-  ·
-  <a href="https://github.com/md786-dotcom/claude-to-wordpress-native/issues">Request Feature</a>
-  ·
-  <a href="https://x.com/mdafanulh">X</a>
-</p>
-
-<p>
-  <a href="https://x.com/mdafanulh">
-    <img alt="Follow @mdafanulh on X" src="https://img.shields.io/badge/X-@mdafanulh-000000?style=flat&logo=x&logoColor=white" />
-  </a>
-</p>
-
-</div>
+[Getting started](#getting-started) · [CLI reference](docs/cli.md) · [Issues](https://github.com/md786-dotcom/claude-to-wordpress-native/issues) · [Contributing](CONTRIBUTING.md)
 
 Claude Code only. Claude does not edit the site after install.
 
-**Disclaimer:** Theme quality depends on the Claude model and the prompt. This tool is a bridge between Claude output and Elementor Free editing.
+> **Disclaimer:** Theme quality depends on the Claude model and the prompt. This tool is a bridge between Claude output and Elementor Free editing.
 
-[![npm provenance][provenance-shield]][npm-url]
-[![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
 <!-- After registering at https://www.bestpractices.dev add: [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<ID>/badge)](https://www.bestpractices.dev/projects/<ID>) -->
 
 <details>
@@ -61,47 +27,39 @@ Claude Code only. Claude does not edit the site after install.
 - [Local development](#local-development)
 - [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 - [Acknowledgments](#acknowledgments)
 
 </details>
+
+---
 
 ## About
 
 The CLI writes an uploadable Hello Elementor child theme. The companion plugin (`ctw-native`) installs Hello Elementor and the declared free stack, then imports the package once.
 
 | Artifact | Role |
-| --- | --- |
+| :--- | :--- |
 | `plugin/` (`ctw-native`) | One-click stack install + one-shot import |
 | Child theme ZIP from `ctw generate` | Hello child + `ctw-package.json` + media |
 | Claude Code skills | `/ctw-native` and `/ctw-native-check` via `npx … skill` |
 
 | Surface | Tool |
-| --- | --- |
+| :--- | :--- |
 | Pages and posts | **Edit with Elementor** (Free widgets only) |
 | Header and footer | **ElementsKit Free** Header Footer (built in WordPress after import) |
 | Shop / cart / checkout | Elementor Free pages + shortcodes; single/archive use child PHP templates |
 | Dummy products | Up to 4 via `products add` / `woocommerce.products` |
 | Extra CSS | **Appearance → Customize → Additional CSS** |
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Built with
 
-[![TypeScript][typescript-shield]][typescript-url]
-[![Node.js][node-shield]][node-url]
-[![WordPress][wordpress-shield]][wordpress-url]
-[![Elementor][elementor-shield]][elementor-url]
-[![Hello Elementor][hello-shield]][hello-url]
-[![WooCommerce][woo-shield]][woo-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+TypeScript · Node.js 20+ · WordPress · Elementor Free · Hello Elementor · WooCommerce (optional)
 
 ## Getting started
 
-Requires [Node.js](https://nodejs.org/) 20+.
+Requires Node.js 20+.
 
-Install from npm ([`claude-to-wordpress-native@0.2.1`](https://www.npmjs.com/package/claude-to-wordpress-native/v/0.2.1)):
+Install the latest release (`0.2.1`):
 
 ```bash
 npx -y claude-to-wordpress-native skill
@@ -157,7 +115,7 @@ npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --me
 
 CLI flags and outputs: [docs/cli.md](docs/cli.md).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+---
 
 ## Usage
 
@@ -201,7 +159,7 @@ Re-import is refused while generated pages exist. Wipe first to regenerate.
 ### Media
 
 | Source | How |
-| --- | --- |
+| :--- | :--- |
 | Local / Claude-attached files | Copy into `./media/`, list in `media[]`, reference `{ "id": "<media.id>", "url": "" }` on image widgets |
 | Unsplash / Pexels / https | `media fetch --url … --id …` or `media[].sourceUrl` + `media sync` / `generate` |
 
@@ -227,7 +185,7 @@ Parent theme: Hello Elementor from wordpress.org (not vendored).
 
 </details>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+---
 
 ## Local development
 
@@ -256,7 +214,7 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 <details>
 <summary>Publish (maintainers)</summary>
 
-**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.1`.
+Latest release: `0.2.1`.
 
 Publish from your machine with the npm account that owns the package:
 
@@ -274,67 +232,28 @@ Bump `version` in the root `package.json`, `packages/*/package.json`, and `plugi
 
 </details>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+---
 
 ## Contributing
 
-- **Obtain:** `npx -y claude-to-wordpress-native` from [npm](https://www.npmjs.com/package/claude-to-wordpress-native), or clone this repository.
+- **Obtain:** `npx -y claude-to-wordpress-native`, or clone this repository.
 - **Bug reports and enhancements:** [GitHub Issues](https://github.com/md786-dotcom/claude-to-wordpress-native/issues).
 - **Contribute:** pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for the process and coding standards.
 - **Security:** [SECURITY.md](SECURITY.md). Do not file public issues for undisclosed vulnerabilities.
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md) and [GitHub Releases](https://github.com/md786-dotcom/claude-to-wordpress-native/releases).
 - **OpenSSF Best Practices:** repo files for the [passing badge](https://www.bestpractices.dev/en/criteria/0) are in place. Registration steps: [docs/openssf-best-practices.md](docs/openssf-best-practices.md).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## License
 
 GPL-2.0-or-later. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-
-Md H — [![X][x-shield]][x-url] [@mdafanulh](https://x.com/mdafanulh)
-
-Project: [github.com/md786-dotcom/claude-to-wordpress-native](https://github.com/md786-dotcom/claude-to-wordpress-native)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Acknowledgments
 
-README structure and header pattern adapted from [Othneil Drew](https://github.com/othneildrew)’s [Best-README-Template](https://github.com/othneildrew/Best-README-Template).
+README structure adapted from [Othneil Drew](https://github.com/othneildrew)’s [Best-README-Template](https://github.com/othneildrew/Best-README-Template).
 
 Patterns adapted from [msrbuilds/elementor-mcp](https://github.com/msrbuilds/elementor-mcp). Parent theme: [elementor/hello-theme](https://github.com/elementor/hello-theme).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-[contributors-shield]: https://img.shields.io/github/contributors/md786-dotcom/claude-to-wordpress-native.svg?style=flat
-[contributors-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/md786-dotcom/claude-to-wordpress-native.svg?style=flat
-[forks-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/network/members
-[stars-shield]: https://img.shields.io/github/stars/md786-dotcom/claude-to-wordpress-native.svg?style=flat
-[stars-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/stargazers
-[issues-shield]: https://img.shields.io/github/issues/md786-dotcom/claude-to-wordpress-native.svg?style=flat
-[issues-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/issues
-[license-shield]: https://img.shields.io/github/license/md786-dotcom/claude-to-wordpress-native.svg?style=flat
-[license-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/blob/main/LICENSE
-[npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat
+[npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat-square&label=npm
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
-[x-shield]: https://img.shields.io/badge/X-000000?style=flat&logo=x&logoColor=white
 [x-url]: https://x.com/mdafanulh
-[provenance-shield]: https://img.shields.io/badge/npm-provenance-cb3837?logo=npm
-[scorecard-shield]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.scorecard.dev%2Fprojects%2Fgithub.com%2Fmd786-dotcom%2Fclaude-to-wordpress-native&query=%24.score&label=OpenSSF%20Scorecard
 [scorecard-url]: https://scorecard.dev/viewer/?uri=github.com/md786-dotcom/claude-to-wordpress-native
-[typescript-shield]: https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white
-[typescript-url]: https://www.typescriptlang.org/
-[node-shield]: https://img.shields.io/badge/Node.js-20+-339933?style=flat&logo=nodedotjs&logoColor=white
-[node-url]: https://nodejs.org/
-[wordpress-shield]: https://img.shields.io/badge/WordPress-21759B?style=flat&logo=wordpress&logoColor=white
-[wordpress-url]: https://wordpress.org/
-[elementor-shield]: https://img.shields.io/badge/Elementor-92003B?style=flat&logo=elementor&logoColor=white
-[elementor-url]: https://elementor.com/
-[hello-shield]: https://img.shields.io/badge/Hello_Elementor-000000?style=flat
-[hello-url]: https://github.com/elementor/hello-theme
-[woo-shield]: https://img.shields.io/badge/WooCommerce-optional-96588A?style=flat&logo=woocommerce&logoColor=white
-[woo-url]: https://woocommerce.com/
