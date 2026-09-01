@@ -1,6 +1,7 @@
 # Claude-to-WordPress Native
 
 [![npm version](https://img.shields.io/npm/v/claude-to-wordpress-native.svg)](https://www.npmjs.com/package/claude-to-wordpress-native)
+<!-- After registering at https://www.bestpractices.dev add: [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<ID>/badge)](https://www.bestpractices.dev/projects/<ID>) -->
 
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs Hello Elementor and the declared free stack, then imports pages so **Edit with Elementor** works.
 
@@ -62,6 +63,15 @@ npm run ctw -- skill
 npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
+
+CLI flags and outputs are listed in [docs/cli.md](docs/cli.md).
+
+## Feedback and contributions
+
+- **Obtain:** `npx -y claude-to-wordpress-native` from [npm](https://www.npmjs.com/package/claude-to-wordpress-native), or clone this repository.
+- **Bug reports and enhancements:** [GitHub Issues](https://github.com/md786-dotcom/claude-to-wordpress-native/issues).
+- **Contribute:** pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for the process and coding standards.
+- **Security:** [SECURITY.md](SECURITY.md). Do not file public issues for undisclosed vulnerabilities.
 
 ## Claude Code workflow (`/ctw-native` then `/ctw-native-check`)
 
@@ -138,8 +148,19 @@ Only `https://` image URLs. Remotes are downloaded into `./media/` before the ch
 ```bash
 npm install
 npm run build
+npm test
+npm run lint
+npm run typecheck
 npm run ctw -- plugin-zip
 npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./brochure.zip
+```
+
+PHP plugin tests:
+
+```bash
+cd plugin
+composer install --no-interaction
+vendor/bin/phpunit
 ```
 
 Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
@@ -172,6 +193,14 @@ Always: Elementor, ElementsKit Lite, MetForm, **WPCode Free** (`insert-headers-a
 Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode Free snippets (`css` | `js` | `html` | `php`). CSS snippets are Woo-only (`.woocommerce` / `.ctw-woo-*`). CSS/JS/HTML use `header` or `footer` only; `everywhere` is PHP-only.
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) and [GitHub Releases](https://github.com/md786-dotcom/claude-to-wordpress-native/releases).
+
+## OpenSSF Best Practices
+
+Repo files for the [passing badge](https://www.bestpractices.dev/en/criteria/0) are in place. Registration on bestpractices.dev must be done while signed in with GitHub. Steps and suggested answers: [docs/openssf-best-practices.md](docs/openssf-best-practices.md).
 
 ## License
 

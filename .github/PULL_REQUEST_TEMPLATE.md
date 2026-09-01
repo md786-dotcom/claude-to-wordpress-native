@@ -1,3 +1,5 @@
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for process, tests, and coding standards.
+
 ## Summary
 
 State what this pull request changes in one short sentence.
