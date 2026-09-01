@@ -1,3 +1,5 @@
+<a id="readme-top"></a>
+
 <div align="center">
 
 [![Contributors][contributors-shield]][contributors-url]
@@ -82,7 +84,7 @@ The CLI writes an uploadable Hello Elementor child theme. The companion plugin (
 | Dummy products | Up to 4 via `products add` / `woocommerce.products` |
 | Extra CSS | **Appearance → Customize → Additional CSS** |
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Built with
 
@@ -93,7 +95,7 @@ The CLI writes an uploadable Hello Elementor child theme. The companion plugin (
 [![Hello Elementor][hello-shield]][hello-url]
 [![WooCommerce][woo-shield]][woo-url]
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting started
 
@@ -155,7 +157,7 @@ npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --me
 
 CLI flags and outputs: [docs/cli.md](docs/cli.md).
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
@@ -225,7 +227,7 @@ Parent theme: Hello Elementor from wordpress.org (not vendored).
 
 </details>
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Local development
 
@@ -272,7 +274,7 @@ Bump `version` in the root `package.json`, `packages/*/package.json`, and `plugi
 
 </details>
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contributing
 
@@ -283,13 +285,13 @@ Bump `version` in the root `package.json`, `packages/*/package.json`, and `plugi
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md) and [GitHub Releases](https://github.com/md786-dotcom/claude-to-wordpress-native/releases).
 - **OpenSSF Best Practices:** repo files for the [passing badge](https://www.bestpractices.dev/en/criteria/0) are in place. Registration steps: [docs/openssf-best-practices.md](docs/openssf-best-practices.md).
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License
 
 GPL-2.0-or-later. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contact
 
@@ -297,7 +299,7 @@ Md H — [![X][x-shield]][x-url] [@mdafanulh](https://x.com/mdafanulh)
 
 Project: [github.com/md786-dotcom/claude-to-wordpress-native](https://github.com/md786-dotcom/claude-to-wordpress-native)
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Acknowledgments
 
@@ -305,7 +307,7 @@ README structure and header pattern adapted from [Othneil Drew](https://github.c
 
 Patterns adapted from [msrbuilds/elementor-mcp](https://github.com/msrbuilds/elementor-mcp). Parent theme: [elementor/hello-theme](https://github.com/elementor/hello-theme).
 
-<p align="right">(<a href="#claude-to-wordpress-native">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/md786-dotcom/claude-to-wordpress-native.svg?style=flat
 [contributors-url]: https://github.com/md786-dotcom/claude-to-wordpress-native/graphs/contributors
