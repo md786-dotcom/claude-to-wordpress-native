@@ -70,7 +70,7 @@ Install the latest release (`0.2.2`):
 npx -y claude-to-wordpress-native skill
 ```
 
-Write an uploadable WordPress plugin ZIP into the current project:
+Write an uploadable WordPress plugin ZIP into the current project (make a folder/directory/repo first):
 
 ```bash
 npx -y claude-to-wordpress-native plugin-zip
@@ -88,35 +88,6 @@ npx -y claude-to-wordpress-native media fetch \
 ```
 
 Or set `media[].sourceUrl` and run `media sync` / `generate` (auto-fetches missing files).
-
-Scaffold a starter package, media folder, and skill:
-
-```bash
-npx -y claude-to-wordpress-native init --name "Acme Child" --slug acme-child
-# Shop scaffold:
-# npx -y claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
-```
-
-Generate the child theme ZIP:
-
-```bash
-npx -y claude-to-wordpress-native generate \
-  --package ./ctw-package.json --out ./acme-child.zip --media ./media
-```
-
-The CLI ships as a self-contained `dist/ctw.mjs` bundle. Unpublished workspace packages are not required at runtime.
-
-Also available as `npx -y ctw …` after `npm install -g claude-to-wordpress-native`.
-
-From a local clone:
-
-```bash
-npm install
-npm run build
-npm run ctw -- skill
-npm run ctw -- plugin-zip
-npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
-```
 
 CLI flags and outputs: [docs/cli.md](docs/cli.md).
 
