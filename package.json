@@ -46,7 +46,7 @@
     "prepublishOnly": "npm run build && npm pack --dry-run"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.13.10",
     "esbuild": "^0.25.1",
     "eslint": "^9.22.0",
