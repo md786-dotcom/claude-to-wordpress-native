@@ -1,13 +1,13 @@
 {
   "name": "claude-to-wordpress-native",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Claude Code toolchain that emits Hello Elementor child themes with Elementor Free pages",
   "license": "GPL-2.0-or-later",
   "main": "./dist/ctw.mjs",
   "bin": {
-    "ctw": "./dist/ctw.mjs",
-    "claude-to-wordpress-native": "./dist/ctw.mjs"
+    "ctw": "dist/ctw.mjs",
+    "claude-to-wordpress-native": "dist/ctw.mjs"
   },
   "files": [
     "dist/ctw.mjs",
