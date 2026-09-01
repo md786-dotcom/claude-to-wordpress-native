@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@types/node": "^22.13.10",
+    "@types/node": "^26.4.0",
     "esbuild": "^0.25.1",
     "eslint": "^9.22.0",
     "eslint-plugin-sonarjs": "^3.0.2",
