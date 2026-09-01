@@ -1,0 +1,40 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: read-all
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Create GitHub Release from CHANGELOG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          NOTES_FILE="$(mktemp)"
+          awk -v version="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" version "\\]") found = 1
+              next
+            }
+            found { print }
+          ' CHANGELOG.md > "$NOTES_FILE"
+          if [ ! -s "$NOTES_FILE" ]; then
+            echo "Release notes for ${VERSION} not found in CHANGELOG.md" >&2
+            exit 1
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; skipping."
+            exit 0
+          fi
+          gh release create "$TAG" --title "$VERSION" --notes-file "$NOTES_FILE"
