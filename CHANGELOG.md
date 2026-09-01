@@ -8,6 +8,7 @@ When a release fixes a publicly known runtime vulnerability that already had a C
 
 ## Unreleased
 
+- README: minimalist layout with single npm and X links, improved spacing, and credit to Othneil Drew's Best-README-Template.
 - Maintainer publish is local `npm login` and `npm publish`. GitHub Actions publish is optional (`workflow_dispatch` only). Git tags do not start a publish.
 
 ## [0.2.1](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.1) - 2026-09-01
