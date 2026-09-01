@@ -2,7 +2,7 @@
 
 # Claude-to-WordPress Native
 
-Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs the free stack and imports pages so **Edit with Elementor** works.
+Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin (CTW Native) installs the free stack and imports pages so **Edit with Elementor** works.
 
 [![npm][npm-shield]][npm-url]
 [![X @mdafanulh][x-shield]][x-url]
@@ -14,8 +14,6 @@ Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** Z
 Claude Code only. Claude does not edit the site after install.
 
 > **Disclaimer:** Theme quality depends on the Claude model and the prompt. This tool is a bridge between Claude output and Elementor Free editing.
-
-<!-- After registering at https://www.bestpractices.dev add: [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<ID>/badge)](https://www.bestpractices.dev/projects/<ID>) -->
 
 <details>
 <summary>Table of contents</summary>
@@ -244,7 +242,6 @@ Bump `version` in the root `package.json`, `packages/*/package.json`, and `plugi
 - **Contribute:** pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for the process and coding standards.
 - **Security:** [SECURITY.md](SECURITY.md). Do not file public issues for undisclosed vulnerabilities.
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md) and [GitHub Releases](https://github.com/md786-dotcom/claude-to-wordpress-native/releases).
-- **OpenSSF Best Practices:** repo files for the [passing badge](https://www.bestpractices.dev/en/criteria/0) are in place. Registration steps: [docs/openssf-best-practices.md](docs/openssf-best-practices.md).
 
 ## License
 
