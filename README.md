@@ -1,5 +1,7 @@
 # Claude-to-WordPress Native
 
+[![npm version](https://img.shields.io/npm/v/claude-to-wordpress-native.svg)](https://www.npmjs.com/package/claude-to-wordpress-native)
+
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs Hello Elementor and the declared free stack, then imports pages so **Edit with Elementor** works.
 
 Claude Code only. Claude does not edit the site after install.
@@ -7,6 +9,8 @@ Claude Code only. Claude does not edit the site after install.
 **Disclaimer:** The quality of the generated theme depends on the Claude model and the prompt. This tool/skill is a bridge between Claude-generated output and Elementor Free editing compatibility.
 
 ## Quick start (Claude Code)
+
+Install from npm ([`claude-to-wordpress-native@0.2.0`](https://www.npmjs.com/package/claude-to-wordpress-native/v/0.2.0)):
 
 ```bash
 npx -y claude-to-wordpress-native skill
@@ -144,21 +148,22 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 
 ## Publish (maintainers)
 
-GitHub Actions publishes `claude-to-wordpress-native` on tag `v*` (for example `v0.2.0`) or from **Actions → Publish → Run workflow**.
+**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.0`.
 
-One-time npm auth (pick one):
-
-1. Repo secret `NPM_TOKEN` with an npm automation token, or
-2. [Trusted publisher](https://docs.npmjs.com/trusted-publishers/) on npmjs.com: GitHub Actions, owner `md786-dotcom`, repo `claude-to-wordpress-native`, workflow `publish.yml`.
-
-Manual publish:
+Before each release, bump `version` in the root `package.json`, `packages/*/package.json`, and `plugin/ctw-native.php` (`CTW_NATIVE_VERSION`).
 
 ```bash
-npm login
+npm ci
+npm test
+npm login    # md786-dotcom npm account
 npm publish
 ```
 
-Preview the tarball first: `npm pack --dry-run` / `npm publish --dry-run`. Name `claude-to-wordpress-native@version` cannot be reused after publish.
+Preview the tarball first: `npm pack --dry-run`. A published version cannot be reused.
+
+### GitHub Actions (optional)
+
+`.github/workflows/publish.yml` runs on tag `v*` or **Actions → Publish**. For CI publish, add repo secret `NPM_TOKEN` or configure [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (owner `md786-dotcom`, repo `claude-to-wordpress-native`, workflow `publish.yml`).
 
 ## Plugins installed by setup
 
