@@ -6,6 +6,9 @@ Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** Z
 
 [![npm][npm-shield]][npm-url]
 [![License][license-shield]][license-url]
+[![WordPress][wp-shield]][wp-url]
+[![Elementor][elementor-shield]][elementor-url]
+[![WooCommerce][woo-shield]][woo-url]
 [![X @mdafanulh][x-shield]][x-url]
 [![npm provenance][provenance-shield]][npm-url]
 [![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
@@ -258,6 +261,12 @@ Elementor Free document and persist patterns adapted from Mian Shahzad Raza’s 
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
 [license-shield]: https://img.shields.io/github/license/md786-dotcom/claude-to-wordpress-native?style=flat-square
 [license-url]: LICENSE
+[wp-shield]: https://img.shields.io/badge/WordPress-6.0%2B-21759B?style=flat-square&logo=wordpress&logoColor=white
+[wp-url]: https://wordpress.org/
+[elementor-shield]: https://img.shields.io/badge/Elementor-3.16%2B-92003B?style=flat-square&logo=elementor&logoColor=white
+[elementor-url]: https://wordpress.org/plugins/elementor/
+[woo-shield]: https://img.shields.io/badge/WooCommerce-7.9%2B%20(optional)-96588A?style=flat-square&logo=woocommerce&logoColor=white
+[woo-url]: https://wordpress.org/plugins/woocommerce/
 [x-shield]: https://img.shields.io/badge/X-@mdafanulh-000000?style=flat-square&logo=x&logoColor=white
 [x-url]: https://x.com/mdafanulh
 [provenance-shield]: https://img.shields.io/badge/npm-provenance-cb3837?logo=npm&style=flat-square
