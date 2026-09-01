@@ -2,7 +2,9 @@
 /**
  * Persists Elementor Free documents (pages and ElementsKit trees).
  *
- * Adapted from EMCP Tools document persist patterns (GPL-2.0-or-later).
+ * The Elementor meta contract written here (`_elementor_data` and friends) follows
+ * the persist pattern used by EMCP Tools, copyright Mian Shahzad Raza (MSR Builds),
+ * GPL-2.0-or-later, https://github.com/msrbuilds/elementor-mcp
  *
  * @package CTW_Native
  */

@@ -251,7 +251,7 @@ GPL-2.0-or-later. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 README structure adapted from [Othneil Drew](https://github.com/othneildrew)’s [Best-README-Template](https://github.com/othneildrew/Best-README-Template).
 
-Patterns adapted from [msrbuilds/elementor-mcp](https://github.com/msrbuilds/elementor-mcp). Parent theme: [elementor/hello-theme](https://github.com/elementor/hello-theme).
+Elementor Free document and persist patterns adapted from Mian Shahzad Raza’s [EMCP Tools / elementor-mcp](https://github.com/msrbuilds/elementor-mcp) (GPL-2.0-or-later). Parent theme: [elementor/hello-theme](https://github.com/elementor/hello-theme).
 
 [npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat-square&label=npm
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
