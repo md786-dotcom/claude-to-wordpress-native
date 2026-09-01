@@ -99,18 +99,9 @@ CLI flags and outputs: [docs/cli.md](docs/cli.md).
 
 After `skill` (or `init`) installs the skills, use the slash commands in this order:
 
-1. Run **`/ctw-native`**. Claude writes `ctw-package.json`, media, WPCode Free snippets, and the rest of the package.
+1. Run **`/ctw-native`** with your website prompt in Claude Code. Claude writes `ctw-package.json`, media, WPCode Free snippets, and the rest of the package.
 2. Run **`/ctw-native-check`**. That runs `check`: schema, WPCode Free locations, native-Elementor style policy (no page CSS snippets, Woo-only CSS selectors, no widget `<style>` / `_css_classes` / `custom_css`), and CSS structure (unclosed `{`, escaped `>`). Fix every error and re-run `/ctw-native-check` until it passes.
-3. Only then generate the child theme ZIP:
-
-```bash
-npx -y claude-to-wordpress-native generate \
-  --package ./ctw-package.json --out ./acme-child.zip --media ./media
-```
-
-Do not skip `/ctw-native-check`. `generate` also refuses a ZIP when CSS check fails, but the slash command is the loop Claude should use after `/ctw-native`.
-
-You can run the same audit from the CLI: `npx -y claude-to-wordpress-native check --package ./ctw-package.json`.
+3. Tell Claude to generate the child theme zip file for WordPress.
 
 ### Web-dev flow
 
