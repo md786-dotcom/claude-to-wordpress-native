@@ -8,6 +8,10 @@ type CssIssue = {
   message: string;
 };
 
+const PSEUDO_CLASS = /:(hover|focus|active|visited|focus-visible|focus-within)\b/i;
+const PSEUDO_ELEMENT = /::(before|after|placeholder|first-line|first-letter)\b/i;
+const BANNED_MOTION_KEYS =
+  /^(motion_fx|motion_fx_|hover_animation|sticky|sticky_on|sticky_parent|sticky_effects_offset)$/i;
 const WOO_CLASS = /\.(?:woocommerce[\w-]*|ctw-woo-[\w-]+)/;
 const NESTED_AT = /^@(?:media|supports|layer|container)\b/i;
 const CSS_CLASS_KEYS = ["_css_classes", "css_classes"] as const;
@@ -18,6 +22,20 @@ const TREE_KEYS = ["shop", "cart", "checkout"] as const;
  */
 export function checkPackageStylePolicy(pkg: CtwPackage): CssIssue[] {
   const issues: CssIssue[] = [];
+  if (pkg.header !== undefined) {
+    issues.push({
+      path: "header",
+      message:
+        "Do not emit a package header template. Build header and footer manually in ElementsKit Free (Header Footer) after import. Omit the top-level header key.",
+    });
+  }
+  if (pkg.footer !== undefined) {
+    issues.push({
+      path: "footer",
+      message:
+        "Do not emit a package footer template. Build header and footer manually in ElementsKit Free (Header Footer) after import. Omit the top-level footer key.",
+    });
+  }
   pkg.snippets.forEach((snippet, index) => {
     if (snippet.type !== "css") {
       return;
@@ -33,9 +51,12 @@ export function checkPackageStylePolicy(pkg: CtwPackage): CssIssue[] {
     }
     for (const selector of cssRuleSelectors(snippet.code)) {
       if (!selectorTargetsWoo(selector)) {
+        const pseudo = selectorUsesBannedPseudo(selector);
         issues.push({
           path,
-          message: `Selector \`${selector}\` is not WooCommerce-scoped. CSS snippets may only target .woocommerce, .woocommerce-*, or .ctw-woo-* so Edit with Elementor still wins on pages.`,
+          message: pseudo
+            ? `Selector \`${selector}\` uses :hover / :focus or ::before / ::after on page elements. Use static native Elementor widget settings. WooCommerce CSS may use pseudo only on .woocommerce / .ctw-woo-* selectors.`
+            : `Selector \`${selector}\` is not WooCommerce-scoped. CSS snippets may only target .woocommerce, .woocommerce-*, or .ctw-woo-* so Edit with Elementor still wins on pages.`,
         });
       }
     }
@@ -67,6 +88,13 @@ export function checkPackageStylePolicy(pkg: CtwPackage): CssIssue[] {
  */
 export function selectorTargetsWoo(selector: string): boolean {
   return WOO_CLASS.test(selector);
+}
+
+/**
+ * True when a selector uses interaction pseudo-classes or pseudo-elements.
+ */
+export function selectorUsesBannedPseudo(selector: string): boolean {
+  return PSEUDO_CLASS.test(selector) || PSEUDO_ELEMENT.test(selector);
 }
 
 /**
@@ -232,6 +260,18 @@ function walkElementPolicy(
 ): void {
   elements.forEach((node, index) => {
     const nodePath = `${path}[${String(index)}]`;
+    for (const [key, value] of Object.entries(node.settings)) {
+      if (BANNED_MOTION_KEYS.test(key)) {
+        issues.push({
+          path: `${nodePath} ${key}`,
+          message:
+            "Do not use motion, sticky, or hover-animation settings that need custom CSS or Pro. Use static native Elementor colors, typography, and borders.",
+        });
+      }
+      if (typeof value === "string") {
+        scanTextForBannedPseudo(value, `${nodePath} ${key}`, issues);
+      }
+    }
     for (const key of CSS_CLASS_KEYS) {
       const value = settingString(node.settings, key);
       if (value !== undefined && value.trim() !== "") {
@@ -262,4 +302,15 @@ function settingString(
 ): string | undefined {
   const value = settings[key];
   return typeof value === "string" ? value : undefined;
+}
+
+function scanTextForBannedPseudo(text: string, path: string, issues: CssIssue[]): void {
+  if (!PSEUDO_CLASS.test(text) && !PSEUDO_ELEMENT.test(text)) {
+    return;
+  }
+  issues.push({
+    path,
+    message:
+      "Do not embed :hover / :focus or ::before / ::after CSS in widget content. Use static native Elementor settings. WooCommerce CSS snippets may use pseudo only on .woocommerce / .ctw-woo-* selectors.",
+  });
 }

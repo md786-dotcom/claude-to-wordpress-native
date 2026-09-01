@@ -222,7 +222,86 @@ describe("checkPackageCss", () => {
     assert.match(checkPackageCss(pkg)[0]?.message ?? "", /CSS classes/);
   });
 
-  it("flags custom_css and widget style blocks across trees", () => {
+  it("rejects package header and footer keys", () => {
+    const pkg = readPackageFromJsonText(
+      JSON.stringify({
+        version: 1,
+        theme: {
+          slug: "demo-child",
+          name: "Demo Child",
+          colors: {},
+          typography: {},
+          menus: [],
+        },
+        media: [],
+        pages: [
+          {
+            title: "Home",
+            slug: "home",
+            isFrontPage: true,
+            template: "elementor_header_footer",
+            elements: [
+              {
+                id: "c1",
+                elType: "container",
+                widgetType: null,
+                isInner: false,
+                settings: { content_width: "full" },
+                elements: [],
+              },
+            ],
+          },
+        ],
+        header: { title: "Header", elements: [] },
+        footer: { title: "Footer", elements: [] },
+        forms: [],
+        snippets: [],
+        woocommerce: { enabled: false },
+        plugins: [...CORE_PLUGIN_SLUGS],
+      }),
+    );
+    const messages = checkPackageCss(pkg).map((issue) => issue.message).join("\n");
+    assert.match(messages, /Do not emit a package header template/);
+    assert.match(messages, /Do not emit a package footer template/);
+  });
+
+  it("allows Woo-scoped :hover in shop css snippets", () => {
+    const pkg = readPackageFromJsonText(
+      shopCss(".woocommerce a.button:hover{background:#111;}"),
+    );
+    assert.deepEqual(checkPackageCss(pkg), []);
+  });
+
+  it("rejects page :hover selectors in shop css snippets", () => {
+    const pkg = readPackageFromJsonText(shopCss("a:hover{color:red;}"));
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /:hover|:focus|::before|not WooCommerce-scoped/);
+  });
+
+  it("rejects hover_animation on elements", () => {
+    const pkg = readPackageFromJsonText(
+      packageWithSnippets([], [
+        {
+          title: "Home",
+          slug: "home",
+          isFrontPage: true,
+          template: "elementor_header_footer",
+          elements: [
+            {
+              id: "b1",
+              elType: "widget",
+              widgetType: "button",
+              isInner: false,
+              settings: { hover_animation: "grow" },
+              elements: [],
+            },
+          ],
+        },
+      ]),
+    );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /hover-animation|motion/i);
+  });
+
+  it("flags custom_css and widget style blocks on pages", () => {
     const pkg = readPackageFromJsonText(
       JSON.stringify({
         version: 1,
@@ -252,32 +331,6 @@ describe("checkPackageCss", () => {
             ],
           },
         ],
-        header: {
-          title: "Head",
-          elements: [
-            {
-              id: "h1",
-              elType: "widget",
-              widgetType: "html",
-              isInner: false,
-              settings: { html: "<style>a{color:red;}</style>" },
-              elements: [],
-            },
-          ],
-        },
-        footer: {
-          title: "Foot",
-          elements: [
-            {
-              id: "f1",
-              elType: "widget",
-              widgetType: "text-editor",
-              isInner: false,
-              settings: { editor: "<style>p{margin:0;}</style>" },
-              elements: [],
-            },
-          ],
-        },
         forms: [],
         snippets: [],
         woocommerce: {

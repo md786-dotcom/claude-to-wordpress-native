@@ -13,12 +13,27 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname as dirname2, resolve } from "node:path";
 
 // packages/generate/dist/check-css-policy.js
+var PSEUDO_CLASS = /:(hover|focus|active|visited|focus-visible|focus-within)\b/i;
+var PSEUDO_ELEMENT = /::(before|after|placeholder|first-line|first-letter)\b/i;
+var BANNED_MOTION_KEYS = /^(motion_fx|motion_fx_|hover_animation|sticky|sticky_on|sticky_parent|sticky_effects_offset)$/i;
 var WOO_CLASS = /\.(?:woocommerce[\w-]*|ctw-woo-[\w-]+)/;
 var NESTED_AT = /^@(?:media|supports|layer|container)\b/i;
 var CSS_CLASS_KEYS = ["_css_classes", "css_classes"];
 var TREE_KEYS = ["shop", "cart", "checkout"];
 function checkPackageStylePolicy(pkg) {
   const issues = [];
+  if (pkg.header !== void 0) {
+    issues.push({
+      path: "header",
+      message: "Do not emit a package header template. Build header and footer manually in ElementsKit Free (Header Footer) after import. Omit the top-level header key."
+    });
+  }
+  if (pkg.footer !== void 0) {
+    issues.push({
+      path: "footer",
+      message: "Do not emit a package footer template. Build header and footer manually in ElementsKit Free (Header Footer) after import. Omit the top-level footer key."
+    });
+  }
   pkg.snippets.forEach((snippet, index) => {
     if (snippet.type !== "css") {
       return;
@@ -33,9 +48,10 @@ function checkPackageStylePolicy(pkg) {
     }
     for (const selector of cssRuleSelectors(snippet.code)) {
       if (!selectorTargetsWoo(selector)) {
+        const pseudo = selectorUsesBannedPseudo(selector);
         issues.push({
           path,
-          message: `Selector \`${selector}\` is not WooCommerce-scoped. CSS snippets may only target .woocommerce, .woocommerce-*, or .ctw-woo-* so Edit with Elementor still wins on pages.`
+          message: pseudo ? `Selector \`${selector}\` uses :hover / :focus or ::before / ::after on page elements. Use static native Elementor widget settings. WooCommerce CSS may use pseudo only on .woocommerce / .ctw-woo-* selectors.` : `Selector \`${selector}\` is not WooCommerce-scoped. CSS snippets may only target .woocommerce, .woocommerce-*, or .ctw-woo-* so Edit with Elementor still wins on pages.`
         });
       }
     }
@@ -59,6 +75,9 @@ function checkPackageStylePolicy(pkg) {
 }
 function selectorTargetsWoo(selector) {
   return WOO_CLASS.test(selector);
+}
+function selectorUsesBannedPseudo(selector) {
+  return PSEUDO_CLASS.test(selector) || PSEUDO_ELEMENT.test(selector);
 }
 function cssRuleSelectors(css) {
   const cursor = new CssCursor(css);
@@ -202,6 +221,17 @@ var CssCursor = class {
 function walkElementPolicy(elements, path, issues) {
   elements.forEach((node, index) => {
     const nodePath = `${path}[${String(index)}]`;
+    for (const [key, value] of Object.entries(node.settings)) {
+      if (BANNED_MOTION_KEYS.test(key)) {
+        issues.push({
+          path: `${nodePath} ${key}`,
+          message: "Do not use motion, sticky, or hover-animation settings that need custom CSS or Pro. Use static native Elementor colors, typography, and borders."
+        });
+      }
+      if (typeof value === "string") {
+        scanTextForBannedPseudo(value, `${nodePath} ${key}`, issues);
+      }
+    }
     for (const key of CSS_CLASS_KEYS) {
       const value = settingString(node.settings, key);
       if (value !== void 0 && value.trim() !== "") {
@@ -226,6 +256,15 @@ function walkElementPolicy(elements, path, issues) {
 function settingString(settings, key) {
   const value = settings[key];
   return typeof value === "string" ? value : void 0;
+}
+function scanTextForBannedPseudo(text, path, issues) {
+  if (!PSEUDO_CLASS.test(text) && !PSEUDO_ELEMENT.test(text)) {
+    return;
+  }
+  issues.push({
+    path,
+    message: "Do not embed :hover / :focus or ::before / ::after CSS in widget content. Use static native Elementor settings. WooCommerce CSS snippets may use pseudo only on .woocommerce / .ctw-woo-* selectors."
+  });
 }
 
 // packages/generate/dist/check-css.js

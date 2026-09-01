@@ -32,6 +32,9 @@ describe("skill assets", () => {
     assert.match(markdown, /container_type/);
     assert.match(markdown, /native Elementor/i);
     assert.match(markdown, /WooCommerce-only|Woo-only/i);
+    assert.match(markdown, /ElementsKit Free/);
+    assert.match(markdown, /Do not emit.*header|No header or footer/i);
+    assert.match(markdown, /pseudo|:hover|::before/i);
     assert.match(markdown, /WPCode Free/);
     assert.match(markdown, /insert-headers-and-footers/);
     assert.match(markdown, /not WPCode Pro|Never `scss`/i);
@@ -40,6 +43,8 @@ describe("skill assets", () => {
     assert.match(checkMd, /everywhere.*PHP-only|PHP-only/i);
     assert.match(checkMd, /native Elementor/i);
     assert.match(checkMd, /WooCommerce-only|Woo-only/i);
+    assert.match(checkMd, /ElementsKit Free/);
+    assert.match(checkMd, /header` or `footer`/i);
     assert.doesNotMatch(checkMd, /validate` runs the same/);
     assert.ok(existsSync(join(skillAssetsDir(), "SKILL.md")));
     assert.ok(existsSync(join(skillAssetsDir(), "check", "SKILL.md")));

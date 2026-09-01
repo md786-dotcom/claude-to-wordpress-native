@@ -89,7 +89,7 @@ You can run the same audit from the CLI: `npx -y claude-to-wordpress-native chec
 | Surface | Tool |
 | --- | --- |
 | Pages and posts | **Edit with Elementor** (Free widgets only) |
-| Header and footer | **ElementsKit** Header Footer |
+| Header and footer | **ElementsKit Free** Header Footer (built manually in WordPress after import — not in the package) |
 | Shop / cart / checkout | Elementor Free pages + shortcodes (assigned as Woo pages); single/archive use child PHP templates |
 | Dummy products | Up to 4 via `products add` / `woocommerce.products` (name, price, description, image) |
 | Extra CSS | **Appearance → Customize → Additional CSS** |

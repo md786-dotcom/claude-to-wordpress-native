@@ -179,58 +179,6 @@
       ]
     }
   ],
-  "header": {
-    "title": "Site Header",
-    "elements": [
-      {
-        "id": "hdr001",
-        "elType": "container",
-        "widgetType": null,
-        "isInner": false,
-        "settings": {
-          "content_width": "full"
-        },
-        "elements": [
-          {
-            "id": "hdr002",
-            "elType": "widget",
-            "widgetType": "heading",
-            "isInner": false,
-            "settings": {
-              "title": "Clearflow Plumbing"
-            },
-            "elements": []
-          }
-        ]
-      }
-    ]
-  },
-  "footer": {
-    "title": "Site Footer",
-    "elements": [
-      {
-        "id": "ftr001",
-        "elType": "container",
-        "widgetType": null,
-        "isInner": false,
-        "settings": {
-          "content_width": "full"
-        },
-        "elements": [
-          {
-            "id": "ftr002",
-            "elType": "widget",
-            "widgetType": "text-editor",
-            "isInner": false,
-            "settings": {
-              "editor": "<p>\u00a9 Clearflow Plumbing</p>"
-            },
-            "elements": []
-          }
-        ]
-      }
-    ]
-  },
   "forms": [
     {
       "title": "Contact",

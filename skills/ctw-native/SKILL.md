@@ -164,6 +164,21 @@ Fonts and brand colors need no page CSS: set `theme.colors` / `theme.typography`
 
 `/ctw-native-check` (`check`) fails the package when these rules are broken.
 
+### No header or footer in the package
+
+Do **not** emit top-level `header` or `footer` in `ctw-package.json`. ElementsKit Free **Header Footer** is configured **manually in WordPress** after import (not by Claude Code).
+
+Tell the developer: after import, open **ElementsKit → Header Footer**, create header and footer templates, and assign them to the site.
+
+### No pseudo-elements, hover CSS, or motion tricks
+
+Site-wide page CSS is banned. Do not design layouts that need custom `:hover`, `:focus`, `::before`, `::after`, transitions, or motion effects backed by WPCode or widget `<style>` blocks.
+
+- Use **static** native Elementor settings: solid colors, typography, padding, borders, grid/flex layout.
+- Do **not** set `hover_animation`, `motion_fx`, or sticky/motion keys on elements.
+- Do **not** put pseudo-class or pseudo-element CSS in `html` / text-editor content.
+- WooCommerce `type: "css"` snippets may still use `:hover` or `::` **only** on `.woocommerce` / `.ctw-woo-*` selectors (for example `.woocommerce a.button:hover`).
+
 ## WPCode Free snippets (not Pro)
 
 The stack installs **WPCode Free** from wordpress.org (`insert-headers-and-footers`). Do **not** assume WPCode Pro. Do not emit Pro-only snippet types, auto-insert locations, generators, cloud library payloads, or device/conditional rules.
@@ -259,7 +274,7 @@ Use **only** these `widgetType` values (plus `elType: "container"` for layout). 
 | `menu-anchor` | |
 | `sidebar` | |
 
-Forms → MetForm (`forms[]`). Header/footer → ElementsKit (`header` / `footer`). Not Elementor form or Theme Builder.
+Forms → MetForm (`forms[]`). **Do not** emit package `header` / `footer` — ElementsKit Free Header Footer is built manually in WordPress after import. Not Elementor form or Theme Builder.
 
 ## Output
 
@@ -292,13 +307,13 @@ Claude cannot edit the live site. After the developer uploads and activates a ne
 
 First-time sites (nothing imported yet): skip wipe, install the stack if needed, then **Import package (one-shot)** once.
 
-Always tell the developer: upload/activate child theme → **CTW Native → Wipe generated content** → **Import package (one-shot)**.
+Always tell the developer: upload/activate child theme → **CTW Native → Wipe generated content** → **Import package (one-shot)** → **ElementsKit → Header Footer** (build header and footer manually).
 
 ## Package rules
 
 - Parent: Hello Elementor (`Template: hello-elementor`).
 - Exactly one `isFrontPage: true`.
-- Elementor Free allowlist only (see table above). Forms → MetForm. Header/footer → ElementsKit.
+- Elementor Free allowlist only (see table above). Forms → MetForm. **No** package `header` / `footer` (ElementsKit Free after import).
 - Containers: always `"content_width": "full"` (never boxed).
 - Layout via native container settings (`container_type: "grid"` or flex). CSS snippets are Woo-only; brochure packages ship none.
 - Brochure: `woocommerce.enabled: false` and omit woo from `plugins`, products, and woo pages.
@@ -306,7 +321,7 @@ Always tell the developer: upload/activate child theme → **CTW Native → Wipe
 ## Client editing
 
 - Pages/posts: Elementor Free
-- Header/footer: ElementsKit
+- Header/footer: **ElementsKit Free** (manual in WP after import — not in `ctw-package.json`)
 - Shop / cart / checkout: Elementor pages assigned as WooCommerce pages (plus native single/archive templates)
 - Extra CSS: Appearance → Customize → Additional CSS (client-authored). Do not ship page layout CSS in WPCode — it would override these Elementor edits.
 - Snippets: **WPCode Free** → Code Snippets (wordpress.org `insert-headers-and-footers`). Auto Insert = Site Wide Header/Footer. CSS snippets are Woo-only. Not WPCode Pro (no SCSS, Blocks, device rules, or CSS-selector insert).

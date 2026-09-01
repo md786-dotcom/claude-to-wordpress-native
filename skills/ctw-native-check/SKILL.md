@@ -34,9 +34,12 @@ Page layout and styling belong in **native Elementor settings**, not WPCode. A s
 
 Automatic findings (fix all of them):
 
+- Top-level `header` or `footer` keys fail. Omit them; build header and footer manually in ElementsKit Free after import.
 - Brochure packages (`woocommerce.enabled: false`) must have **zero** `type: "css"` snippets.
-- Shop `type: "css"` selectors must include `.woocommerce`, `.woocommerce-*`, or `.ctw-woo-*` only. `!important` is allowed there.
+- Shop `type: "css"` selectors must include `.woocommerce`, `.woocommerce-*`, or `.ctw-woo-*` only. `!important` is allowed there. `:hover` / `::pseudo` are allowed only on those Woo selectors.
 - Any `<style>` in Elementor `html` / text-editor widgets (or WPCode `html` snippets) fails. Do not move that CSS to a page snippet.
+- `:hover`, `:focus`, or `::before` / `::after` in widget `html` / `editor` / other string settings fails.
+- `hover_animation`, `motion_fx`, or sticky/motion settings on elements fail.
 - `custom_css` on elements fails (Elementor Free does not print it).
 - `_css_classes` / `css_classes` on elements fails. Use `container_type: "grid"` and native padding/colors/typography.
 - `type: "css"` snippets must be **raw CSS** (no `<style>` wrapper).

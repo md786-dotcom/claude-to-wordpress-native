@@ -7,9 +7,10 @@ Build a brochure site for a local plumbing company named "Clearflow Plumbing" in
 - Hello Elementor child theme via CTW Native
 - Pages: Home (front), Services, Contact
 - Free Elementor widgets only
-- Header and footer via ElementsKit payloads
 - Contact form via MetForm (name, email, message)
 - Native Elementor heading typography (letter-spacing). Do not add a WPCode `type: "css"` snippet — brochure packages ship none.
+- **Do not** emit package `header` / `footer`. Build header and footer manually in ElementsKit Free after import.
+- No pseudo-element or `:hover` CSS in pages; static native styling only (Woo CSS may use pseudo on `.woocommerce` selectors).
 - `woocommerce.enabled`: false
 - Colors: primary `#0B3D91`
 - Include one hero image in `media/` and reference it from the home page image widget
