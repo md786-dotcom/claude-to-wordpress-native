@@ -6,8 +6,8 @@
   "license": "GPL-2.0-or-later",
   "main": "./dist/ctw.mjs",
   "bin": {
-    "ctw": "./dist/ctw.mjs",
-    "claude-to-wordpress-native": "./dist/ctw.mjs"
+    "ctw": "dist/ctw.mjs",
+    "claude-to-wordpress-native": "dist/ctw.mjs"
   },
   "files": [
     "dist/ctw.mjs",
