@@ -2,7 +2,6 @@ name: CodeQL
 
 on:
   push:
-    branches: [main, "cursor/**"]
   pull_request:
   schedule:
     - cron: "18 7 * * 1"
@@ -23,10 +22,10 @@ jobs:
         # CodeQL has no PHP extractor; PHP is covered by PHPStan/PHPMD in ci.yml.
         language: [javascript-typescript]
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: github/codeql-action/init@6f5948dfacef28e207b48d0905cf90c03365536d # v3.37.9
         with:
           languages: ${{ matrix.language }}
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@6f5948dfacef28e207b48d0905cf90c03365536d # v3.37.9
         with:
           category: "/language:${{ matrix.language }}"
