@@ -4,7 +4,10 @@
 
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs the free stack and imports pages so **Edit with Elementor** works.
 
-[![npm][npm-shield]][npm-url] · [@mdafanulh on X][x-url] · [OpenSSF Scorecard][scorecard-url] · [npm provenance][npm-url]
+[![npm][npm-shield]][npm-url]
+[![X @mdafanulh][x-shield]][x-url]
+[![npm provenance][provenance-shield]][npm-url]
+[![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
 
 [Getting started](#getting-started) · [CLI reference](docs/cli.md) · [Issues](https://github.com/md786-dotcom/claude-to-wordpress-native/issues) · [Contributing](CONTRIBUTING.md)
 
@@ -255,5 +258,8 @@ Patterns adapted from [msrbuilds/elementor-mcp](https://github.com/msrbuilds/ele
 
 [npm-shield]: https://img.shields.io/npm/v/claude-to-wordpress-native?style=flat-square&label=npm
 [npm-url]: https://www.npmjs.com/package/claude-to-wordpress-native
+[x-shield]: https://img.shields.io/badge/X-@mdafanulh-000000?style=flat-square&logo=x&logoColor=white
 [x-url]: https://x.com/mdafanulh
+[provenance-shield]: https://img.shields.io/badge/npm-provenance-cb3837?logo=npm&style=flat-square
+[scorecard-shield]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.scorecard.dev%2Fprojects%2Fgithub.com%2Fmd786-dotcom%2Fclaude-to-wordpress-native&query=%24.score&label=OpenSSF%20Scorecard&style=flat-square
 [scorecard-url]: https://scorecard.dev/viewer/?uri=github.com/md786-dotcom/claude-to-wordpress-native
