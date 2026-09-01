@@ -1,14 +1,25 @@
+# Dependabot config for OpenSSF Scorecard's Dependency-Update-Tool check.
+#
+# Version-update PRs are disabled (open-pull-requests-limit: 0) so unsolicited
+# dependency bumps do not break CI or published builds. Vulnerability alerts
+# still appear under GitHub Security; enable "Dependabot security updates" in
+# repo settings if you want PRs only for known CVEs.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
   - package-ecosystem: composer
     directory: /plugin
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
