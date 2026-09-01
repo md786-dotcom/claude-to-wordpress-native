@@ -29,15 +29,4 @@ jobs:
       - name: Publish to GitHub Packages (repo Packages sidebar)
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-        run: |
-          {
-            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
-            echo "registry=https://npm.pkg.github.com/"
-          } >> .npmrc
-          npm publish --access public
-      - name: Make GitHub Package public
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -X PATCH "user/packages/npm/claude-to-wordpress-native" \
-            -f visibility=public 2>/dev/null || true
+        run: bash .github/scripts/publish-github-packages.sh
