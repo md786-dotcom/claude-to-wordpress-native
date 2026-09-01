@@ -3,7 +3,7 @@
  * Plugin Name: CTW Native
  * Plugin URI: https://github.com/md786-dotcom/claude-to-wordpress-native
  * Description: Installs Hello Elementor and the declared free stack, then imports a CTW child theme package for Elementor Free editing.
- * Version: 0.2.1
+ * Version: 0.2.2
  * Requires at least: 6.0
  * Requires PHP: 8.1
  * Author: md786-dotcom
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CTW_NATIVE_VERSION', '0.2.1' );
+define( 'CTW_NATIVE_VERSION', '0.2.2' );
 define( 'CTW_NATIVE_FILE', __FILE__ );
 define( 'CTW_NATIVE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CTW_NATIVE_URL', plugin_dir_url( __FILE__ ) );

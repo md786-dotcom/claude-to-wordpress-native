@@ -64,7 +64,7 @@ TypeScript · Node.js 20+ · WordPress · Elementor Free · Hello Elementor · W
 
 Requires Node.js 20+.
 
-Install the latest release (`0.2.1`):
+Install the latest release (`0.2.2`):
 
 ```bash
 npx -y claude-to-wordpress-native skill
@@ -219,7 +219,7 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 <details>
 <summary>Publish (maintainers)</summary>
 
-Latest release: `0.2.1`.
+Latest release: `0.2.2`.
 
 Publish from your machine with the npm account that owns the package:
 

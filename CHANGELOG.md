@@ -8,9 +8,17 @@ When a release fixes a publicly known runtime vulnerability that already had a C
 
 ## Unreleased
 
-- README: restore shield badges for X, npm provenance, and OpenSSF Scorecard in the header.
-- README: minimalist layout with single npm and X links, improved spacing, and credit to Othneil Drew's Best-README-Template.
-- Maintainer publish is local `npm login` and `npm publish`. GitHub Actions publish is optional (`workflow_dispatch` only). Git tags do not start a publish.
+## [0.2.2](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.2) - 2026-09-01
+
+Install: `npx -y claude-to-wordpress-native@0.2.2 skill`
+
+- Ship the full GPL-2.0 license text in `LICENSE` (GitHub and npm consumers can detect GPL-2.0).
+- Include `LICENSE` and `NOTICE` inside the uploadable plugin ZIP from `plugin-zip`.
+- Credit Mian Shahzad Raza (EMCP Tools / elementor-mcp) in README, NOTICE, and the Elementor document writer.
+- README: license badge (`GPL-2.0-or-later`), and platform badges for WordPress 6.0+, Elementor 3.16+, and WooCommerce 7.9+ (optional).
+- Sync `package-lock.json` so `npm ci` works under npm 10.
+
+No publicly known CVE-assigned runtime vulnerabilities were fixed in this release.
 
 ## [0.2.1](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.1) - 2026-09-01
 
