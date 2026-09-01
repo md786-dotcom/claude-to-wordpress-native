@@ -171,20 +171,21 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 
 ## Publish (maintainers)
 
-**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.1`. From this version, npm shows a **provenance** mark on the package page (Sigstore / SLSA, built by `.github/workflows/publish.yml`). Verify with `npm audit signatures`.
+**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.1`.
 
-Releases are published from GitHub Actions with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). There is no long-lived `NPM_TOKEN`. npm attaches Sigstore / SLSA provenance automatically. After a trusted publish, users can run `npm audit signatures`.
+Publish from your machine with the npm account that owns the package:
 
-Configure once on npm (package **Settings → Trusted Publisher**):
+```bash
+npm ci
+npm test
+npm pack --dry-run
+npm login    # md786-dotcom
+npm publish --access public
+```
 
-- Organization or user: `md786-dotcom`
-- Repository: `claude-to-wordpress-native`
-- Workflow filename: `publish.yml` (filename only, not a path)
-- Allowed actions: `npm publish`
+Bump `version` in the root `package.json`, `packages/*/package.json`, and `plugin/ctw-native.php` (`CTW_NATIVE_VERSION`) before you publish. A published version cannot be reused.
 
-Then bump `version` in the root `package.json`, `packages/*/package.json`, and `plugin/ctw-native.php` (`CTW_NATIVE_VERSION`). Preview with `npm pack --dry-run`. Push tag `vMAJOR.MINOR.PATCH` (for example `v0.3.0`). `.github/workflows/publish.yml` publishes from that tag. A published version cannot be reused.
-
-Do not `npm publish` from a laptop. After trusted publishing works, on npm **Settings → Publishing access** choose **Require two-factor authentication and disallow tokens**, and revoke any old automation tokens.
+`0.2.1` was published from GitHub Actions with [trusted publishing](https://docs.npmjs.com/trusted-publishers/), so that version has Sigstore provenance (`npm audit signatures`). A laptop `npm publish` does not attach provenance. Optional CI publish remains **Actions → Publish** (workflow_dispatch only; tags do not publish automatically).
 
 ## Plugins installed by setup
 
