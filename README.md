@@ -1,7 +1,8 @@
 # Claude-to-WordPress Native
 
 [![npm](https://img.shields.io/npm/v/claude-to-wordpress-native)](https://www.npmjs.com/package/claude-to-wordpress-native)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/md786-dotcom/claude-to-wordpress-native/badge)](https://scorecard.dev/viewer/?uri=github.com/md786-dotcom/claude-to-wordpress-native)
+[![npm provenance](https://img.shields.io/badge/npm-provenance-cb3837?logo=npm)](https://www.npmjs.com/package/claude-to-wordpress-native)
+[![OpenSSF Scorecard](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.scorecard.dev%2Fprojects%2Fgithub.com%2Fmd786-dotcom%2Fclaude-to-wordpress-native&query=%24.score&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/md786-dotcom/claude-to-wordpress-native)
 <!-- After registering at https://www.bestpractices.dev add: [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<ID>/badge)](https://www.bestpractices.dev/projects/<ID>) -->
 
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs Hello Elementor and the declared free stack, then imports pages so **Edit with Elementor** works.
@@ -12,7 +13,7 @@ Claude Code only. Claude does not edit the site after install.
 
 ## Quick start (Claude Code)
 
-Install from npm ([`claude-to-wordpress-native@0.2.0`](https://www.npmjs.com/package/claude-to-wordpress-native/v/0.2.0)):
+Install from npm ([`claude-to-wordpress-native@0.2.1`](https://www.npmjs.com/package/claude-to-wordpress-native/v/0.2.1)):
 
 ```bash
 npx -y claude-to-wordpress-native skill
@@ -170,7 +171,7 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 
 ## Publish (maintainers)
 
-**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.0`. The package page shows a provenance badge on versions published via trusted publishing.
+**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.1`. From this version, npm shows a **provenance** mark on the package page (Sigstore / SLSA, built by `.github/workflows/publish.yml`). Verify with `npm audit signatures`.
 
 Releases are published from GitHub Actions with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). There is no long-lived `NPM_TOKEN`. npm attaches Sigstore / SLSA provenance automatically. After a trusted publish, users can run `npm audit signatures`.
 

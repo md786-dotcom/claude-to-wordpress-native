@@ -2,7 +2,7 @@
 
 Claude Code entry for Claude-to-WordPress Native.
 
-Published via the root package [`claude-to-wordpress-native@0.2.0`](https://www.npmjs.com/package/claude-to-wordpress-native):
+Published via the root package [`claude-to-wordpress-native@0.2.1`](https://www.npmjs.com/package/claude-to-wordpress-native):
 
 ```bash
 npx -y claude-to-wordpress-native skill

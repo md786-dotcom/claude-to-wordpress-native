@@ -6,6 +6,15 @@ The project uses [Semantic Versioning](https://semver.org/). Git tags use the fo
 
 When a release fixes a publicly known runtime vulnerability that already had a CVE (or similar) at release time, that identifier is listed here.
 
+## [0.2.1](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.1) - 2026-09-01
+
+Install: `npx -y claude-to-wordpress-native@0.2.1 skill`
+
+- Publish from GitHub Actions with npm trusted publishing (OIDC). npm attaches Sigstore / SLSA provenance. No long-lived `NPM_TOKEN`.
+- README: npm provenance badge; OpenSSF Scorecard badge reads the published score from api.scorecard.dev.
+
+No publicly known CVE-assigned runtime vulnerabilities were fixed in this release.
+
 ## [0.2.0](https://github.com/md786-dotcom/claude-to-wordpress-native/releases/tag/v0.2.0) - 2026-09-01
 
 Install: `npx -y claude-to-wordpress-native@0.2.0 skill`
