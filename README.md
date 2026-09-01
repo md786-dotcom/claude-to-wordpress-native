@@ -78,7 +78,7 @@ npx -y claude-to-wordpress-native plugin-zip
 
 This creates `./ctw-native.zip`. In WordPress: **Plugins → Add New → Upload Plugin**.
 
-Pull images from Unsplash, Pexels, or a direct https URL into `./media` (optional `--package` updates `media[]`):
+Pull images from Unsplash, Pexels, or a direct https URL into `./media` (optional `--package` updates `media[]`) OR leave it to Claude Code itself:
 
 ```bash
 npx -y claude-to-wordpress-native media fetch \
