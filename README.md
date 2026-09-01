@@ -144,6 +144,15 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 
 ## Publish (maintainers)
 
+GitHub Actions publishes `claude-to-wordpress-native` on tag `v*` (for example `v0.2.0`) or from **Actions → Publish → Run workflow**.
+
+One-time npm auth (pick one):
+
+1. Repo secret `NPM_TOKEN` with an npm automation token, or
+2. [Trusted publisher](https://docs.npmjs.com/trusted-publishers/) on npmjs.com: GitHub Actions, owner `md786-dotcom`, repo `claude-to-wordpress-native`, workflow `publish.yml`.
+
+Manual publish:
+
 ```bash
 npm login
 npm publish
