@@ -1,6 +1,7 @@
 # Claude-to-WordPress Native
 
-[![npm version](https://img.shields.io/npm/v/claude-to-wordpress-native.svg)](https://www.npmjs.com/package/claude-to-wordpress-native)
+[![npm](https://img.shields.io/npm/v/claude-to-wordpress-native)](https://www.npmjs.com/package/claude-to-wordpress-native)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/md786-dotcom/claude-to-wordpress-native/badge)](https://scorecard.dev/viewer/?uri=github.com/md786-dotcom/claude-to-wordpress-native)
 <!-- After registering at https://www.bestpractices.dev add: [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<ID>/badge)](https://www.bestpractices.dev/projects/<ID>) -->
 
 Offline **Claude Code** toolchain that emits a Hello Elementor **child theme** ZIP. A companion plugin installs Hello Elementor and the declared free stack, then imports pages so **Edit with Elementor** works.
@@ -169,22 +170,20 @@ Check schema and style policy without writing a ZIP: `npm run ctw -- check --pac
 
 ## Publish (maintainers)
 
-**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.0`.
+**npm:** [`claude-to-wordpress-native`](https://www.npmjs.com/package/claude-to-wordpress-native) — latest `0.2.0`. The package page shows a provenance badge on versions published via trusted publishing.
 
-Before each release, bump `version` in the root `package.json`, `packages/*/package.json`, and `plugin/ctw-native.php` (`CTW_NATIVE_VERSION`).
+Releases are published from GitHub Actions with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). There is no long-lived `NPM_TOKEN`. npm attaches Sigstore / SLSA provenance automatically. After a trusted publish, users can run `npm audit signatures`.
 
-```bash
-npm ci
-npm test
-npm login    # md786-dotcom npm account
-npm publish
-```
+Configure once on npm (package **Settings → Trusted Publisher**):
 
-Preview the tarball first: `npm pack --dry-run`. A published version cannot be reused.
+- Organization or user: `md786-dotcom`
+- Repository: `claude-to-wordpress-native`
+- Workflow filename: `publish.yml` (filename only, not a path)
+- Allowed actions: `npm publish`
 
-### GitHub Actions (optional)
+Then bump `version` in the root `package.json`, `packages/*/package.json`, and `plugin/ctw-native.php` (`CTW_NATIVE_VERSION`). Preview with `npm pack --dry-run`. Push tag `vMAJOR.MINOR.PATCH` (for example `v0.3.0`). `.github/workflows/publish.yml` publishes from that tag. A published version cannot be reused.
 
-`.github/workflows/publish.yml` runs on tag `v*` or **Actions → Publish**. For CI publish, add repo secret `NPM_TOKEN` or configure [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (owner `md786-dotcom`, repo `claude-to-wordpress-native`, workflow `publish.yml`).
+Do not `npm publish` from a laptop. After trusted publishing works, on npm **Settings → Publishing access** choose **Require two-factor authentication and disallow tokens**, and revoke any old automation tokens.
 
 ## Plugins installed by setup
 
