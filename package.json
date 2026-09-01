@@ -58,6 +58,12 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "eslint-plugin-sonarjs": {
+      "minimatch": "10.2.4"
+    },
+    "qs": "6.15.2"
+  },
   "keywords": [
     "claude-code",
     "wordpress",
