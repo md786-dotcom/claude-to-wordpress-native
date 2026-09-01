@@ -14,11 +14,11 @@ The Hello Elementor child theme ZIP emitted by `@ctw/generate` (`generateChildTh
 
 ## One-shot package apply
 
-The plugin import path that reads the active child theme package once, sideloads media, writes Elementor Free pages, ElementsKit header/footer, MetForm, WPCode Free (`insert-headers-and-footers`) snippets, and menus, then marks import done. Re-import requires wipe. Wipe keeps Customizer Additional CSS. WPCode Free stores snippet type and location as taxonomies (`wpcode_type`, `wpcode_location`) with `_wpcode_auto_insert` = 1. CSS/JS/HTML map to Site Wide Header/Footer; `everywhere` is PHP-only.
+The plugin import path that reads the active child theme package once, sideloads media, writes Elementor Free pages, ElementsKit header/footer, MetForm, WPCode Free (`insert-headers-and-footers`) snippets, and menus, then marks import done. Re-import requires wipe. Wipe keeps Customizer Additional CSS. WPCode Free stores snippet type and location as taxonomies (`wpcode_type`, `wpcode_location`) with `_wpcode_auto_insert` = 1. CSS/JS/HTML map to Site Wide Header/Footer; `everywhere` is PHP-only. Page layout belongs in native Elementor settings. WPCode `type: "css"` snippets are WooCommerce-only (`.woocommerce` / `.ctw-woo-*`); brochure packages ship none so later Edit with Elementor changes are not overridden.
 
 ## Elementor persistence
 
-Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and ElementsKit templates both go through `Document_Writer` after Free tree validation. Containers are forced to Elementor `content_width: full` (never boxed).
+Writing `_elementor_*` meta so **Edit with Elementor** works. Pages and ElementsKit templates both go through `Document_Writer` after Free tree validation. Containers are forced to Elementor `content_width: full` (never boxed). Layout uses native `container_type` grid or flex, not WPCode page CSS.
 
 ## Stack install
 

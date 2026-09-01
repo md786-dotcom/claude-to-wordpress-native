@@ -3,6 +3,7 @@
  * Does not rewrite CSS. Callers must fail generate when errors exist.
  */
 import type { CtwPackage, ElementNode, JsonValue } from "@ctw/schema";
+import { checkPackageStylePolicy } from "./check-css-policy.js";
 
 export type CssIssue = {
   path: string;
@@ -20,14 +21,13 @@ type CssSource = {
 const STYLE_BLOCK = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
 const HTML_ENTITY = /&(?:gt|lt|amp|quot|#0*60|#0*62|#x0*3[ce]);/i;
 const ESCAPED_COMBINATOR = /\\>|\\3e\s/i;
-const CHILD_COMBINATOR = /(?:[\w.)\]])\s*>\s*(?:[.#:[\w*])/i;
 const STYLE_WRAPPER = /<style[\s>]/i;
 
 /**
  * Scan a package and return CSS problems. Empty means the CSS is structurally OK.
  */
 export function checkPackageCss(pkg: CtwPackage): CssIssue[] {
-  const issues: CssIssue[] = [];
+  const issues: CssIssue[] = [...checkPackageStylePolicy(pkg)];
   for (const source of collectCssSources(pkg)) {
     issues.push(...checkCssSource(source));
   }
@@ -76,15 +76,16 @@ function checkCssSource(source: CssSource): CssIssue[] {
     issues.push({
       path: prefix,
       message:
-        "Do not backslash-escape the child combinator (`\\>` / `\\3e`). `.grid-2 > .e-con-inner` is valid CSS. Prefer `.grid-2 .e-con-inner, .grid-2` so Elementor inner wrappers still match.",
+        "Do not backslash-escape the child combinator (`\\>` / `\\3e`). Write `>` in WPCode type \"css\" snippets. Page layout still belongs in native Elementor settings, not CSS.",
     });
   }
-  if (source.kind === "html-css" && CHILD_COMBINATOR.test(css)) {
+  if (source.kind === "html-css") {
     issues.push({
       path: prefix,
       message:
-        "Child combinator `>` inside HTML can break in WordPress. Move this CSS to a WPCode snippet with type \"css\", or use a descendant selector (a space) such as `.grid-2 .e-con-inner`.",
+        "Do not put CSS in HTML <style> blocks. Use native Elementor widget and container settings. WPCode type \"css\" is WooCommerce-only.",
     });
+    return issues;
   }
   for (const message of scanCssStructure(css)) {
     issues.push({ path: prefix, message });
@@ -280,14 +281,6 @@ function walkElements(elements: ElementNode[], path: string, sources: CssSource[
           kind: "html-css",
           css,
         });
-      });
-    }
-    const customCss = settingString(node.settings, "custom_css");
-    if (customCss !== undefined && customCss.trim() !== "") {
-      sources.push({
-        path: `${nodePath} custom_css`,
-        kind: "css",
-        css: customCss,
       });
     }
     if (node.elements.length > 0) {

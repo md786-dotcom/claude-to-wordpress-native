@@ -71,31 +71,33 @@ describe("ctw CLI", () => {
     assert.match(again.stdout, /Updated/);
   });
 
-  it("validates the brochure fixture", () => {
-    const result = run(["validate", "--package", fixturePackage]);
+  it("checks the brochure fixture", () => {
+    const result = run(["check", "--package", fixturePackage]);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Valid package/);
     assert.match(result.stdout, /CSS check passed/);
   });
 
-  it("check is an alias of validate", () => {
-    const result = run(["check", "--package", fixturePackage]);
-    assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /CSS check passed/);
+  it("does not expose a validate command", () => {
+    const help = run(["--help"]);
+    assert.doesNotMatch(help.stdout, /\bvalidate\b/);
+    const result = run(["validate", "--package", fixturePackage]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Unknown command/);
   });
 
-  it("fails validate without --package", () => {
-    const result = run(["validate"]);
+  it("fails check without --package", () => {
+    const result = run(["check"]);
     assert.equal(result.status, 1);
     assert.match(result.stderr, /Missing --package/);
   });
 
-  it("fails validate on bad JSON package", () => {
+  it("fails check on bad JSON package", () => {
     const cwd = mkdtempSync(join(tmpdir(), "ctw-bad-"));
     dirs.push(cwd);
     const bad = join(cwd, "bad.json");
     writeFileSync(bad, '{"version":1}\n', "utf8");
-    const result = run(["validate", "--package", bad]);
+    const result = run(["check", "--package", bad]);
     assert.equal(result.status, 1);
     assert.match(result.stderr, /Invalid package/);
   });

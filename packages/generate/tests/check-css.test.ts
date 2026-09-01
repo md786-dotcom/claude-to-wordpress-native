@@ -12,6 +12,7 @@ import {
   readPackageFromJsonText,
   scanCssStructure,
 } from "../src/index.js";
+import { cssRuleSelectors, selectorTargetsWoo } from "../src/check-css-policy.js";
 
 const truncatedHeroCss = `.grid-2 > .e-con-inner,.grid-2,.grid-3 > .e-con-inner,.grid-3,
 .grid-4 > .e-con-inner,.grid-4,.split > .e-con-inner,.split,
@@ -38,7 +39,12 @@ type PageInput = {
   }>;
 };
 
-function packageWithSnippets(snippets: SnippetInput[], pages?: PageInput[]): string {
+function packageWithSnippets(
+  snippets: SnippetInput[],
+  pages?: PageInput[],
+  options?: { woocommerce?: boolean },
+): string {
+  const woo = options?.woocommerce === true;
   return JSON.stringify({
     version: 1,
     theme: {
@@ -69,8 +75,14 @@ function packageWithSnippets(snippets: SnippetInput[], pages?: PageInput[]): str
     ],
     forms: [],
     snippets,
-    woocommerce: { enabled: false },
-    plugins: [...CORE_PLUGIN_SLUGS],
+    woocommerce: { enabled: woo },
+    plugins: woo ? [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG] : [...CORE_PLUGIN_SLUGS],
+  });
+}
+
+function shopCss(code: string, title = "Woo"): string {
+  return packageWithSnippets([{ title, type: "css", code }], undefined, {
+    woocommerce: true,
   });
 }
 
@@ -102,7 +114,7 @@ describe("scanCssStructure", () => {
 });
 
 describe("checkPackageCss", () => {
-  it("allows a complete css snippet that uses > as a combinator", () => {
+  it("rejects brochure css snippets", () => {
     const pkg = readPackageFromJsonText(
       packageWithSnippets([
         {
@@ -112,10 +124,24 @@ describe("checkPackageCss", () => {
         },
       ]),
     );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /Brochure packages/);
+  });
+
+  it("allows a Woo-scoped css snippet that uses > as a combinator", () => {
+    const pkg = readPackageFromJsonText(
+      shopCss(".woocommerce .products > li{margin:0;}"),
+    );
     assert.deepEqual(checkPackageCss(pkg), []);
   });
 
-  it("accepts html snippets with balanced style blocks", () => {
+  it("rejects page selectors on shop css snippets", () => {
+    const pkg = readPackageFromJsonText(
+      shopCss(".grid-2,.grid-2 .e-con-inner{display:grid;}"),
+    );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /not WooCommerce-scoped/);
+  });
+
+  it("rejects html snippets with style blocks", () => {
     const pkg = readPackageFromJsonText(
       packageWithSnippets([
         {
@@ -125,40 +151,15 @@ describe("checkPackageCss", () => {
         },
       ]),
     );
-    assert.deepEqual(checkPackageCss(pkg), []);
-  });
-
-  it("rejects child combinators in html snippet style tags", () => {
-    const pkg = readPackageFromJsonText(
-      packageWithSnippets([
-        {
-          title: "Bad",
-          type: "html",
-          code: "<style>.a > .b{color:red;}</style>",
-        },
-      ]),
-    );
-    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /Child combinator/);
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /HTML <style>/);
   });
 
   it("rejects HTML-escaped and backslash-escaped combinators", () => {
     const htmlEscaped = readPackageFromJsonText(
-      packageWithSnippets([
-        {
-          title: "Hero",
-          type: "css",
-          code: ".grid-2 &gt; .e-con-inner{display:grid;}",
-        },
-      ]),
+      shopCss(".woocommerce .products &gt; li{margin:0;}"),
     );
     const slashEscaped = readPackageFromJsonText(
-      packageWithSnippets([
-        {
-          title: "Hero",
-          type: "css",
-          code: ".grid-2 \\> .e-con-inner{display:grid;}",
-        },
-      ]),
+      shopCss(".woocommerce .products \\> li{margin:0;}"),
     );
     assert.match(checkPackageCss(htmlEscaped)[0]?.message ?? "", /HTML-escape/);
     assert.match(checkPackageCss(slashEscaped)[0]?.message ?? "", /backslash-escape/);
@@ -166,18 +167,12 @@ describe("checkPackageCss", () => {
 
   it("rejects style wrappers on css snippets", () => {
     const pkg = readPackageFromJsonText(
-      packageWithSnippets([
-        {
-          title: "Hero",
-          type: "css",
-          code: "<style>h1{color:red;}</style>",
-        },
-      ]),
+      shopCss("<style>.woocommerce{color:red;}</style>"),
     );
     assert.match(checkPackageCss(pkg)[0]?.message ?? "", /raw CSS/);
   });
 
-  it("rejects child combinators inside html widget style tags", () => {
+  it("rejects style tags inside html widgets", () => {
     const pkg = readPackageFromJsonText(
       packageWithSnippets([], [
         {
@@ -200,10 +195,34 @@ describe("checkPackageCss", () => {
         },
       ]),
     );
-    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /Child combinator/);
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /HTML <style>/);
   });
 
-  it("checks header, footer, text-editor, custom_css, and woo pages", () => {
+  it("rejects _css_classes on containers", () => {
+    const pkg = readPackageFromJsonText(
+      packageWithSnippets([], [
+        {
+          title: "Home",
+          slug: "home",
+          isFrontPage: true,
+          template: "elementor_header_footer",
+          elements: [
+            {
+              id: "c1",
+              elType: "container",
+              widgetType: null,
+              isInner: false,
+              settings: { _css_classes: "grid-2" },
+              elements: [],
+            },
+          ],
+        },
+      ]),
+    );
+    assert.match(checkPackageCss(pkg)[0]?.message ?? "", /CSS classes/);
+  });
+
+  it("flags custom_css and widget style blocks across trees", () => {
     const pkg = readPackageFromJsonText(
       JSON.stringify({
         version: 1,
@@ -282,7 +301,9 @@ describe("checkPackageCss", () => {
         plugins: [...CORE_PLUGIN_SLUGS, WOO_PLUGIN_SLUG],
       }),
     );
-    assert.deepEqual(checkPackageCss(pkg), []);
+    const messages = checkPackageCss(pkg).map((issue) => issue.message).join("\n");
+    assert.match(messages, /custom_css/);
+    assert.match(messages, /HTML <style>/);
   });
 
   it("formatCssIssues lists every path", () => {
@@ -303,6 +324,23 @@ describe("checkPackageCss", () => {
   it("assertPackageCss is a no-op when CSS is valid", () => {
     const pkg = readPackageFromJsonText(packageWithSnippets([]));
     assert.doesNotThrow(() => assertPackageCss(pkg));
+  });
+});
+
+describe("cssRuleSelectors", () => {
+  it("reads nested media queries and skips keyframes", () => {
+    const css = `
+      .woocommerce ul.products{display:grid;}
+      @media (max-width: 768px){.woocommerce ul.products{display:block;}}
+      @keyframes pulse{0%{opacity:1;}100%{opacity:0;}}
+    `;
+    assert.deepEqual(cssRuleSelectors(css), [
+      ".woocommerce ul.products",
+      ".woocommerce ul.products",
+    ]);
+    assert.equal(selectorTargetsWoo(".woocommerce ul.products"), true);
+    assert.equal(selectorTargetsWoo(".grid-2 .e-con-inner"), false);
+    assert.equal(selectorTargetsWoo(".ctw-woo-archive h1"), true);
   });
 });
 

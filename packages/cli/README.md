@@ -12,11 +12,10 @@ npx -y claude-to-wordpress-native media sync --package ./ctw-package.json
 npx -y claude-to-wordpress-native init --name "Acme Child" --slug acme-child
 npx -y claude-to-wordpress-native init --name "Shop Child" --slug shop-child --woocommerce
 npx -y claude-to-wordpress-native products add --name "Mug" --price 12.00 --image-url https://images.unsplash.com/… --package ./ctw-package.json
-npx -y claude-to-wordpress-native validate --package ./ctw-package.json
 npx -y claude-to-wordpress-native check --package ./ctw-package.json
 npx -y claude-to-wordpress-native generate --package ./ctw-package.json --out ./acme-child.zip --media ./media
 ```
 
-`skill` copies the packaged skills into `.claude/skills/ctw-native` (`/ctw-native`) and `.claude/skills/ctw-native-check` (`/ctw-native-check`). After `/ctw-native` writes the package, run `/ctw-native-check` until it passes, then `generate`. `plugin-zip` writes `./ctw-native.zip` for WordPress upload. `media fetch` / `media sync` pull https images into `./media`. `products add` appends up to 4 dummy WooCommerce products. `init` also writes a starter `ctw-package.json` and `media/` (add `--woocommerce` for shop packages). `check` / `validate` verify schema plus CSS snippets (unclosed rules, HTML-escaped combinators, WPCode Free locations) before `generate`. Snippets target WPCode Free (`insert-headers-and-footers`), not Pro.
+`skill` copies the packaged skills into `.claude/skills/ctw-native` (`/ctw-native`) and `.claude/skills/ctw-native-check` (`/ctw-native-check`). After `/ctw-native` writes the package, run `/ctw-native-check` until it passes, then `generate`. `plugin-zip` writes `./ctw-native.zip` for WordPress upload. `media fetch` / `media sync` pull https images into `./media`. `products add` appends up to 4 dummy WooCommerce products. `init` also writes a starter `ctw-package.json` and `media/` (add `--woocommerce` for shop packages). `check` verifies schema, native-Elementor style policy, and CSS snippets (Woo-only selectors, unclosed rules, HTML-escaped combinators, WPCode Free locations) before `generate`. Snippets target WPCode Free (`insert-headers-and-footers`), not Pro.
 
 Runtime ships as a self-contained `dist/ctw.mjs` bundle (no unpublished `@ctw/*` resolution). This workspace package is private and not published on its own.

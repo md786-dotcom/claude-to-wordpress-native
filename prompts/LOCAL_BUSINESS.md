@@ -9,7 +9,7 @@ Build a brochure site for a local plumbing company named "Clearflow Plumbing" in
 - Free Elementor widgets only
 - Header and footer via ElementsKit payloads
 - Contact form via MetForm (name, email, message)
-- One CSS snippet via WPCode Free (`type: "css"`, `location: "header"`) for slight letter-spacing on headings. Do not use WPCode Pro types or `everywhere` on CSS.
+- Native Elementor heading typography (letter-spacing). Do not add a WPCode `type: "css"` snippet — brochure packages ship none.
 - `woocommerce.enabled`: false
 - Colors: primary `#0B3D91`
 - Include one hero image in `media/` and reference it from the home page image widget

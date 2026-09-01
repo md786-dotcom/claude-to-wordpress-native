@@ -64,7 +64,7 @@ npm run ctw -- generate --package ./ctw-package.json --out ./acme-child.zip --me
 After `skill` (or `init`) installs the skills, use the slash commands in this order:
 
 1. Run **`/ctw-native`**. Claude writes `ctw-package.json`, media, WPCode Free snippets, and the rest of the package.
-2. When that output is done, run **`/ctw-native-check`**. That validates schema, WPCode Free locations, and CSS (unclosed `{`, escaped `>` combinators, `<style>` wrappers on `type: "css"`). Fix every error and re-run `/ctw-native-check` until it passes.
+2. When that output is done, run **`/ctw-native-check`**. That runs `check`: schema, WPCode Free locations, native-Elementor style policy (no page CSS snippets, Woo-only CSS selectors, no widget `<style>` / `_css_classes` / `custom_css`), and CSS structure (unclosed `{`, escaped `>`). Fix every error and re-run `/ctw-native-check` until it passes.
 3. Only then generate the child theme ZIP:
 
 ```bash
@@ -74,7 +74,7 @@ npx -y claude-to-wordpress-native generate \
 
 Do not skip `/ctw-native-check`. `generate` also refuses a ZIP when CSS check fails, but the slash command is the loop Claude should use after `/ctw-native`.
 
-You can run the same check from the CLI: `npx -y claude-to-wordpress-native check --package ./ctw-package.json` (`validate` is the same command).
+You can run the same audit from the CLI: `npx -y claude-to-wordpress-native check --package ./ctw-package.json`.
 
 ## What you get
 
@@ -118,7 +118,7 @@ Re-import is refused while generated pages exist. Wipe first to regenerate.
 
 `heading`, `image`, `text-editor`, `video`, `button`, `divider`, `spacer`, `google_maps`, `icon`, `image-box`, `icon-box`, `star-rating`, `image-carousel`, `image-gallery`, `icon-list`, `counter`, `progress`, `testimonial`, `tabs`, `accordion`, `toggle`, `social-icons`, `alert`, `html`, `shortcode`, `menu-anchor`, `sidebar`.
 
-Layout uses Elementor `container` (`content_width: full`). Forms → MetForm. Header/footer → ElementsKit.
+Layout uses Elementor `container` (`content_width: full`, native `container_type` grid or flex). Forms → MetForm. Header/footer → ElementsKit.
 
 ## Media
 
@@ -140,7 +140,7 @@ npm run ctw -- generate --package ./fixtures/brochure/ctw-package.json --out ./b
 
 Package legality (Free widgets, core plugins, snippet types) lives in `packages/schema/contract/ctw-contract.json`. Run `npm run build -w @ctw/schema` after editing it.
 
-Validate schema and CSS snippets without writing a ZIP: `npm run ctw -- check --package ./ctw-package.json` (`validate` is the same command; this is what `/ctw-native-check` runs). `generate` refuses a ZIP when CSS check fails (unclosed `{`, HTML-escaped `>` combinators, `<style>` wrappers on `type: "css"`).
+Check schema and style policy without writing a ZIP: `npm run ctw -- check --package ./ctw-package.json` (this is what `/ctw-native-check` runs). `generate` refuses a ZIP when check fails (page CSS snippets, non-Woo selectors, widget `<style>`, unclosed `{`, HTML-escaped `>` combinators, `<style>` wrappers on `type: "css"`).
 
 ## Publish (maintainers)
 
@@ -155,7 +155,7 @@ Preview the tarball first: `npm pack --dry-run` / `npm publish --dry-run`. Name 
 
 Always: Elementor, ElementsKit Lite, MetForm, **WPCode Free** (`insert-headers-and-footers` on wordpress.org — not WPCode Pro).
 
-Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode Free snippets (`css` | `js` | `html` | `php`). CSS/JS/HTML use `header` or `footer` only; `everywhere` is PHP-only.
+Optional: WooCommerce when `woocommerce.enabled` is true in the package, or when the Setup **Install WooCommerce** switch is turned on. Shop packages may include branded shop/cart/checkout Elementor pages, up to 4 dummy products, and WPCode Free snippets (`css` | `js` | `html` | `php`). CSS snippets are Woo-only (`.woocommerce` / `.ctw-woo-*`). CSS/JS/HTML use `header` or `footer` only; `everywhere` is PHP-only.
 
 Parent theme: Hello Elementor from wordpress.org (not vendored).
 

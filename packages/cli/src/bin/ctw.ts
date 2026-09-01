@@ -35,8 +35,7 @@ function printHelp(): void {
         ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
-      "  validate           Validate a ctw-package.json (schema + CSS) without writing a ZIP",
-      "  check              Same as validate; run before generate (Claude: /ctw-native-check)",
+      "  check              Check a ctw-package.json (schema + style policy + CSS) without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
@@ -330,7 +329,6 @@ async function main(argv: string[]): Promise<number> {
       return runProducts(rest);
     case "init":
       return runInit(rest);
-    case "validate":
     case "check":
       return runValidate(rest);
     case "generate":

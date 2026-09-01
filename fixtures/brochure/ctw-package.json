@@ -57,7 +57,9 @@
               "isInner": false,
               "settings": {
                 "title": "Clearflow Plumbing",
-                "header_size": "h1"
+                "header_size": "h1",
+                "typography_typography": "custom",
+                "typography_letter_spacing": { "unit": "em", "size": 0.02, "sizes": [] }
               },
               "elements": []
             },
@@ -258,14 +260,7 @@
       ]
     }
   ],
-  "snippets": [
-    {
-      "title": "Heading letter spacing",
-      "type": "css",
-      "location": "header",
-      "code": "h1,h2,h3{letter-spacing:0.02em;}"
-    }
-  ],
+  "snippets": [],
   "woocommerce": {
     "enabled": false
   },

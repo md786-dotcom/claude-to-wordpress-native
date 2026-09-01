@@ -1,6 +1,6 @@
 ---
 name: ctw-native-check
-description: Validate a CTW Native ctw-package.json (schema + CSS snippets) and fix CSS before generating the Hello Elementor child theme ZIP. Use when asked to /ctw-native-check, check the theme, lint snippets, or when CSS looks wrong on the WordPress front end.
+description: Check a CTW Native ctw-package.json (schema + style policy + CSS) and fix it before generating the Hello Elementor child theme ZIP. Use when asked to /ctw-native-check, check the theme, lint snippets, or when CSS would override later Elementor edits.
 ---
 
 # CTW Native check
@@ -17,7 +17,7 @@ npx -y claude-to-wordpress-native check --package ./ctw-package.json
 
 From a local clone: `npm run ctw -- check --package ./ctw-package.json`.
 
-`validate` runs the same checks. `generate` refuses to write a ZIP when CSS check fails.
+There is no `validate` command. `check` is the only audit. `generate` refuses to write a ZIP when `check` fails.
 
 ## Loop
 
@@ -26,29 +26,23 @@ From a local clone: `npm run ctw -- check --package ./ctw-package.json`.
 3. Re-run until exit 0.
 4. Only then run `generate`.
 
-## CSS rules (do not “escape” combinators)
+## What `check` enforces
 
 This stack uses **WPCode Free** (`insert-headers-and-footers`), not WPCode Pro. `type: "css"` snippets must use `"location": "header"` or `"footer"` (`everywhere` is PHP-only and fails schema). Never emit `scss`, `blocks`, device rules, or CSS-selector insert locations.
 
-WPCode Free **css** snippets print as real CSS. The child combinator `>` is valid. **Do not** “fix” `.grid-2 > .e-con-inner` by turning `>` into `\>`, `\3e`, or `&gt;` — that changes the selector and it will not match.
+Page layout and styling belong in **native Elementor settings**, not WPCode. A site-wide CSS snippet keeps printing after import and overrides later **Edit with Elementor** changes. CSS snippets are WooCommerce-only.
 
-Prefer Elementor-safe targeting (inner wrapper plus the container itself):
+Automatic findings (fix all of them):
 
-```css
-.grid-2,
-.grid-2 .e-con-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-```
-
-Use a descendant space, not a backslash-escaped `>`.
-
-Other rules the checker enforces:
-
+- Brochure packages (`woocommerce.enabled: false`) must have **zero** `type: "css"` snippets.
+- Shop `type: "css"` selectors must include `.woocommerce`, `.woocommerce-*`, or `.ctw-woo-*` only. `!important` is allowed there.
+- Any `<style>` in Elementor `html` / text-editor widgets (or WPCode `html` snippets) fails. Do not move that CSS to a page snippet.
+- `custom_css` on elements fails (Elementor Free does not print it).
+- `_css_classes` / `css_classes` on elements fails. Use `container_type: "grid"` and native padding/colors/typography.
 - `type: "css"` snippets must be **raw CSS** (no `<style>` wrapper).
-- Every `{` must have a matching `}`. Truncated rules such as `{grid-template-columns:1fr !important;` fail.
-- Do not HTML-escape CSS (`&gt;`, `&lt;`).
-- CSS inside Elementor `html` / text-editor `<style>` blocks must not use `>`. Move that CSS to a WPCode `type: "css"` snippet, or use a descendant selector.
+- Every `{` must have a matching `}`.
+- Do not HTML-escape CSS (`&gt;`, `&lt;`) or backslash-escape `>`.
 
-Layout CSS belongs in `snippets[]` with `"type": "css"` and `"location": "header"`.
+WPCode Free **css** snippets print as real CSS. The child combinator `>` is valid in residual Woo CSS. **Do not** turn `>` into `\>`, `\3e`, or `&gt;`.
+
+Font Awesome stays a WPCode **`html`** snippet (`<link>`), not CSS.

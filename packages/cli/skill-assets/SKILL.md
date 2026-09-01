@@ -112,6 +112,58 @@ npx -y claude-to-wordpress-native products add \
 
 This downloads the image into `./media/`, registers `media[]`, and appends `woocommerce.products[]` with `imageMediaId`. The WordPress importer creates simple products on import.
 
+## Layout: native Elementor settings first
+
+There are two styling authorities. **Edit with Elementor** is the product USP. WPCode CSS is site-wide, is not editable in Elementor, and with `!important` (or layout selectors like `.e-con-inner`) silently overrides later client edits.
+
+Do **not** put page layout CSS (grids, hero splits, `.e-con-inner`, `.grid-2`) in a WPCode snippet.
+
+### Grids → native Grid Container
+
+Use Elementor `container_type: "grid"` (Free Grid Container, 3.16+). The importer writes `settings` through verbatim.
+
+```json
+{
+  "id": "heroGrid",
+  "elType": "container",
+  "widgetType": null,
+  "isInner": false,
+  "settings": {
+    "content_width": "full",
+    "container_type": "grid",
+    "grid_columns_grid": { "unit": "fr", "size": 2, "sizes": [] },
+    "grid_rows_grid": { "unit": "fr", "size": 1, "sizes": [] },
+    "grid_gaps": {
+      "unit": "px",
+      "size": 24,
+      "sizes": [],
+      "column": "24",
+      "row": "24",
+      "isLinked": true
+    },
+    "grid_columns_grid_tablet": { "unit": "fr", "size": 2, "sizes": [] },
+    "grid_columns_grid_mobile": { "unit": "fr", "size": 1, "sizes": [] }
+  },
+  "elements": []
+}
+```
+
+Pre-3.16 fallback: `container_type: "flex"` with `flex_direction: "row"` and `flex_direction_mobile: "column"`. Never CSS `display: grid` on Elementor wrappers.
+
+### Page styling → native widget settings
+
+Padding, colors, typography, borders, letter-spacing, and gaps belong on the element (`padding`, `background_color`, `typography_*`, `border_*`). Do not set `_css_classes` / `css_classes` to hook layout CSS.
+
+Fonts and brand colors need no page CSS: set `theme.colors` / `theme.typography` (generate emits `--ctw-*` tokens) and set heading/text-editor typography on the widget (Elementor enqueues Google Fonts).
+
+### CSS snippets are WooCommerce-only
+
+- Brochure packages (`woocommerce.enabled: false`): **zero** `type: "css"` snippets.
+- Shop packages: `type: "css"` selectors must be `.woocommerce…` or `.ctw-woo-…` only. `!important` is legitimate there.
+- Font Awesome stays a WPCode **`html`** snippet (see Icons). `php` / `js` follow the Free location rules below.
+
+`/ctw-native-check` (`check`) fails the package when these rules are broken.
+
 ## WPCode Free snippets (not Pro)
 
 The stack installs **WPCode Free** from wordpress.org (`insert-headers-and-footers`). Do **not** assume WPCode Pro. Do not emit Pro-only snippet types, auto-insert locations, generators, cloud library payloads, or device/conditional rules.
@@ -126,7 +178,7 @@ The stack installs **WPCode Free** from wordpress.org (`insert-headers-and-foote
 | `"footer"` | Site Wide Footer (`wp_footer`) | Site Wide Footer |
 | `"everywhere"` | **Invalid** — `check` / schema fail. Use `"header"`. | Run Everywhere (PHP only) |
 
-- Put **layout CSS** (grids, hero splits, `.e-con-inner`) in a `type: "css"` snippet with `location: "header"`. Do not put that CSS in an Elementor `html` widget.
+- Do **not** put layout CSS (grids, hero splits, `.e-con-inner`) in a `type: "css"` snippet or in an Elementor `html` / text-editor `<style>` block. Use native Grid/Flex container settings.
 - Omit `location` and css/js/html default to `"header"`; php defaults to `"everywhere"`.
 - Use `php` only for small site helpers (filters, Woo tweaks). Prefer CSS tokens for branding when possible.
 - Never emit remote code loaders or destructive admin scripts.
@@ -136,23 +188,13 @@ The stack installs **WPCode Free** from wordpress.org (`insert-headers-and-foote
 
 ### CSS must parse (run `check` before generate)
 
-WPCode prints `type: "css"` as real CSS. The child combinator `>` is valid. **Do not** “escape special characters” in selectors:
+WPCode prints residual Woo `type: "css"` as real CSS. The child combinator `>` is valid. **Do not** “escape special characters” in selectors:
 
 | Wrong | Why | Right |
 | --- | --- | --- |
-| `.grid-2 \> .e-con-inner` or `.grid-2 &gt; .e-con-inner` | Escaping `>` changes the selector. It will not match. | `.grid-2 .e-con-inner, .grid-2 { … }` |
+| `.woocommerce .products \> li` or `&gt;` | Escaping `>` changes the selector. It will not match. | `.woocommerce .products > li` or a descendant space |
 | `{grid-template-columns:1fr !important;` | Truncated rule (missing `}`) | Close every `{` with `}` |
 | `<style>…</style>` inside `type: "css"` | WPCode wraps CSS for you | Raw CSS only |
-
-Prefer descendant targeting so Elementor inner wrappers still receive the grid:
-
-```css
-.grid-2,
-.grid-2 .e-con-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-```
 
 After writing or changing snippets, **always** run:
 
@@ -160,7 +202,7 @@ After writing or changing snippets, **always** run:
 npx -y claude-to-wordpress-native check --package ./ctw-package.json
 ```
 
-Fix every error and re-run until exit 0. The `/ctw-native-check` skill is this same loop. `generate` refuses a ZIP when CSS check fails.
+Fix every error and re-run until exit 0. The `/ctw-native-check` skill is this same loop. `generate` refuses a ZIP when check fails. There is no `validate` command.
 
 ## Icons (Font Awesome Free via CDN)
 
@@ -212,7 +254,7 @@ Use **only** these `widgetType` values (plus `elType: "container"` for layout). 
 | `toggle` | |
 | `social-icons` | Needs Font Awesome Free CDN snippet |
 | `alert` | |
-| `html` | |
+| `html` | Do not put `<style>` here. Use native Elementor settings. |
 | `shortcode` | Prefer for Woo shop/cart/checkout |
 | `menu-anchor` | |
 | `sidebar` | |
@@ -225,7 +267,7 @@ After `/ctw-native` finishes writing the package, **always** run `/ctw-native-ch
 
 1. Write valid `ctw-package.json` (version 1).
 2. Ensure media files exist (fetch/sync/products add).
-3. Run `/ctw-native-check` (same as `check`) and fix CSS/schema errors until it passes:
+3. Run `/ctw-native-check` (`check`) and fix schema/style errors until it passes:
 
 ```bash
 npx -y claude-to-wordpress-native check --package ./ctw-package.json
@@ -258,6 +300,7 @@ Always tell the developer: upload/activate child theme → **CTW Native → Wipe
 - Exactly one `isFrontPage: true`.
 - Elementor Free allowlist only (see table above). Forms → MetForm. Header/footer → ElementsKit.
 - Containers: always `"content_width": "full"` (never boxed).
+- Layout via native container settings (`container_type: "grid"` or flex). CSS snippets are Woo-only; brochure packages ship none.
 - Brochure: `woocommerce.enabled: false` and omit woo from `plugins`, products, and woo pages.
 
 ## Client editing
@@ -265,5 +308,5 @@ Always tell the developer: upload/activate child theme → **CTW Native → Wipe
 - Pages/posts: Elementor Free
 - Header/footer: ElementsKit
 - Shop / cart / checkout: Elementor pages assigned as WooCommerce pages (plus native single/archive templates)
-- Extra CSS: Appearance → Customize → Additional CSS
-- Snippets: **WPCode Free** → Code Snippets (wordpress.org `insert-headers-and-footers`). Auto Insert = Site Wide Header/Footer. Not WPCode Pro (no SCSS, Blocks, device rules, or CSS-selector insert).
+- Extra CSS: Appearance → Customize → Additional CSS (client-authored). Do not ship page layout CSS in WPCode — it would override these Elementor edits.
+- Snippets: **WPCode Free** → Code Snippets (wordpress.org `insert-headers-and-footers`). Auto Insert = Site Wide Header/Footer. CSS snippets are Woo-only. Not WPCode Pro (no SCSS, Blocks, device rules, or CSS-selector insert).

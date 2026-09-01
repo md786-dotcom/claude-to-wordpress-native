@@ -12,14 +12,229 @@ import { resolve as resolve6 } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname as dirname2, resolve } from "node:path";
 
+// packages/generate/dist/check-css-policy.js
+var WOO_CLASS = /\.(?:woocommerce[\w-]*|ctw-woo-[\w-]+)/;
+var NESTED_AT = /^@(?:media|supports|layer|container)\b/i;
+var CSS_CLASS_KEYS = ["_css_classes", "css_classes"];
+var TREE_KEYS = ["shop", "cart", "checkout"];
+function checkPackageStylePolicy(pkg) {
+  const issues = [];
+  pkg.snippets.forEach((snippet, index) => {
+    if (snippet.type !== "css") {
+      return;
+    }
+    const path = `snippets[${String(index)}] "${snippet.title}"`;
+    if (!pkg.woocommerce.enabled) {
+      issues.push({
+        path,
+        message: 'Brochure packages must not include type "css" snippets. Use native Elementor container and widget settings. CSS snippets are WooCommerce-only.'
+      });
+      return;
+    }
+    for (const selector of cssRuleSelectors(snippet.code)) {
+      if (!selectorTargetsWoo(selector)) {
+        issues.push({
+          path,
+          message: `Selector \`${selector}\` is not WooCommerce-scoped. CSS snippets may only target .woocommerce, .woocommerce-*, or .ctw-woo-* so Edit with Elementor still wins on pages.`
+        });
+      }
+    }
+  });
+  pkg.pages.forEach((page, index) => {
+    walkElementPolicy(page.elements, `pages[${String(index)}].elements`, issues);
+  });
+  if (pkg.header !== void 0) {
+    walkElementPolicy(pkg.header.elements, "header.elements", issues);
+  }
+  if (pkg.footer !== void 0) {
+    walkElementPolicy(pkg.footer.elements, "footer.elements", issues);
+  }
+  for (const key of TREE_KEYS) {
+    const page = pkg.woocommerce.pages[key];
+    if (page !== void 0) {
+      walkElementPolicy(page.elements, `woocommerce.pages.${key}.elements`, issues);
+    }
+  }
+  return issues;
+}
+function selectorTargetsWoo(selector) {
+  return WOO_CLASS.test(selector);
+}
+function cssRuleSelectors(css) {
+  const cursor = new CssCursor(css);
+  const selectors = [];
+  let buffer = "";
+  while (!cursor.done) {
+    const copied = cursor.eatMeta();
+    if (copied !== null) {
+      buffer += copied;
+      continue;
+    }
+    const ch = cursor.ch;
+    if (ch === "{") {
+      onRuleOpen(cursor, buffer, selectors);
+      buffer = "";
+      continue;
+    }
+    if (ch === "}") {
+      buffer = "";
+      cursor.step();
+      continue;
+    }
+    buffer += ch;
+    cursor.step();
+  }
+  return selectors;
+}
+function onRuleOpen(cursor, buffer, selectors) {
+  const sel = buffer.trim();
+  cursor.step();
+  if (sel === "" || NESTED_AT.test(sel)) {
+    return;
+  }
+  if (sel.startsWith("@")) {
+    cursor.skipBlock();
+    return;
+  }
+  for (const part of sel.split(",")) {
+    const item = part.trim();
+    if (item !== "") {
+      selectors.push(item);
+    }
+  }
+  cursor.skipBlock();
+}
+var CssCursor = class {
+  css;
+  i = 0;
+  inString = null;
+  inComment = false;
+  escaped = false;
+  constructor(css) {
+    this.css = css;
+  }
+  get done() {
+    return this.i >= this.css.length;
+  }
+  get ch() {
+    return this.css[this.i] ?? "";
+  }
+  step() {
+    this.i += 1;
+  }
+  /**
+   * Consume a comment or string character.
+   * Returns "" when a comment char was eaten, the char when a string char
+   * was eaten, or null when the current char is source CSS.
+   */
+  eatMeta() {
+    if (this.inComment) {
+      this.eatComment();
+      return "";
+    }
+    if (this.inString !== null) {
+      const ch = this.ch;
+      this.eatString();
+      return ch;
+    }
+    return this.openMeta();
+  }
+  skipBlock() {
+    let depth = 1;
+    while (!this.done && depth > 0) {
+      if (this.eatMeta() !== null) {
+        continue;
+      }
+      depth += this.braceDelta();
+      this.step();
+    }
+  }
+  braceDelta() {
+    if (this.ch === "{") {
+      return 1;
+    }
+    if (this.ch === "}") {
+      return -1;
+    }
+    return 0;
+  }
+  openMeta() {
+    const next = this.css[this.i + 1] ?? "";
+    if (this.ch === "/" && next === "*") {
+      this.inComment = true;
+      this.i += 2;
+      return "";
+    }
+    if (this.ch === '"' || this.ch === "'") {
+      this.inString = this.ch;
+      const ch = this.ch;
+      this.step();
+      return ch;
+    }
+    return null;
+  }
+  eatComment() {
+    const next = this.css[this.i + 1] ?? "";
+    if (this.ch === "*" && next === "/") {
+      this.inComment = false;
+      this.i += 2;
+      return;
+    }
+    this.step();
+  }
+  eatString() {
+    if (this.escaped) {
+      this.escaped = false;
+      this.step();
+      return;
+    }
+    if (this.ch === "\\") {
+      this.escaped = true;
+      this.step();
+      return;
+    }
+    if (this.ch === this.inString) {
+      this.inString = null;
+    }
+    this.step();
+  }
+};
+function walkElementPolicy(elements, path, issues) {
+  elements.forEach((node, index) => {
+    const nodePath = `${path}[${String(index)}]`;
+    for (const key of CSS_CLASS_KEYS) {
+      const value = settingString(node.settings, key);
+      if (value !== void 0 && value.trim() !== "") {
+        issues.push({
+          path: `${nodePath} ${key}`,
+          message: "Do not set CSS classes for page styling. Use native Elementor container and widget settings (container_type grid, padding, colors, typography) so Edit with Elementor remains the styling authority."
+        });
+      }
+    }
+    const customCss = settingString(node.settings, "custom_css");
+    if (customCss !== void 0 && customCss.trim() !== "") {
+      issues.push({
+        path: `${nodePath} custom_css`,
+        message: "Do not use custom_css. Elementor Free does not print it, and it is not editable like native widget settings. Use padding, colors, typography, and borders on the element instead."
+      });
+    }
+    if (node.elements.length > 0) {
+      walkElementPolicy(node.elements, `${nodePath}.elements`, issues);
+    }
+  });
+}
+function settingString(settings, key) {
+  const value = settings[key];
+  return typeof value === "string" ? value : void 0;
+}
+
 // packages/generate/dist/check-css.js
 var STYLE_BLOCK = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
 var HTML_ENTITY = /&(?:gt|lt|amp|quot|#0*60|#0*62|#x0*3[ce]);/i;
 var ESCAPED_COMBINATOR = /\\>|\\3e\s/i;
-var CHILD_COMBINATOR = /(?:[\w.)\]])\s*>\s*(?:[.#:[\w*])/i;
 var STYLE_WRAPPER = /<style[\s>]/i;
 function checkPackageCss(pkg) {
-  const issues = [];
+  const issues = [...checkPackageStylePolicy(pkg)];
   for (const source of collectCssSources(pkg)) {
     issues.push(...checkCssSource(source));
   }
@@ -56,14 +271,15 @@ function checkCssSource(source) {
   if (ESCAPED_COMBINATOR.test(css)) {
     issues.push({
       path: prefix,
-      message: "Do not backslash-escape the child combinator (`\\>` / `\\3e`). `.grid-2 > .e-con-inner` is valid CSS. Prefer `.grid-2 .e-con-inner, .grid-2` so Elementor inner wrappers still match."
+      message: 'Do not backslash-escape the child combinator (`\\>` / `\\3e`). Write `>` in WPCode type "css" snippets. Page layout still belongs in native Elementor settings, not CSS.'
     });
   }
-  if (source.kind === "html-css" && CHILD_COMBINATOR.test(css)) {
+  if (source.kind === "html-css") {
     issues.push({
       path: prefix,
-      message: 'Child combinator `>` inside HTML can break in WordPress. Move this CSS to a WPCode snippet with type "css", or use a descendant selector (a space) such as `.grid-2 .e-con-inner`.'
+      message: 'Do not put CSS in HTML <style> blocks. Use native Elementor widget and container settings. WPCode type "css" is WooCommerce-only.'
     });
+    return issues;
   }
   for (const message of scanCssStructure(css)) {
     issues.push({ path: prefix, message });
@@ -223,7 +439,7 @@ function collectCssSources(pkg) {
 function walkElements(elements, path, sources) {
   elements.forEach((node, index) => {
     const nodePath = `${path}[${String(index)}]`;
-    const html = settingString(node.settings, "html");
+    const html = settingString2(node.settings, "html");
     if (html !== void 0) {
       extractStyleBlocks(html).forEach((css, blockIndex) => {
         sources.push({
@@ -233,7 +449,7 @@ function walkElements(elements, path, sources) {
         });
       });
     }
-    const editor = settingString(node.settings, "editor");
+    const editor = settingString2(node.settings, "editor");
     if (editor !== void 0) {
       extractStyleBlocks(editor).forEach((css, blockIndex) => {
         sources.push({
@@ -243,20 +459,12 @@ function walkElements(elements, path, sources) {
         });
       });
     }
-    const customCss = settingString(node.settings, "custom_css");
-    if (customCss !== void 0 && customCss.trim() !== "") {
-      sources.push({
-        path: `${nodePath} custom_css`,
-        kind: "css",
-        css: customCss
-      });
-    }
     if (node.elements.length > 0) {
       walkElements(node.elements, `${nodePath}.elements`, sources);
     }
   });
 }
-function settingString(settings, key) {
+function settingString2(settings, key) {
   const value = settings[key];
   return typeof value === "string" ? value : void 0;
 }
@@ -6024,8 +6232,7 @@ function printHelp() {
       "  products add       Add a dummy WooCommerce product (max " + String(MAX_DUMMY_PRODUCTS) + ": name, price, description, image)",
       "  init               Scaffold ctw-package.json, media/, and the Claude Code skill",
       "                    (add --woocommerce for shop packages)",
-      "  validate           Validate a ctw-package.json (schema + CSS) without writing a ZIP",
-      "  check              Same as validate; run before generate (Claude: /ctw-native-check)",
+      "  check              Check a ctw-package.json (schema + style policy + CSS) without writing a ZIP",
       "  generate           Emit a Hello Elementor child theme ZIP (auto-syncs sourceUrl media)",
       "",
       "Claude Code only. No Cursor. No live WordPress MCP.",
@@ -6312,7 +6519,6 @@ async function main(argv) {
       return runProducts(rest);
     case "init":
       return runInit(rest);
-    case "validate":
     case "check":
       return runValidate(rest);
     case "generate":
