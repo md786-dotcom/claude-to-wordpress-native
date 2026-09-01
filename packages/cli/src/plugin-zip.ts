@@ -22,6 +22,13 @@ const SKIP_FILE_NAMES = new Set([
 ]);
 
 /**
+ * GPL-2.0 requires every distributed copy to carry the license text, and the
+ * NOTICE carries third-party attribution. Neither lives under plugin/, so they
+ * are pulled from the package root that encloses it.
+ */
+const LICENSE_FILE_NAMES = ["LICENSE", "NOTICE"];
+
+/**
  * Locate the plugin/ source directory from src, dist, or root CLI bundle.
  */
 export function findPluginSourceDir(): string {
@@ -60,6 +67,7 @@ export function packPluginZip(options: PackPluginOptions): PackPluginResult {
 
   const files: Record<string, Uint8Array> = {};
   collectFiles(pluginRoot, pluginRoot, files);
+  addLicenseFiles(pluginRoot, files);
   const fileCount = Object.keys(files).length;
   if (fileCount === 0) {
     throw new Error("No plugin files to pack.");
@@ -70,6 +78,25 @@ export function packPluginZip(options: PackPluginOptions): PackPluginResult {
   mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, bytes);
   return { outputPath, fileCount };
+}
+
+function addLicenseFiles(
+  pluginRoot: string,
+  out: Record<string, Uint8Array>,
+): void {
+  for (const name of LICENSE_FILE_NAMES) {
+    const target = `ctw-native/${name}`;
+    if (out[target]) {
+      continue;
+    }
+    const source = [join(pluginRoot, name), join(pluginRoot, "..", name)].find(
+      (candidate) => statSync(candidate, { throwIfNoEntry: false })?.isFile(),
+    );
+    if (!source) {
+      throw new Error(`Missing ${name} for the plugin ZIP; GPL builds must ship it.`);
+    }
+    out[target] = readFileSync(source);
+  }
 }
 
 function collectFiles(

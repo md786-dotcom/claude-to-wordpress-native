@@ -6021,6 +6021,7 @@ var SKIP_FILE_NAMES = /* @__PURE__ */ new Set([
   "phpunit.xml",
   "infection.log"
 ]);
+var LICENSE_FILE_NAMES = ["LICENSE", "NOTICE"];
 function findPluginSourceDir() {
   const candidates = [
     join4(here2, "../../../plugin"),
@@ -6042,6 +6043,7 @@ function packPluginZip(options) {
   }
   const files = {};
   collectFiles(pluginRoot, pluginRoot, files);
+  addLicenseFiles(pluginRoot, files);
   const fileCount = Object.keys(files).length;
   if (fileCount === 0) {
     throw new Error("No plugin files to pack.");
@@ -6051,6 +6053,21 @@ function packPluginZip(options) {
   mkdirSync3(dirname4(outputPath), { recursive: true });
   writeFileSync3(outputPath, bytes);
   return { outputPath, fileCount };
+}
+function addLicenseFiles(pluginRoot, out) {
+  for (const name of LICENSE_FILE_NAMES) {
+    const target = `ctw-native/${name}`;
+    if (out[target]) {
+      continue;
+    }
+    const source = [join4(pluginRoot, name), join4(pluginRoot, "..", name)].find(
+      (candidate) => statSync2(candidate, { throwIfNoEntry: false })?.isFile()
+    );
+    if (!source) {
+      throw new Error(`Missing ${name} for the plugin ZIP; GPL builds must ship it.`);
+    }
+    out[target] = readFileSync4(source);
+  }
 }
 function collectFiles(absDir, pluginRoot, out) {
   for (const entry of readdirSync2(absDir)) {

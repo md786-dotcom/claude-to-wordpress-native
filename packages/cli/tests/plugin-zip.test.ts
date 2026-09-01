@@ -36,4 +36,20 @@ describe("packPluginZip", () => {
     assert.ok(!paths.some((p) => p.includes("/vendor/")));
     assert.ok(!paths.some((p) => p.includes("/tests/")));
   });
+
+  it("ships the GPL license text and third-party NOTICE", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "ctw-plugin-zip-license-"));
+    dirs.push(cwd);
+    const out = join(cwd, "ctw-native.zip");
+    packPluginZip({ outputPath: out });
+
+    const unzipped = unzipSync(readFileSync(out));
+    const decoder = new TextDecoder();
+    const license = unzipped["ctw-native/LICENSE"];
+    const notice = unzipped["ctw-native/NOTICE"];
+    assert.ok(license, "LICENSE must be in the plugin ZIP");
+    assert.ok(notice, "NOTICE must be in the plugin ZIP");
+    assert.match(decoder.decode(license), /GNU GENERAL PUBLIC LICENSE/);
+    assert.match(decoder.decode(notice), /elementor-mcp/);
+  });
 });
