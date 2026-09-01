@@ -18,7 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript, php]
+        # CodeQL has no PHP extractor; PHP is covered by PHPStan/PHPMD in ci.yml.
+        language: [javascript-typescript]
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3

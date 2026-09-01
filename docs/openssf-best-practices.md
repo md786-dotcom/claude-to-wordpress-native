@@ -106,7 +106,7 @@ Mark **Met** unless noted. Paste the URLs. Use **N/A** only where listed.
 
 | Criterion | Status | Justification / URL |
 | --- | --- | --- |
-| static_analysis | Met | ESLint SonarJS, PHPStan, PHPMD, Knip, CodeQL (`.github/workflows/codeql.yml`). |
+| static_analysis | Met | ESLint SonarJS, PHPStan, PHPMD, Knip, CodeQL for JavaScript/TypeScript (`.github/workflows/codeql.yml`). PHP is not a CodeQL language; PHPStan/PHPMD cover the plugin. |
 | static_analysis_common_vulnerabilities | Met | CodeQL + SonarJS. |
 | static_analysis_fixed | Met | Medium+ exploitable findings are fixed before release. |
 | static_analysis_often | Met | CI and CodeQL on pull requests. |
